@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 20 14% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 14% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14% 4%;
+    --primary: 15 80% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 90% 95%;
+    --secondary-foreground: 15 80% 55%;
+    --muted: 60 5% 96%;
+    --muted-foreground: 25 5% 45%;
+    --accent: 30 90% 95%;
+    --accent-foreground: 15 80% 55%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 20 5% 90%;
+    --input: 20 5% 94%;
+    --ring: 15 80% 55%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 20 14% 4%;
+    --foreground: 0 0% 98%;
+    --card: 20 14% 6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 20 14% 4%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 15 80% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 25 30% 20%;
+    --secondary-foreground: 15 80% 55%;
+    --muted: 12 6% 15%;
+    --muted-foreground: 24 5% 65%;
+    --accent: 25 30% 20%;
+    --accent-foreground: 15 80% 55%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 12 6% 20%;
+    --input: 12 6% 18%;
+    --ring: 15 80% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 60s linear infinite;
+}

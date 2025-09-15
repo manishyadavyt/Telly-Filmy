@@ -1,0 +1,55 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "1",
+      "imageUrl": "https://picsum.photos/seed/tech-future/800/600",
+      "imageHint": "tech future"
+    },
+    {
+      "id": "2",
+      "imageUrl": "https://picsum.photos/seed/design-thinking/800/600",
+      "imageHint": "design thinking"
+    },
+    {
+      "id": "3",
+      "imageUrl": "https://picsum.photos/seed/productivity-hacks/800/600",
+      "imageHint": "productivity hacks"
+    },
+    {
+      "id": "4",
+      "imageUrl": "https://picsum.photos/seed/remote-work/800/600",
+      "imageHint": "remote work"
+    },
+    {
+      "id": "5",
+      "imageUrl": "https://picsum.photos/seed/ai-innovation/800/600",
+      "imageHint": "AI innovation"
+    },
+    {
+      "id": "6",
+      "imageUrl": "https://picsum.photos/seed/mindful-living/800/600",
+      "imageHint": "mindful living"
+    },
+    {
+      "id": "7",
+      "imageUrl": "https://picsum.photos/seed/travel-adventure/800/600",
+      "imageHint": "travel adventure"
+    },
+    {
+      "id": "8",
+      "imageUrl": "https://picsum.photos/seed/sustainable-tech/800/600",
+      "imageHint": "sustainable tech"
+    },
+    {
+      "id": "9",
+      "imageUrl": "https://picsum.photos/seed/creative-coding/800/600",
+      "imageHint": "creative coding"
+    },
+    {
+      "id": "10",
+      "imageUrl": "https://picsum.photos/seed/urban-gardening/800/600",
+      "imageHint": "urban gardening"
+    }
+  ]
+}
