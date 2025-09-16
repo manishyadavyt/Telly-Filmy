@@ -8,6 +8,7 @@
     "isTopStory": false,
     "isTrending": true,
     "imageHint": "custom image",
+   "imageUrl": "https://yourwebsite.com/images/NY.jpg",
     "id": "sfyiyvzn7cn",
     "slug": "testign",
     "author": {
