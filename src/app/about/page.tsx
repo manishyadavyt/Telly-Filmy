@@ -26,36 +26,6 @@ export default function AboutPage() {
 Do subscribe my channel for more interesting videos.
             </p>
 
-            <h2 className="mt-12 text-3xl font-bold flex items-center">
-              <Users className="mr-4 h-8 w-8 text-primary" />
-              Our Team
-            </h2>
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="text-center">
-                <Avatar className="w-24 h-24 mx-auto mb-4">
-                  <AvatarImage src="https://i.pravatar.cc/150?u=jane" />
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-                <h3 className="font-semibold text-lg">Jane Doe</h3>
-                <p className="text-sm text-muted-foreground">Founder & Editor-in-Chief</p>
-              </div>
-              <div className="text-center">
-                <Avatar className="w-24 h-24 mx-auto mb-4">
-                  <AvatarImage src="https://i.pravatar.cc/150?u=john" />
-                  <AvatarFallback>JS</AvatarFallback>
-                </Avatar>
-                <h3 className="font-semibold text-lg">John Smith</h3>
-                <p className="text-sm text-muted-foreground">Lead Technology Writer</p>
-              </div>
-              <div className="text-center">
-                <Avatar className="w-24 h-24 mx-auto mb-4">
-                  <AvatarImage src="https://i.pravatar.cc/150?u=emily" />
-                  <AvatarFallback>EW</AvatarFallback>
-                </Avatar>
-                <h3 className="font-semibold text-lg">Emily White</h3>
-                <p className="text-sm text-muted-foreground">Design & Productivity Expert</p>
-              </div>
-            </div>
           </div>
         </CardContent>
       </Card>
