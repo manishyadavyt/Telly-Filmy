@@ -17,22 +17,13 @@ export default function AboutPage() {
         <CardContent className="p-8 md:p-12">
           <div className="prose prose-lg dark:prose-invert max-w-none">
             <p>
-              Welcome to Telly Filmy, your number one source for insightful
-              articles on technology, design, productivity, and more. We're
-              dedicated to giving you the very best of content, with a focus on
-              quality, relevance, and fresh perspectives.
+              Hello welcome to Telly Filmy . We are here to give you latest Entertainment reporting..
             </p>
+            Our team of dedicated reporters and hosts are passionate about delivering the  interviews, and behind-the-scenes glimpses of your favorite stars. From exclusive interviews with A-list celebrities to uncovering the latest industry trends, we've got it all 
+            covered.
             <p>
-              Founded in 2024, Telly Filmy has come a long way from its
-              beginnings. When we first started out, our passion for sharing
-              knowledge and sparking curiosity drove us to create this platform.
-              We now serve readers all over the world, and are thrilled that
-              we're able to turn our passion into our own website.
-            </p>
-            <p>
-              We hope you enjoy our articles as much as we enjoy offering them
-              to you. If you have any questions or comments, please don't
-              hesitate to contact us.
+              Here you will get latest Bollywood TV shows and YouTube related updates.Our Website is full of Entertainment News and Reporting.
+Do subscribe my channel for more interesting videos.
             </p>
 
             <h2 className="mt-12 text-3xl font-bold flex items-center">
