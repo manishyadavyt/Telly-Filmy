@@ -60,11 +60,11 @@ export async function Header() {
                       <Link href="/contact">Contact</Link>
                     </Button>
                   </SheetClose>
-                  <SheetClose asChild>
+                  {/* <SheetClose asChild>
                     <Button variant="ghost" className="justify-start" asChild>
                       <Link href="/admin/create">Create Post</Link>
                     </Button>
-                  </SheetClose>
+                  </SheetClose> */}
                 </nav>
               </div>
             </SheetContent>
@@ -83,9 +83,9 @@ export async function Header() {
             <Button variant="ghost" asChild>
               <Link href="/contact">Contact</Link>
             </Button>
-            <Button variant="ghost" asChild>
+            {/* <Button variant="ghost" asChild>
               <Link href="/admin/create">Create Post</Link>
-            </Button>
+            </Button> */}
           </nav>
         </div>
 

@@ -27,7 +27,7 @@ export async function Footer() {
                 <li><Link href="/about" className="text-sm text-muted-foreground hover:text-primary">About</Link></li>
                 <li><Link href="/contact" className="text-sm text-muted-foreground hover:text-primary">Contact</Link></li>
                 <li><Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
-                <li><Link href="/admin/create" className="text-sm text-muted-foreground hover:text-primary">Create Post</Link></li>
+                {/* <li><Link href="/admin/create" className="text-sm text-muted-foreground hover:text-primary">Create Post</Link></li> */}
               </ul>
             </div>
             <div>
