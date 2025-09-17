@@ -8,64 +8,10 @@
     "imageUrl": "/images/post1.jpeg",
     "imageHint": "remote work",
     "category": "Business",
-    "tags": [
-      "Remote Work",
-      "Culture",
-      "Future of Work"
-    ],
-    "author": {
-      "name": "John Smith",
-      "avatarUrl": "https://i.pravatar.cc/150?u=john"
-    },
     "date": "2024-07-17T11:00:00Z",
     "isTopStory": true,
     "isTrending": false,
     "views": 980
-  },
-  {
-    "id": "post-5",
-    "slug": "sustainable-tech-innovations-shaping-our-planet",
-    "title": "Sustainable Tech: Innovations Shaping Our Planet",
-    "excerpt": "Technology holds the key to solving some of our most pressing environmental challenges. From renewable energy to circular economy models, these are the innovations to watch.",
-    "content": "In the face of climate change, technology is emerging as a powerful ally in the quest for sustainability. Innovations in renewable energy, such as more efficient solar panels and next-generation wind turbines, are making clean energy more accessible and affordable. The Internet of Things (IoT) is enabling smart grids that optimize energy consumption and reduce waste. In the realm of materials, scientists are developing biodegradable plastics and new methods for recycling that support a circular economy. AI is also playing a role, with algorithms that monitor deforestation, predict weather patterns, and optimize agricultural practices. These sustainable technologies are not just environmentally friendly; they are driving economic growth and creating new opportunities for a greener future.",
-    "imageUrl": "https://picsum.photos/seed/sustainable-tech/800/600",
-    "imageHint": "sustainable tech",
-    "category": "Technology",
-    "tags": [
-      "Sustainability",
-      "Green Tech",
-      "Innovation"
-    ],
-    "author": {
-      "name": "Emily White",
-      "avatarUrl": "https://i.pravatar.cc/150?u=emily"
-    },
-    "date": "2024-07-16T16:00:00Z",
-    "isTopStory": false,
-    "isTrending": true,
-    "views": 2100
-  },
-  {
-    "id": "post-6",
-    "slug": "mindful-living-in-a-digital-world",
-    "title": "A Guide to Mindful Living in a Digital World",
-    "excerpt": "Our devices are designed to capture our attention, but we can reclaim our focus. Learn practical techniques for digital mindfulness and cultivate a healthier relationship with technology.",
-    "content": "In an age of constant connectivity, practicing mindfulness is more important than ever. The endless scroll on social media and the constant ping of notifications can lead to mental fatigue and a feeling of being perpetually distracted. Digital mindfulness is about using technology with intention. This can start with simple practices like scheduling specific times to check email and social media, rather than reacting to every notification. Turning off non-essential alerts is another crucial step. Cultivating a habit of single-tasking, instead of juggling multiple digital activities, can dramatically improve focus and the quality of your work. By setting boundaries and being conscious of how and why we use our devices, we can transform technology from a source of stress into a tool that truly serves us.",
-    "imageUrl": "https://picsum.photos/seed/mindful-living/800/600",
-    "imageHint": "mindful living",
-    "category": "Lifestyle",
-    "tags": [
-      "Mindfulness",
-      "Digital Wellbeing",
-      "Health"
-    ],
-    "author": {
-      "name": "Jane Doe",
-      "avatarUrl": "https://i.pravatar.cc/150?u=jane"
-    },
-    "date": "2024-07-15T12:00:00Z",
-    "isTopStory": false,
-    "isTrending": false,
-    "views": 750
   }
+
 ]
