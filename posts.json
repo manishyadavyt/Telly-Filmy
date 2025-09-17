@@ -13,7 +13,10 @@
       "Culture",
       "Future of Work"
     ],
-    
+    "author": {
+      "name": "John Smith",
+      "avatarUrl": "https://i.pravatar.cc/150?u=john"
+    },
     "date": "2024-07-17T11:00:00Z",
     "isTopStory": true,
     "isTrending": false,
