@@ -6,13 +6,13 @@
     "category": "Entertainment",
     "imageUrl": "/images/bb19.jpeg",
     "tags": [
-      "BB19"
+      "News"
     ],
     "isTopStory": true,
     "isTrending": true,
     "imageHint": "custom image",
     "id": "27lrft5c1xz",
-    "slug": "",
+    "slug": "test",
     "author": {
       "name": "Telly Filmy",
       "avatarUrl": "/Public/logo.png"
@@ -34,7 +34,7 @@
     "isTrending": true,
     "imageHint": "custom image",
     "id": "27lrft5c1xz",
-    "slug": "",
+    "slug": "test",
     "author": {
       "name": "Telly Filmy",
       "avatarUrl": "/Public/logo.png"
