@@ -1,51 +1,5 @@
 [  
   {
-    "id": "post-1",
-    "slug": "Dangal TV Channel Ranked No.1 on YouTube Globally as per Tubular Leaderboard in Media & Entertainment and Films & Movies Categories",
-    "title": "Dangal TV Channel Ranked No.1 on YouTube Globally as per Tubular Leaderboard in Media & Entertainment and Films & Movies Categories",
-    "excerpt": "Dangal TV, one of India’s leading entertainment brands, has set yet another benchmark on the global stage",
-    "content": "Dangal TV, one of India’s leading entertainment brands, has set yet another benchmark on the global stage.",
-    "imageUrl": "/uploads/post1.jpeg",
-    "imageHint": "Entertainment",
-    "category": "Entertainment",
-    "tags": [
-      "TV showa",
-      "Dangal TV",
-      "Entertainment"
-    ],
-    "author": {
-      "name": "Telly Filmy",
-      "avatarUrl": "/uploads/logo.png"
-    },
-    "date": "2024-07-16T16:00:00Z",
-    "isTopStory": true,
-    "isTrending": true,
-    "views": 2100
-  },
-  {
-    "id": "post-6",
-    "slug": "mindful-living-in-a-digital-world",
-    "title": "A Guide to Mindful Living in a Digital World",
-    "excerpt": "Our devices are designed to capture our attention, but we can reclaim our focus. Learn practical techniques for digital mindfulness and cultivate a healthier relationship with technology.",
-    "content": "In an age of constant connectivity, practicing mindfulness is more important than ever. The endless scroll on social media and the constant ping of notifications can lead to mental fatigue and a feeling of being perpetually distracted. Digital mindfulness is about using technology with intention. This can start with simple practices like scheduling specific times to check email and social media, rather than reacting to every notification. Turning off non-essential alerts is another crucial step. Cultivating a habit of single-tasking, instead of juggling multiple digital activities, can dramatically improve focus and the quality of your work. By setting boundaries and being conscious of how and why we use our devices, we can transform technology from a source of stress into a tool that truly serves us.",
-    "imageUrl": "https://picsum.photos/seed/mindful-living/800/600",
-    "imageHint": "mindful living",
-    "category": "Lifestyle",
-    "tags": [
-      "Mindfulness",
-      "Digital Wellbeing",
-      "Health"
-    ],
-    "author": {
-      "name": "Jane Doe",
-      "avatarUrl": "https://i.pravatar.cc/150?u=jane"
-    },
-    "date": "2024-07-15T12:00:00Z",
-    "isTopStory": false,
-    "isTrending": false,
-    "views": 750
-  }
-  ,{
     "title": "Dangal TV Channel Ranked No.1 on YouTube Globally as per Tubular Leaderboard in Media & Entertainment and Films & Movies Categories",
     "excerpt": "Dangal TV Channel Ranked No.1 on YouTube Globally as per Tubular Leaderboard in Media & Entertainment and Films & Movies Categories ",
     "content": "Dangal TV, one of India’s leading entertainment brands, has set yet another benchmark on the global stage.",
@@ -54,14 +8,14 @@
     "tags": [
       "News"
     ],
-    "isTopStory": false,
+    "isTopStory": true,
     "isTrending": true,
     "imageHint": "custom image",
     "id": "27lrft5c1xz",
     "slug": "test",
     "author": {
-      "name": "Admin",
-      "avatarUrl": "https://i.pravatar.cc/150?u=admin"
+      "name": "Telly Filmy",
+      "avatarUrl": "/images/logo.png"
     },
     "date": "2025-09-17T16:59:38.877Z",
     "views": 0
