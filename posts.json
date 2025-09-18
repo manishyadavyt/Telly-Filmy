@@ -1,43 +1,24 @@
-[  {
-    "id": "post-4",
-    "slug": "the-rise-of-remote-work-and-its-impact-on-culture",
-    "title": "The Rise of Remote Work and Its Impact on Company Culture",
-    "excerpt": "The shift to remote work has been one of the most significant workplace transformations of our time. We analyze its effects on collaboration, communication, and the very fabric of company culture.",
-    "content": "The global shift towards remote work has fundamentally altered the professional landscape. While offering flexibility and autonomy, it also presents unique challenges to maintaining a strong company culture. Without the spontaneous interactions of the physical office, intentional effort is required to foster connection and collaboration. Virtual team-building activities, regular and transparent communication from leadership, and the use of collaborative digital tools are essential. It's also crucial to establish clear expectations and work-life boundaries to prevent burnout. Companies that succeed in this new paradigm are those that prioritize trust, empower their employees, and actively cultivate a sense of community, regardless of physical location. The future of work is not just remote; it's about building a culture that thrives on flexibility and connection.",
-    "imageUrl": "https://picsum.photos/seed/remote-work/800/600",
-    "imageHint": "remote work",
-    "category": "Business",
-    "tags": [
-      "Remote Work",
-      "Culture",
-      "Future of Work"
-    ],
-
-    "date": "2024-07-17T11:00:00Z",
-    "isTopStory": true,
-    "isTrending": false,
-    "views": 980
-  },
+[  
   {
-    "id": "post-5",
-    "slug": "sustainable-tech-innovations-shaping-our-planet",
-    "title": "Sustainable Tech: Innovations Shaping Our Planet",
-    "excerpt": "Technology holds the key to solving some of our most pressing environmental challenges. From renewable energy to circular economy models, these are the innovations to watch.",
-    "content": "In the face of climate change, technology is emerging as a powerful ally in the quest for sustainability. Innovations in renewable energy, such as more efficient solar panels and next-generation wind turbines, are making clean energy more accessible and affordable. The Internet of Things (IoT) is enabling smart grids that optimize energy consumption and reduce waste. In the realm of materials, scientists are developing biodegradable plastics and new methods for recycling that support a circular economy. AI is also playing a role, with algorithms that monitor deforestation, predict weather patterns, and optimize agricultural practices. These sustainable technologies are not just environmentally friendly; they are driving economic growth and creating new opportunities for a greener future.",
-    "imageUrl": "https://picsum.photos/seed/sustainable-tech/800/600",
-    "imageHint": "sustainable tech",
-    "category": "Technology",
+    "id": "post-1",
+    "slug": "Dangal TV Channel Ranked No.1 on YouTube Globally as per Tubular Leaderboard in Media & Entertainment and Films & Movies Categories",
+    "title": "Dangal TV Channel Ranked No.1 on YouTube Globally as per Tubular Leaderboard in Media & Entertainment and Films & Movies Categories",
+    "excerpt": "Dangal TV, one of India’s leading entertainment brands, has set yet another benchmark on the global stage",
+    "content": "Dangal TV, one of India’s leading entertainment brands, has set yet another benchmark on the global stage.",
+    "imageUrl": "/uploads/post1.jpeg",
+    "imageHint": "Entertainment",
+    "category": "Entertainment",
     "tags": [
-      "Sustainability",
-      "Green Tech",
-      "Innovation"
+      "TV showa",
+      "Dangal TV",
+      "Entertainment"
     ],
     "author": {
-      "name": "Emily White",
-      "avatarUrl": "https://i.pravatar.cc/150?u=emily"
+      "name": "Telly Filmy",
+      "avatarUrl": "/uploads/logo.png"
     },
     "date": "2024-07-16T16:00:00Z",
-    "isTopStory": false,
+    "isTopStory": true,
     "isTrending": true,
     "views": 2100
   },
