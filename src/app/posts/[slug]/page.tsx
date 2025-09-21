@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Eye, User, Tag } from 'lucide-react';
+import { Clock, Eye, Tag } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function PostPage({ params }: { params: { slug: string } }) {
@@ -69,7 +69,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
       {/* Content with paragraph spacing */}
       <div className="prose prose-lg dark:prose-invert max-w-none mx-auto text-foreground/90 leading-relaxed">
         {post.content.split('\n\n').map((para, i) => (
-          <p key={i}>{para}</p>
+          <p key={i} className="mb-6">{para}</p>  // spacing between paragraphs
         ))}
       </div>
 
