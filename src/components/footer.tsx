@@ -1,6 +1,6 @@
 
 import Link from 'next/link';
-import { Instagram, Linkedin, Twitter } from 'lucide-react';
+import { Instagram, Facebook, Twitter, Youtube } from 'lucide-react';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { Logo } from './logo';
@@ -51,13 +51,16 @@ export async function Footer() {
           </p>
           <div className="flex items-center gap-2 mt-4 md:mt-0">
             <Button variant="ghost" size="icon" asChild>
-              <Link href="#"><Twitter className="h-4 w-4" /></Link>
+              <Link href="https://x.com/telly_filmy?t=QBCSCWDKfFAkiipz0bH-eg&s=09"><Twitter className="h-4 w-4" /></Link>
             </Button>
             <Button variant="ghost" size="icon" asChild>
-              <Link href="#"><Linkedin className="h-4 w-4" /></Link>
+              <Link href="https://www.youtube.com/channel/UC1b3PrlMsODBp2lnS7IX4bA"><Youtube className="h-4 w-4" /></Link>
             </Button>
             <Button variant="ghost" size="icon" asChild>
-              <Link href="#"><Instagram className="h-4 w-4" /></Link>
+              <Link href="https://www.instagram.com/tellyfilmy?igsh=aGlyanNrY3k5Z2M5"><Instagram className="h-4 w-4" /></Link>
+              </Button>
+              <Button variant="ghost" size="icon" asChild>
+              <Link href="https://www.facebook.com/profile.php?id=61551867691591&mibextid=ZbWKwL"><Facebook className="h-4 w-4" /></Link>
             </Button>
           </div>
         </div>
