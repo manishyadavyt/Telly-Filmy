@@ -1,4 +1,4 @@
-
+// src/app/posts/[slug]/page.tsx
 import { getPostBySlug } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -14,43 +14,47 @@ export default async function PostPage({ params }: { params: { slug: string } })
   if (!post) {
     notFound();
   }
-  
+
   const readingTime = Math.ceil(post.content.split(' ').length / 200);
 
   return (
     <article className="container max-w-4xl mx-auto py-8 md:py-12">
+      {/* Header */}
       <div className="space-y-4 text-center">
         <Link href={`/category/${encodeURIComponent(post.category.toLowerCase())}`}>
-          <Badge variant="secondary" className="w-fit cursor-pointer hover:bg-secondary/80 transition-colors">
+          <Badge
+            variant="secondary"
+            className="w-fit cursor-pointer hover:bg-secondary/80 transition-colors"
+          >
             {post.category}
           </Badge>
         </Link>
         <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
           {post.title}
         </h1>
-        <p className="text-lg text-muted-foreground">
-          {post.excerpt}
-        </p>
+        <p className="text-lg text-muted-foreground">{post.excerpt}</p>
       </div>
-      
+
+      {/* Author + Meta */}
       <div className="my-8 flex items-center justify-center gap-6 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-                <AvatarImage src={post.author.avatarUrl} alt={post.author.name} />
-                <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <span>{post.author.name}</span>
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={post.author.avatarUrl} alt={post.author.name} />
+            <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <span>{post.author.name}</span>
         </div>
         <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            <span>{format(new Date(post.date), 'MMMM d, yyyy')}</span>
+          <Clock className="h-4 w-4" />
+          <span>{format(new Date(post.date), 'MMMM d, yyyy')}</span>
         </div>
         <div className="flex items-center gap-2">
-            <Eye className="h-4 w-4" />
-            <span>{readingTime} min read</span>
+          <Eye className="h-4 w-4" />
+          <span>{readingTime} min read</span>
         </div>
       </div>
 
+      {/* Featured Image */}
       <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg my-12">
         <Image
           src={post.imageUrl}
@@ -62,10 +66,14 @@ export default async function PostPage({ params }: { params: { slug: string } })
         />
       </div>
 
+      {/* Content with paragraph spacing */}
       <div className="prose prose-lg dark:prose-invert max-w-none mx-auto text-foreground/90 leading-relaxed">
-        <p>{post.content}</p>
+        {post.content.split('\n\n').map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
       </div>
 
+      {/* Tags */}
       {post.tags && post.tags.length > 0 && (
         <div className="mt-12">
           <div className="flex items-center gap-2">
@@ -74,7 +82,9 @@ export default async function PostPage({ params }: { params: { slug: string } })
           </div>
           <div className="flex flex-wrap gap-2 mt-4">
             {post.tags.map((tag) => (
-              <Badge key={tag} variant="outline">{tag}</Badge>
+              <Badge key={tag} variant="outline">
+                {tag}
+              </Badge>
             ))}
           </div>
         </div>
