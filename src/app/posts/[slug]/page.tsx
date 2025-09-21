@@ -19,6 +19,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
 
   return (
     <article className="container max-w-4xl mx-auto py-8 md:py-12">
+
       {/* Header */}
       <div className="space-y-4 text-center">
         <Link href={`/category/${encodeURIComponent(post.category.toLowerCase())}`}>
@@ -69,9 +70,23 @@ export default async function PostPage({ params }: { params: { slug: string } })
       {/* Content with paragraph spacing */}
       <div className="prose prose-lg dark:prose-invert max-w-none mx-auto text-foreground/90 leading-relaxed">
         {post.content.split('\n\n').map((para, i) => (
-          <p key={i} className="mb-6">{para}</p>  // spacing between paragraphs
+          <p key={i} className="mb-6">{para}</p>
         ))}
       </div>
+
+      {/* YouTube Video */}
+      {post.videoUrl && (
+        <div className="my-12 relative w-full aspect-video rounded-xl overflow-hidden shadow-lg">
+          <iframe
+            src={post.videoUrl}
+            title={post.title}
+            className="w-full h-full"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      )}
 
       {/* Tags */}
       {post.tags && post.tags.length > 0 && (
@@ -82,9 +97,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
           </div>
           <div className="flex flex-wrap gap-2 mt-4">
             {post.tags.map((tag) => (
-              <Badge key={tag} variant="outline">
-                {tag}
-              </Badge>
+              <Badge key={tag} variant="outline">{tag}</Badge>
             ))}
           </div>
         </div>

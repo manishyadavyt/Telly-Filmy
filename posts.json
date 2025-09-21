@@ -1,5 +1,21 @@
 [ 
- 
+ {
+  "title": "Star Parivaar Award 2025",
+  "excerpt": "Watch Star Parivaar Award 2025.",
+  "content": "Watch the video below and enjoy !",
+  "videoUrl": "https://www.youtube.com/embed/Z1fnZr7CBuw?si=ZOEtOaE9jrJTGchy",
+  "category": "Entertainment",
+  "imageUrl": "/images/starparivar.jpeg",
+  "tags": ["YouTube", "Video", "starparivar"],
+  "isTopStory": true,
+  "isTrending": true,
+  "id": "video001",
+  "slug": "starparivar-youtube-video-post",
+  "author": { "name": "Telly Filmy", "avatarUrl": "/Public/logo.png" },
+  "date": "2025-09-21T12:30:00.000Z",
+  "views": 0
+}
+,
 {
   "title": "“My character is the personification of greed,” says Manav Gohil from COLORS’ ‘Binddii’",
   "excerpt": "No prison wall is strong enough to cage a mother’s spirit. COLORS brings a stirring tale of love, betrayal, and resilience in its new drama Binddii.",
