@@ -50,7 +50,7 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
                       <span className="inline-block rounded-full bg-primary/80 px-3 py-1 text-xs font-semibold text-primary-foreground backdrop-blur-sm">
                         {post.category}
                       </span>
-                      <h4 className="mt-4 text-xl font-bold text-white sm:text-1xl md:text-3xl leading-tight">
+                      <h4 className="mt-4 text-xl font-bold text-white sm:text-1xl md:text-2xl leading-tight">
                         {post.title}
                       </h4>
                     </div>
