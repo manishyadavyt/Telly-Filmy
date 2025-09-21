@@ -1,8 +1,6 @@
-
 // src/app/about/page.tsx
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users, Newspaper } from 'lucide-react';
+import { Newspaper } from 'lucide-react';
 
 export default function AboutPage() {
   return (
@@ -17,15 +15,21 @@ export default function AboutPage() {
         <CardContent className="p-8 md:p-12">
           <div className="prose prose-lg dark:prose-invert max-w-none">
             <p>
-              Hello welcome to Telly Filmy . We are here to give you latest Entertainment reporting..
-            </p>
-            Our team of dedicated reporters and hosts are passionate about delivering the  interviews, and behind-the-scenes glimpses of your favorite stars. From exclusive interviews with A-list celebrities to uncovering the latest industry trends, we've got it all 
-            covered.
-            <p>
-              Here you will get latest Bollywood TV shows and YouTube related updates.Our Website is full of Entertainment News and Reporting.
-Do subscribe my channel for more interesting videos.
+              Hello and welcome to <strong>Telly Filmy</strong>. We are here to give you the latest
+              Entertainment reporting.
             </p>
 
+            <p>
+              Our team of dedicated reporters and hosts are passionate about delivering interviews,
+              and behind-the-scenes glimpses of your favorite stars. From exclusive interviews with
+              A-list celebrities to uncovering the latest industry trends, we've got it all covered.
+            </p>
+
+            <p>
+              Here you will get the latest Bollywood, TV shows, and YouTube related updates. Our
+              website is full of Entertainment News and Reporting. Do subscribe to my channel for
+              more interesting videos.
+            </p>
           </div>
         </CardContent>
       </Card>
