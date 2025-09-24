@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next';
 import './globals.css';
 import { Inter } from 'next/font/google';
@@ -10,8 +9,33 @@ import { BackToTopButton } from '@/components/back-to-top-button';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'Telly Filmy',
-  description: 'A modern, responsive blogging website.',
+  title: 'Telly Filmy – Entertainment News, TV Serials & Bollywood Updates',
+  description:
+    'Get the latest TV serial updates, Bollywood news, web stories, and entertainment trends on Telly Filmy.',
+  openGraph: {
+    title: 'Telly Filmy – Entertainment News, TV Serials & Bollywood Updates',
+    description:
+      'Latest TV serials, Bollywood news & trending entertainment stories.',
+    url: 'https://www.tellyfilmy.com',
+    siteName: 'Telly Filmy',
+    images: [
+      {
+        url: '/Public/logo.png',
+        width: 800,
+        height: 600,
+        alt: 'Telly Filmy Logo',
+      },
+    ],
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Telly Filmy – Entertainment News, TV Serials & Bollywood Updates',
+    description:
+      'Get the latest entertainment news, serial updates & Bollywood buzz.',
+    images: ['/Public/logo.png'],
+  },
 };
 
 export default function RootLayout({
