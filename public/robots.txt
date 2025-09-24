@@ -5,4 +5,3 @@ Disallow: /private/
 Allow: /
 
 Sitemap: https://www.tellyfilmy.com/sitemap.xml
-Host: https://www.tellyfilmy.com
