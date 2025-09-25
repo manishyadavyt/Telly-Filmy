@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { BackToTopButton } from '@/components/back-to-top-button';
-import Script from 'next/script'; // ✅ for Google Analytics
+import Script from 'next/script'; // ✅ Google Analytics
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: 'Telly Filmy – Entertainment News & Bollywood Updates',
   description:
     'Get the latest TV serial updates, Bollywood news, web stories, and entertainment trends on Telly Filmy.',
+  alternates: {
+    canonical: 'https://www.tellyfilmy.com', // ✅ Canonical URL
+  },
   openGraph: {
     title: 'Telly Filmy – Entertainment News, TV Serials & Bollywood Updates',
     description:
@@ -57,7 +60,9 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-7269LC27VB');
+            gtag('config', 'G-7269LC27VB', {
+              page_path: window.location.pathname,
+            });
           `}
         </Script>
       </head>
