@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   CardFooter,
-  CardHeader,
 } from '@/components/ui/card';
 import { Button } from './ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -17,41 +16,52 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
   return (
-    <Card className="group flex h-full flex-col overflow-hidden rounded-xl shadow-sm transition-all hover:shadow-xl">
-      <CardHeader className="p-0">
-        <Link href={`/posts/${post.slug}`} className="block">
-          <div className="relative aspect-[16/9] w-full overflow-hidden">
-            <Image
-              src={post.imageUrl}
-              alt={post.title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              data-ai-hint={post.imageHint}
-            />
-          </div>
+    <Card className="group flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:bg-gray-900 shadow-sm transition-all hover:shadow-md hover:-translate-y-1 duration-200">
+      {/* Thumbnail */}
+      <Link href={`/posts/${post.slug}`} className="block relative aspect-[4/3] overflow-hidden">
+        <Image
+          src={post.imageUrl}
+          alt={post.title}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          data-ai-hint={post.imageHint}
+        />
+      </Link>
+
+      {/* Content */}
+      <CardContent className="flex flex-col p-4">
+        <Link
+          href={`/category/${encodeURIComponent(post.category.toLowerCase())}`}
+          className="w-fit"
+        >
+          <Badge
+            variant="secondary"
+            className="text-[11px] font-medium cursor-pointer hover:bg-secondary/80 transition-colors"
+          >
+            {post.category}
+          </Badge>
         </Link>
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col p-6">
-        <Link href={`/category/${encodeURIComponent(post.category.toLowerCase())}`} className='w-fit'>
-          <Badge variant="secondary" className="w-fit cursor-pointer hover:bg-secondary/80 transition-colors">{post.category}</Badge>
-        </Link>
-        <h3 className="mt-4 text-xl font-bold leading-tight text-foreground">
-          <Link href={`/posts/${post.slug}`} className="stretched-link">
+
+        <h3 className="mt-2 text-base font-semibold leading-snug text-foreground line-clamp-2">
+          <Link href={`/posts/${post.slug}`} className="hover:text-primary transition-colors">
             {post.title}
           </Link>
         </h3>
-        <p className="mt-2 text-sm text-muted-foreground line-clamp-2 flex-grow">
+
+        <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
           {post.excerpt}
         </p>
       </CardContent>
-      <CardFooter className="p-6 pt-0">
+
+      {/* Footer */}
+      <CardFooter className="p-4 pt-0">
         <Button
           variant="link"
-          className="p-0 text-sm font-semibold text-primary as-child"
+          className="p-0 text-sm font-medium text-primary"
           asChild
         >
           <Link href={`/posts/${post.slug}`}>
-            Read More <ArrowRight className="ml-2 h-4 w-4" />
+            Read More <ArrowRight className="ml-1 h-3 w-3" />
           </Link>
         </Button>
       </CardFooter>
