@@ -17,7 +17,7 @@ export async function Footer() {
           <div className="md:col-span-1">
             <Logo />
             <p className="text-muted-foreground mt-4 text-sm">
-              A modern blog for the modern reader.
+              “Telly Filmy – Where Entertainment Meets Fun! From TV dramas to the latest show buzz, we bring you everything that keeps your screen—and your mood—lit!”.
             </p>
           </div>
           <div className="grid grid-cols-2 md:col-span-2 md:grid-cols-3 gap-8">
