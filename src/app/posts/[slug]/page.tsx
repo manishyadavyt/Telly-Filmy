@@ -7,19 +7,102 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Eye, Tag } from 'lucide-react';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 
+// ✅ Generate SEO Metadata for each Post
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const post = await getPostBySlug(params.slug);
+
+  if (!post) return { title: 'Post Not Found | Telly Filmy' };
+
+  const baseUrl = 'https://www.tellyfilmy.com';
+  const url = `${baseUrl}/posts/${post.slug}`;
+
+  return {
+    title: `${post.title} | Telly Filmy`,
+    description: post.excerpt,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      url,
+      siteName: 'Telly Filmy',
+      type: 'article',
+      images: [
+        {
+          url: post.imageUrl,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt,
+      images: [post.imageUrl],
+      creator: '@TellyFilmy',
+    },
+  };
+}
+
+// ✅ Main Post Page
 export default async function PostPage({ params }: { params: { slug: string } }) {
   const post = await getPostBySlug(params.slug);
 
-  if (!post) {
-    notFound();
-  }
+  if (!post) notFound();
 
   const readingTime = Math.ceil(post.content.split(' ').length / 200);
 
+  // ✅ Render content with inline image placeholders
+  const renderContent = () => {
+    const images = post.images ?? [];
+    const paragraphs = post.content.split('\n\n');
+
+    return paragraphs.map((para, i) => {
+      const match = para.trim().match(/^\[image(\d+)(?::\s*(.+))?\]$/i);
+      if (match) {
+        const index = parseInt(match[1], 10) - 1;
+        const caption = match[2] || '';
+        const imageUrl = images[index];
+        if (imageUrl) {
+          return (
+            <figure key={`image-${index}`} className="my-8">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg">
+                <Image
+                  src={imageUrl}
+                  alt={`${post.title} - image ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  priority={index === 0}
+                />
+              </div>
+              {caption && (
+                <figcaption className="text-center text-sm text-muted-foreground mt-2 italic">
+                  {caption}
+                </figcaption>
+              )}
+            </figure>
+          );
+        }
+      }
+      return (
+        <p key={i} className="mb-6">
+          {para}
+        </p>
+      );
+    });
+  };
+
   return (
     <article className="container max-w-4xl mx-auto py-8 md:py-12">
-
       {/* Header */}
       <div className="space-y-4 text-center">
         <Link href={`/category/${encodeURIComponent(post.category.toLowerCase())}`}>
@@ -36,8 +119,8 @@ export default async function PostPage({ params }: { params: { slug: string } })
         <p className="text-lg text-muted-foreground">{post.excerpt}</p>
       </div>
 
-      {/* Author + Meta */}
-      <div className="my-8 flex items-center justify-center gap-6 text-sm text-muted-foreground">
+      {/* Author + Meta Info */}
+      <div className="my-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src={post.author.avatarUrl} alt={post.author.name} />
@@ -62,19 +145,16 @@ export default async function PostPage({ params }: { params: { slug: string } })
           alt={post.title}
           fill
           className="object-cover"
-          data-ai-hint={post.imageHint}
           priority
         />
       </div>
 
-      {/* Content with paragraph spacing */}
+      {/* Article Content */}
       <div className="prose prose-lg dark:prose-invert max-w-none mx-auto text-foreground/90 leading-relaxed">
-        {post.content.split('\n\n').map((para, i) => (
-          <p key={i} className="mb-6">{para}</p>
-        ))}
+        {renderContent()}
       </div>
 
-      {/* YouTube Video */}
+      {/* Optional Video */}
       {post.videoUrl && (
         <div className="my-12 relative w-full aspect-video rounded-xl overflow-hidden shadow-lg">
           <iframe
@@ -89,7 +169,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
       )}
 
       {/* Tags */}
-      {post.tags && post.tags.length > 0 && (
+      {post.tags?.length > 0 && (
         <div className="mt-12">
           <div className="flex items-center gap-2">
             <Tag className="h-5 w-5 text-muted-foreground" />
@@ -97,7 +177,9 @@ export default async function PostPage({ params }: { params: { slug: string } })
           </div>
           <div className="flex flex-wrap gap-2 mt-4">
             {post.tags.map((tag) => (
-              <Badge key={tag} variant="outline">{tag}</Badge>
+              <Badge key={tag} variant="outline">
+                {tag}
+              </Badge>
             ))}
           </div>
         </div>
