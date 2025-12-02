@@ -91,7 +91,7 @@ export async function Header() {
 
         <div className="flex items-center justify-end md:flex-1">
           <div className="w-full max-w-xs md:w-auto md:flex-none">
-            <SearchBar posts={posts} />
+    
           </div>
         </div>
       </div>
