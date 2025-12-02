@@ -33,7 +33,16 @@ export const getPostBySlug = async (slug: string): Promise<Post | undefined> => 
   return posts.find((post) => post.slug === slug);
 };
 
+import { randomUUID } from "crypto";
+
 export const addPostToStore = async (newPost: Post) => {
   const posts = await readPosts();
-  await writePosts([newPost, ...posts]);
+
+  const postWithId = {
+    ...newPost,
+    id: newPost.id ?? randomUUID(),
+  };
+
+  await writePosts([postWithId, ...posts]);
 };
+
