@@ -1,126 +1,99 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Search, Loader2 } from 'lucide-react';
-import type { Post } from '@/lib/types';
-import { Input } from '@/components/ui/input';
+import { Menu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from '@/components/ui/sheet';
+import { SearchBar } from '@/components/search-bar';
+import { getPosts } from '@/lib/data';
+import { Logo } from './logo';
 
-interface SearchBarProps {
-  posts: Post[];
-}
-
-export function SearchBar({ posts }: SearchBarProps) {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(0);
-
-  useEffect(() => {
-    if (wrapperRef.current) {
-      setWidth(wrapperRef.current.offsetWidth);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (query.length < 2) {
-      setResults([]);
-      return;
-    }
-
-    setLoading(true);
-    const timeout = setTimeout(() => {
-      const q = query.toLowerCase();
-      const filtered = posts.filter((post) => 
-        post.title.toLowerCase().includes(q) ||
-        post.excerpt.toLowerCase().includes(q) ||
-        post.category.toLowerCase().includes(q) ||
-        post.tags?.some(tag => tag.toLowerCase().includes(q))
-      );
-
-      setResults(filtered);
-      setLoading(false);
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [query, posts]);
+export async function Header() {
+  const posts = await getPosts();
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <div ref={wrapperRef} className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search posts..."
-            className="w-full pl-9"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setOpen(true);
-            }}
-          />
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 max-w-screen-2xl items-center justify-between gap-4">
+
+        {/* Mobile Menu */}
+        <div className="flex items-center gap-2 md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+
+            <Link href="/" className="flex items-center space-x-2">
+              <Logo />
+              <span className="sr-only">Telly Filmy</span>
+            </Link>
+
+            <SheetContent side="left" className="w-3/4 p-0">
+              <SheetHeader className="p-4 text-left border-b">
+                <SheetClose asChild>
+                  <Link href="/">
+                    <Logo />
+                  </Link>
+                </SheetClose>
+                <SheetTitle className="sr-only">Menu</SheetTitle>
+              </SheetHeader>
+
+              <div className="p-4 pt-4">
+                <nav className="flex flex-col gap-1">
+                  <SheetClose asChild>
+                    <Button variant="ghost" className="justify-start" asChild>
+                      <Link href="/">Home</Link>
+                    </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Button variant="ghost" className="justify-start" asChild>
+                      <Link href="/about">About</Link>
+                    </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Button variant="ghost" className="justify-start" asChild>
+                      <Link href="/contact">Contact</Link>
+                    </Button>
+                  </SheetClose>
+                </nav>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
-      </PopoverTrigger>
 
-      <PopoverContent
-        align="start"
-        className="p-0"
-        style={{ width }}
-        onOpenAutoFocus={(e) => e.preventDefault()}
-      >
-        <div className="max-h-96 overflow-y-auto">
-          {loading && (
-            <div className="p-4 flex items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin" />
-            </div>
-          )}
+        {/* Desktop Logo */}
+        <div className="hidden flex-1 items-center justify-start md:flex">
+          <Link href="/" className="mr-4">
+            <Logo />
+          </Link>
 
-          {!loading && query.length > 1 && results.length === 0 && (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              No results found.
-            </div>
-          )}
-
-          {!loading && results.length > 0 && (
-            <div className="space-y-1 p-2">
-              {results.map((post) => (
-                <Link
-                  key={post.id}
-                  href={`/posts/${post.slug}`}
-                  className="block p-2 rounded-md hover:bg-accent"
-                  onClick={() => setOpen(false)}
-                >
-                  <div className="flex items-center gap-3">
-                    <Image
-                      src={post.imageUrl}
-                      alt={post.title}
-                      width={60}
-                      height={40}
-                      className="rounded-md object-cover"
-                    />
-                    <div>
-                      <p className="font-semibold text-sm line-clamp-1">
-                        {post.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground line-clamp-1">
-                        {post.excerpt}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+          <nav className="flex items-center gap-2">
+            <Button variant="ghost" asChild>
+              <Link href="/about">About</Link>
+            </Button>
+            <Button variant="ghost" asChild>
+              <Link href="/contact">Contact</Link>
+            </Button>
+          </nav>
         </div>
-      </PopoverContent>
-    </Popover>
+
+        {/* Search Bar */}
+        <div className="flex items-center justify-end md:flex-1">
+          <div className="w-full max-w-xs md:w-auto md:flex-none">
+            <SearchBar posts={posts} />
+          </div>
+        </div>
+
+      </div>
+    </header>
   );
 }
