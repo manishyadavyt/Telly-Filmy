@@ -5,14 +5,67 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from './ui/button';
 import { ArrowRight } from 'lucide-react';
 import { Badge } from './ui/badge';
+import { cn } from '@/lib/utils';
 
 interface PostCardProps {
   post: Post;
+  variant?: 'default' | 'horizontal';
+  className?: string; // Add className prop for flexibility
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, variant = 'default', className }: PostCardProps) {
+  if (variant === 'horizontal') {
+    return (
+      <Card className={cn("flex flex-row overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all active:scale-[0.98]", className)}>
+        {/* Thumbnail (Left) */}
+        <Link href={`/posts/${post.slug}`} className="relative h-28 w-32 flex-shrink-0 sm:w-40">
+          <Image
+            src={post.imageUrl}
+            alt={post.title}
+            fill
+            className="object-cover"
+            data-ai-hint={post.imageHint}
+            sizes="(max-width: 768px) 33vw, 20vw"
+          />
+        </Link>
+
+        {/* Content (Right) */}
+        <CardContent className="flex flex-1 flex-col justify-center p-3">
+           <Link
+              href={`/category/${encodeURIComponent(post.category.toLowerCase())}`}
+              className="mb-1 w-fit"
+           >
+              {/* Optional: Show category or breaking badge if needed. For list, usually minimal. */}
+              {post.isTopStory && (
+                  <Badge variant="destructive" className="h-5 px-1.5 text-[9px] uppercase tracking-wider">
+                      Breaking
+                  </Badge>
+              )}
+           </Link>
+
+          <h3 className="line-clamp-2 text-sm font-bold leading-tight text-foreground sm:text-base">
+            <Link href={`/posts/${post.slug}`}>
+              {post.title}
+            </Link>
+          </h3>
+          
+           <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
+              <span>{post.category}</span>
+              <span>•</span>
+              <span>{new Date(post.date).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              })}</span>
+           </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Default Vertical Card
   return (
-    <Card className="group flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:bg-gray-900 shadow-sm transition-all hover:shadow-md hover:-translate-y-1 duration-200">
+    <Card className={cn("group flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:bg-gray-900 shadow-sm transition-all hover:shadow-md hover:-translate-y-1 duration-200", className)}>
       {/* Thumbnail */}
       <Link href={`/posts/${post.slug}`} className="block relative aspect-[16/9] overflow-hidden">
         <Image
