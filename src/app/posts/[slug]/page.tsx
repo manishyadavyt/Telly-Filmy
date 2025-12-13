@@ -5,9 +5,10 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Eye, Tag } from 'lucide-react';
+import { Clock, Eye, Tag, Facebook, Twitter, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { ShareButtons } from '@/components/share-buttons';
 
 // ✅ Generate SEO Metadata for each Post
 export async function generateMetadata({
@@ -102,44 +103,55 @@ export default async function PostPage({ params }: { params: { slug: string } })
   };
 
   return (
-    <article className="container max-w-4xl mx-auto py-8 md:py-12">
-      {/* Header */}
-      <div className="space-y-4 text-center">
+    <article className="container max-w-4xl mx-auto py-6 md:py-10 px-4">
+      {/* Header Section (Left Aligned) */}
+      <div className="space-y-4 mb-6">
+        {/* Category Badge */}
         <Link href={`/category/${encodeURIComponent(post.category.toLowerCase())}`}>
           <Badge
-            variant="secondary"
-            className="w-fit cursor-pointer hover:bg-secondary/80 transition-colors"
+            variant="destructive" // Red badge like screenshot
+            className="w-fit cursor-pointer hover:bg-destructive/90 transition-colors uppercase text-[10px] tracking-wider px-2 py-0.5"
           >
             {post.category}
           </Badge>
         </Link>
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
+        
+        {/* Title */}
+        <h1 className="text-2xl md:text-4xl font-bold leading-tight text-foreground">
           {post.title}
         </h1>
-        <p className="text-lg text-muted-foreground">{post.excerpt}</p>
-      </div>
 
-      {/* Author + Meta Info */}
-      <div className="my-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={post.author.avatarUrl} alt={post.author.name} />
-            <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <span>{post.author.name}</span>
+        {/* Excerpt */}
+        <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+          {post.excerpt}
+        </p>
+
+        {/* Date */}
+        <div className="text-xs text-muted-foreground font-medium">
+          Published: {format(new Date(post.date), 'EEEE, MMMM d, yyyy')}
         </div>
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4" />
-          <span>{format(new Date(post.date), 'MMMM d, yyyy')}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Eye className="h-4 w-4" />
-          <span>{readingTime} min read</span>
+
+        {/* Author & Share Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-b border-gray-100 py-4 my-6">
+           {/* Author */}
+           <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10 border border-gray-200">
+                <AvatarImage src={post.author.avatarUrl} alt={post.author.name} />
+                <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                 <span className="text-sm font-semibold text-primary">{post.author.name}</span>
+                 <span className="text-[10px] text-muted-foreground">View Profile</span>
+              </div>
+           </div>
+
+           {/* Share Icons */}
+           <ShareButtons url={`https://www.tellyfilmy.com/posts/${post.slug}`} title={post.title} />
         </div>
       </div>
 
       {/* Featured Image */}
-      <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg my-12">
+      <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-sm mb-8 bg-gray-100">
         <Image
           src={post.imageUrl}
           alt={post.title}
@@ -150,7 +162,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
       </div>
 
       {/* Article Content */}
-      <div className="prose prose-lg dark:prose-invert max-w-none mx-auto text-foreground/90 leading-relaxed">
+      <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed">
         {renderContent()}
       </div>
 
@@ -170,14 +182,14 @@ export default async function PostPage({ params }: { params: { slug: string } })
 
       {/* Tags */}
       {post.tags?.length > 0 && (
-        <div className="mt-12">
-          <div className="flex items-center gap-2">
-            <Tag className="h-5 w-5 text-muted-foreground" />
-            <h3 className="text-lg font-semibold">Tags</h3>
+        <div className="mt-12 pt-6 border-t">
+          <div className="flex items-center gap-2 mb-4">
+            <Tag className="h-4 w-4 text-primary" />
+            <h3 className="text-base font-semibold">Tags</h3>
           </div>
-          <div className="flex flex-wrap gap-2 mt-4">
+          <div className="flex flex-wrap gap-2">
             {post.tags.map((tag) => (
-              <Badge key={tag} variant="outline">
+              <Badge key={tag} variant="secondary" className="px-3 py-1 font-normal">
                 {tag}
               </Badge>
             ))}
