@@ -18,9 +18,9 @@ export async function Header() {
   const posts = await getPosts();
 
   return (
-    <header className="w-full border-b bg-white sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
-        
+    <header className="w-full border-b bg-white z-50">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-2">
+
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2">
           <Logo />
