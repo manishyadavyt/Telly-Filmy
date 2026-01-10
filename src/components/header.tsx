@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
-import { Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import Link from "next/link";
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -10,61 +10,93 @@ import {
   SheetTitle,
   SheetTrigger,
   SheetClose,
-} from '@/components/ui/sheet';
-import { getPosts } from '@/lib/data';
-import { Logo } from './logo';
+} from "@/components/ui/sheet";
+import { SearchBar } from "@/components/search-bar";
+import { Logo } from "./logo";
 
-export async function Header() {
-  const posts = await getPosts();
+// Define Post type
+export type Post = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  date?: string;
+  image?: string;
+};
 
+export default function Header({ posts }: { posts: Post[] }) {
   return (
-    <header className="w-full border-b bg-white z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-1">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 max-w-screen-2xl items-center justify-between gap-4">
+        
+        {/* Mobile Menu */}
+        <div className="flex items-center gap-2 md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
 
-        {/* LOGO */}
-        <Link href="/" className="flex items-center gap-2">
-          <Logo />
-        </Link>
+            <SheetContent side="left" className="w-3/4 p-0">
+              <SheetHeader className="p-4 text-left border-b">
+                <SheetClose asChild>
+                  <Link href="/">
+                    <Logo />
+                  </Link>
+                </SheetClose>
+                <SheetTitle className="sr-only">Menu</SheetTitle>
+              </SheetHeader>
 
-        {/* DESKTOP NAV */}
-        <nav className="hidden md:flex items-center gap-6 text-sm">
-          <Link href="/" className="hover:text-blue-600">Home</Link>
-          <Link href="/news" className="hover:text-blue-600">News</Link>
-          <Link href="/tv" className="hover:text-blue-600">TV Shows</Link>
-          <Link href="/videos" className="hover:text-blue-600">Videos</Link>
-        </nav>
+              <div className="p-4 pt-4">
+                <nav className="flex flex-col gap-1">
+                  <SheetClose asChild>
+                    <Button variant="ghost" className="justify-start" asChild>
+                      <Link href="/">Home</Link>
+                    </Button>
+                  </SheetClose>
 
-        {/* MOBILE MENU */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" className="md:hidden">
-              <Menu />
+                  <SheetClose asChild>
+                    <Button variant="ghost" className="justify-start" asChild>
+                      <Link href="/about">About</Link>
+                    </Button>
+                  </SheetClose>
+
+                  <SheetClose asChild>
+                    <Button variant="ghost" className="justify-start" asChild>
+                      <Link href="/contact">Contact</Link>
+                    </Button>
+                  </SheetClose>
+                </nav>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        {/* Desktop Logo + Navigation */}
+        <div className="hidden flex-1 items-center justify-start md:flex">
+          <Link href="/" className="mr-4">
+            <Logo />
+          </Link>
+
+          <nav className="flex items-center gap-2">
+            <Button variant="ghost" asChild>
+              <Link href="/about">About</Link>
             </Button>
-          </SheetTrigger>
-          <SheetContent side="left">
-            <SheetHeader>
-              <SheetTitle className="text-lg">Menu</SheetTitle>
-            </SheetHeader>
 
-            <div className="flex flex-col gap-4 mt-4 text-lg">
-              <SheetClose asChild>
-                <Link href="/">Home</Link>
-              </SheetClose>
+            <Button variant="ghost" asChild>
+              <Link href="/contact">Contact</Link>
+            </Button>
+          </nav>
+        </div>
 
-              <SheetClose asChild>
-                <Link href="/news">News</Link>
-              </SheetClose>
+        {/* Search Bar */}
+        <div className="flex items-center justify-end md:flex-1">
+          <div className="w-full max-w-xs md:w-auto md:flex-none">
+          </div>
+        </div>
 
-              <SheetClose asChild>
-                <Link href="/tv">TV Shows</Link>
-              </SheetClose>
-
-              <SheetClose asChild>
-                <Link href="/videos">Videos</Link>
-              </SheetClose>
-            </div>
-          </SheetContent>
-        </Sheet>
       </div>
     </header>
   );
