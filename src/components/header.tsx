@@ -11,24 +11,13 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { SearchBar } from "@/components/search-bar";
 import { Logo } from "./logo";
 
-// Define Post type
-export type Post = {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt?: string;
-  date?: string;
-  image?: string;
-};
-
-export default function Header({ posts }: { posts: Post[] }) {
+export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-screen-2xl items-center justify-between gap-4">
-        
+
         {/* Mobile Menu */}
         <div className="flex items-center gap-2 md:hidden">
           <Sheet>
@@ -40,7 +29,7 @@ export default function Header({ posts }: { posts: Post[] }) {
             </SheetTrigger>
 
             <SheetContent side="left" className="w-3/4 p-0">
-              <SheetHeader className="p-4 text-left border-b">
+              <SheetHeader className="border-b p-4 text-left">
                 <SheetClose asChild>
                   <Link href="/">
                     <Logo />
@@ -49,7 +38,7 @@ export default function Header({ posts }: { posts: Post[] }) {
                 <SheetTitle className="sr-only">Menu</SheetTitle>
               </SheetHeader>
 
-              <div className="p-4 pt-4">
+              <div className="p-4">
                 <nav className="flex flex-col gap-1">
                   <SheetClose asChild>
                     <Button variant="ghost" className="justify-start" asChild>
@@ -74,8 +63,8 @@ export default function Header({ posts }: { posts: Post[] }) {
           </Sheet>
         </div>
 
-        {/* Desktop Logo + Navigation */}
-        <div className="hidden flex-1 items-center justify-start md:flex">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex flex-1 items-center">
           <Link href="/" className="mr-4">
             <Logo />
           </Link>
@@ -91,11 +80,8 @@ export default function Header({ posts }: { posts: Post[] }) {
           </nav>
         </div>
 
-        {/* Search Bar */}
-        <div className="flex items-center justify-end md:flex-1">
-          <div className="w-full max-w-xs md:w-auto md:flex-none">
-          </div>
-        </div>
+        {/* Right Side (future search / actions) */}
+        <div className="flex md:flex-1 justify-end"></div>
 
       </div>
     </header>
