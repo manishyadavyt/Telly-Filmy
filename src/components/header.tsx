@@ -80,9 +80,7 @@ export default function Header() {
           </nav>
         </div>
 
-        {/* Right Side (future search / actions) */}
         <div className="flex md:flex-1 justify-end"></div>
-
       </div>
     </header>
   );

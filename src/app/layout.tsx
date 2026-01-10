@@ -1,56 +1,56 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import { Inter } from 'next/font/google';
-import { Toaster } from '@/components/ui/toaster';
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
-import { BackToTopButton } from '@/components/back-to-top-button';
-import Script from 'next/script'; // ✅ Google Analytics
+import type { Metadata } from "next";
+import "./globals.css";
+import { Inter } from "next/font/google";
+import Script from "next/script";
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+import Header from "@/components/header";
+import Footer from "@/components/footer";
+import { Toaster } from "@/components/ui/toaster";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: 'Telly Filmy – Entertainment News & Bollywood Updates',
+  title: "Telly Filmy – Entertainment News & Bollywood Updates",
   description:
-    'Get the latest TV serial updates, Bollywood news, web stories, and entertainment trends on Telly Filmy.',
+    "Get the latest TV serial updates, Bollywood news, web stories, and entertainment trends on Telly Filmy.",
   alternates: {
-    canonical: 'https://www.tellyfilmy.com', // ✅ Canonical URL
+    canonical: "https://www.tellyfilmy.com",
   },
   openGraph: {
-    title: 'Telly Filmy – Entertainment News, TV Serials & Bollywood Updates',
+    title: "Telly Filmy – Entertainment News, TV Serials & Bollywood Updates",
     description:
-      'Latest TV serials, Bollywood news & trending entertainment stories.',
-    url: 'https://www.tellyfilmy.com',
-    siteName: 'Telly Filmy',
+      "Latest TV serials, Bollywood news & trending entertainment stories.",
+    url: "https://www.tellyfilmy.com",
+    siteName: "Telly Filmy",
     images: [
       {
-        url: '/Public/logo.png',
+        url: "/logo.png",
         width: 800,
         height: 600,
-        alt: 'Telly Filmy Logo',
+        alt: "Telly Filmy Logo",
       },
     ],
-    locale: 'en_IN',
-    type: 'website',
+    locale: "en_IN",
+    type: "website",
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Telly Filmy – Entertainment News, TV Serials & Bollywood Updates',
+    card: "summary_large_image",
+    title: "Telly Filmy – Entertainment News, TV Serials & Bollywood Updates",
     description:
-      'Get the latest entertainment news, serial updates & Bollywood buzz.',
-    images: ['/Public/logo.png'],
+      "Get the latest entertainment news, serial updates & Bollywood buzz.",
+    images: ["/logo.png"],
   },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        {/* ✅ Google Analytics */}
+      <body className={`${inter.variable} font-sans antialiased`}>
+        {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-7269LC27VB"
           strategy="afterInteractive"
@@ -60,19 +60,16 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-7269LC27VB', {
-              page_path: window.location.pathname,
-            });
+            gtag('config', 'G-7269LC27VB');
           `}
         </Script>
-      </head>
-      <body className={`${inter.variable} font-sans antialiased`}>
+
         <div className="relative flex min-h-screen flex-col bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20">
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
         </div>
-        <BackToTopButton />
+
         <Toaster />
       </body>
     </html>
