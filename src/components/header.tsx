@@ -1,6 +1,7 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,6 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { Logo } from "./logo";
 
 export default function Header() {
   return (
@@ -31,8 +31,14 @@ export default function Header() {
             <SheetContent side="left" className="w-3/4 p-0">
               <SheetHeader className="border-b p-4 text-left">
                 <SheetClose asChild>
-                  <Link href="/">
-                    <Logo />
+                  <Link href="/" className="flex items-center gap-2">
+                    <Image
+                      src="/logo.png"
+                      alt="Telly Filmy Logo"
+                      width={140}
+                      height={40}
+                      priority
+                    />
                   </Link>
                 </SheetClose>
                 <SheetTitle className="sr-only">Menu</SheetTitle>
@@ -63,10 +69,16 @@ export default function Header() {
           </Sheet>
         </div>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Logo + Navigation */}
         <div className="hidden md:flex flex-1 items-center">
-          <Link href="/" className="mr-4">
-            <Logo />
+          <Link href="/" className="mr-4 flex items-center">
+            <Image
+              src="/logo.png"
+              alt="Telly Filmy Logo"
+              width={150}
+              height={42}
+              priority
+            />
           </Link>
 
           <nav className="flex items-center gap-2">
