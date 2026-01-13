@@ -15,10 +15,10 @@ import {
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur">
+    <header className="w-full border-b border-border/40 bg-background/95 backdrop-blur">
       <div className="container flex h-14 max-w-screen-2xl items-center justify-between px-3">
 
-        {/* LEFT: Logo (ALWAYS VISIBLE) */}
+        {/* LEFT: Logo */}
         <Link href="/" className="flex items-center">
           <Image
             src="/logo.png"
