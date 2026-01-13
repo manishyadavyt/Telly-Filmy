@@ -18,7 +18,30 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur">
       <div className="container flex h-14 max-w-screen-2xl items-center justify-between px-3">
 
-        {/* LEFT: Mobile Menu */}
+        {/* LEFT: Logo (ALWAYS VISIBLE) */}
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logo.png"
+            alt="Telly Filmy Logo"
+            width={130}
+            height={36}
+            priority
+            className="h-8 w-auto md:h-9"
+          />
+        </Link>
+
+        {/* RIGHT: Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-2">
+          <Button variant="ghost" asChild>
+            <Link href="/about">About</Link>
+          </Button>
+
+          <Button variant="ghost" asChild>
+            <Link href="/contact">Contact</Link>
+          </Button>
+        </nav>
+
+        {/* RIGHT: Mobile Menu */}
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
@@ -28,7 +51,7 @@ export default function Header() {
               </Button>
             </SheetTrigger>
 
-            <SheetContent side="left" className="w-3/4 p-0">
+            <SheetContent side="right" className="w-3/4 p-0">
               <SheetHeader className="border-b p-4">
                 <SheetClose asChild>
                   <Link href="/" className="flex items-center">
@@ -66,29 +89,6 @@ export default function Header() {
             </SheetContent>
           </Sheet>
         </div>
-
-        {/* CENTER: Logo (VISIBLE ON ALL SCREENS) */}
-        <Link href="/" className="flex items-center">
-          <Image
-            src="/logo.png"
-            alt="Telly Filmy Logo"
-            width={130}
-            height={36}
-            priority
-            className="h-8 w-auto md:h-9"
-          />
-        </Link>
-
-        {/* RIGHT: Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-2">
-          <Button variant="ghost" asChild>
-            <Link href="/about">About</Link>
-          </Button>
-
-          <Button variant="ghost" asChild>
-            <Link href="/contact">Contact</Link>
-          </Button>
-        </nav>
       </div>
     </header>
   );
