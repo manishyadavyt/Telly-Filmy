@@ -15,28 +15,28 @@ import {
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 max-w-screen-2xl items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur">
+      <div className="container flex h-14 max-w-screen-2xl items-center justify-between px-3">
 
-        {/* Mobile Menu */}
-        <div className="flex items-center gap-2 md:hidden">
+        {/* LEFT: Mobile Menu */}
+        <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
 
             <SheetContent side="left" className="w-3/4 p-0">
-              <SheetHeader className="border-b p-4 text-left">
+              <SheetHeader className="border-b p-4">
                 <SheetClose asChild>
-                  <Link href="/" className="flex items-center gap-2">
+                  <Link href="/" className="flex items-center">
                     <Image
                       src="/logo.png"
                       alt="Telly Filmy Logo"
-                      width={140}
-                      height={40}
+                      width={120}
+                      height={34}
                       priority
                     />
                   </Link>
@@ -44,55 +44,51 @@ export default function Header() {
                 <SheetTitle className="sr-only">Menu</SheetTitle>
               </SheetHeader>
 
-              <div className="p-4">
-                <nav className="flex flex-col gap-1">
-                  <SheetClose asChild>
-                    <Button variant="ghost" className="justify-start" asChild>
-                      <Link href="/">Home</Link>
-                    </Button>
-                  </SheetClose>
+              <nav className="flex flex-col gap-1 p-4">
+                <SheetClose asChild>
+                  <Button variant="ghost" className="justify-start" asChild>
+                    <Link href="/">Home</Link>
+                  </Button>
+                </SheetClose>
 
-                  <SheetClose asChild>
-                    <Button variant="ghost" className="justify-start" asChild>
-                      <Link href="/about">About</Link>
-                    </Button>
-                  </SheetClose>
+                <SheetClose asChild>
+                  <Button variant="ghost" className="justify-start" asChild>
+                    <Link href="/about">About</Link>
+                  </Button>
+                </SheetClose>
 
-                  <SheetClose asChild>
-                    <Button variant="ghost" className="justify-start" asChild>
-                      <Link href="/contact">Contact</Link>
-                    </Button>
-                  </SheetClose>
-                </nav>
-              </div>
+                <SheetClose asChild>
+                  <Button variant="ghost" className="justify-start" asChild>
+                    <Link href="/contact">Contact</Link>
+                  </Button>
+                </SheetClose>
+              </nav>
             </SheetContent>
           </Sheet>
         </div>
 
-        {/* Desktop Logo + Navigation */}
-        <div className="hidden md:flex flex-1 items-center">
-          <Link href="/" className="mr-4 flex items-center">
-            <Image
-              src="/logo.png"
-              alt="Telly Filmy Logo"
-              width={150}
-              height={42}
-              priority
-            />
-          </Link>
+        {/* CENTER: Logo (VISIBLE ON ALL SCREENS) */}
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logo.png"
+            alt="Telly Filmy Logo"
+            width={130}
+            height={36}
+            priority
+            className="h-8 w-auto md:h-9"
+          />
+        </Link>
 
-          <nav className="flex items-center gap-2">
-            <Button variant="ghost" asChild>
-              <Link href="/about">About</Link>
-            </Button>
+        {/* RIGHT: Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-2">
+          <Button variant="ghost" asChild>
+            <Link href="/about">About</Link>
+          </Button>
 
-            <Button variant="ghost" asChild>
-              <Link href="/contact">Contact</Link>
-            </Button>
-          </nav>
-        </div>
-
-        <div className="flex md:flex-1 justify-end"></div>
+          <Button variant="ghost" asChild>
+            <Link href="/contact">Contact</Link>
+          </Button>
+        </nav>
       </div>
     </header>
   );
