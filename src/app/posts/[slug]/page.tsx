@@ -12,7 +12,7 @@ import type { Metadata } from 'next';
 import { ShareButtons } from '@/components/share-buttons';
 
 
-// ✅ Generate SEO Metadata (NOW SUPPORTS MULTIPLE IMAGES)
+// ✅ Generate SEO Metadata (Supports Multiple Images)
 export async function generateMetadata({
   params,
 }: {
@@ -25,7 +25,6 @@ export async function generateMetadata({
   const baseUrl = 'https://www.tellyfilmy.com';
   const url = `${baseUrl}/posts/${post.slug}`;
 
-  // 🔥 Support multiple images for social preview
   const images = post.images?.length
     ? post.images
     : [post.imageUrl];
@@ -68,12 +67,13 @@ export default async function PostPage({
   if (!post) notFound();
 
   const readingTime = Math.ceil(post.content.split(' ').length / 200);
-  const allImages = post.images?.length ? post.images : [post.imageUrl];
+  const paragraphs = post.content.split('\n\n');
+  const midIndex = Math.floor(paragraphs.length / 2);
 
   return (
     <article className="container max-w-4xl mx-auto py-6 md:py-10 px-4">
 
-      {/* Category Badge */}
+      {/* Category */}
       <Link href={`/category/${encodeURIComponent(post.category.toLowerCase())}`}>
         <Badge
           variant="destructive"
@@ -93,7 +93,7 @@ export default async function PostPage({
         {post.excerpt}
       </p>
 
-      {/* Date */}
+      {/* Date + Reading Time */}
       <div className="text-xs text-muted-foreground font-medium mt-2">
         Published: {format(new Date(post.date), 'EEEE, MMMM d, yyyy')} • {readingTime} min read
       </div>
@@ -123,30 +123,35 @@ export default async function PostPage({
         />
       </div>
 
-      {/* 🔥 MULTIPLE IMAGES GALLERY (AUTO RENDER) */}
-      <div className="space-y-8 mb-10">
-        {allImages.map((img: string, index: number) => (
-          <div
-            key={index}
-            className="relative w-full aspect-video rounded-xl overflow-hidden shadow-md bg-gray-100"
-          >
-            <Image
-              src={img}
-              alt={`${post.title} - Image ${index + 1}`}
-              fill
-              className="object-cover"
-              priority={index === 0}
-            />
-          </div>
-        ))}
+      {/* ✅ Featured Image (Main Image) */}
+      <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-sm mb-8 bg-gray-100">
+        <Image
+          src={post.imageUrl}
+          alt={post.title}
+          fill
+          className="object-cover"
+          priority
+        />
       </div>
 
-      {/* Article Content */}
+      {/* ✅ Article Content With Mid Image */}
       <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed">
-        {post.content.split('\n\n').map((para: string, i: number) => (
-          <p key={i} className="mb-6">
-            {para}
-          </p>
+        {paragraphs.map((para: string, i: number) => (
+          <div key={i}>
+            <p className="mb-6">{para}</p>
+
+            {/* Insert second image in middle */}
+            {i === midIndex - 1 && post.images?.[0] && (
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-md my-8 bg-gray-100">
+                <Image
+                  src={post.images[0]}
+                  alt={`${post.title} - Additional Image`}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
+          </div>
         ))}
       </div>
 
