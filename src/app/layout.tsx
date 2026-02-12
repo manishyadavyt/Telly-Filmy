@@ -10,35 +10,48 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Telly Filmy – Entertainment News & Bollywood Updates",
+  metadataBase: new URL("https://www.tellyfilmy.com"),
+
+  title: {
+    default: "Telly Filmy – Entertainment News & Bollywood Updates",
+    template: "%s | Telly Filmy",
+  },
+
   description:
     "Get the latest TV serial updates, Bollywood news, web stories, and entertainment trends on Telly Filmy.",
+
   alternates: {
-    canonical: "https://www.tellyfilmy.com",
+    canonical: "/",
   },
+
   openGraph: {
     title: "Telly Filmy – Entertainment News, TV Serials & Bollywood Updates",
     description:
       "Latest TV serials, Bollywood news & trending entertainment stories.",
-    url: "https://www.tellyfilmy.com",
+    url: "/",
     siteName: "Telly Filmy",
+    locale: "en_IN",
+    type: "website",
     images: [
       {
         url: "/logo.png",
-        width: 800,
-        height: 600,
-        alt: "Telly Filmy Logo",
+        width: 1200,
+        height: 630,
+        alt: "Telly Filmy",
       },
     ],
-    locale: "en_IN",
-    type: "website",
   },
+
   twitter: {
     card: "summary_large_image",
-    title: "Telly Filmy – Entertainment News, TV Serials & Bollywood Updates",
+    title: "Telly Filmy – Entertainment News & Bollywood Updates",
     description:
       "Get the latest entertainment news, serial updates & Bollywood buzz.",
     images: ["/logo.png"],
+  },
+
+  icons: {
+    icon: "/favicon.ico",
   },
 };
 
@@ -50,6 +63,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
+        
         {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-7269LC27VB"
