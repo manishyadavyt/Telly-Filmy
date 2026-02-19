@@ -66,7 +66,7 @@ export default async function Home() {
           </div>
           
            <div className="text-center mt-4">
-               <Link href="/news" className="text-sm font-medium text-primary underline">
+               <Link href="/posts" className="text-sm font-medium text-primary underline">
                   View More News
                </Link>
            </div>
