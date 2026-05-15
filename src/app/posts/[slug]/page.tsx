@@ -136,23 +136,27 @@ export default async function PostPage({
 
       {/* ✅ Article Content With Mid Image */}
       <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed">
-        {paragraphs.map((para: string, i: number) => (
-          <div key={i}>
-            <p className="mb-6">{para}</p>
+        {paragraphs.map((para: string, i: number) => {
+  const imageIndex = Math.floor(i / 2);
 
-            {/* Insert second image in middle */}
-            {i === midIndex - 1 && post.images?.[0] && (
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-md my-8 bg-gray-100">
-                <Image
-                  src={post.images[0]}
-                  alt={`${post.title} - Additional Image`}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            )}
-          </div>
-        ))}
+  return (
+    <div key={i}>
+      <p className="mb-6">{para}</p>
+
+      {/* Auto Insert Images After Every 2 Paragraphs */}
+      {post.images?.[imageIndex] && i % 2 === 1 && (
+        <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-md my-8 bg-gray-100">
+          <Image
+            src={post.images[imageIndex]}
+            alt={`${post.title} image ${imageIndex + 1}`}
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
+    </div>
+  );
+})}
       </div>
 
       {/* Optional Video */}
