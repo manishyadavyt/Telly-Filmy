@@ -128,8 +128,8 @@ export default async function PostPage({
         <Image
           src={post.imageUrl}
           alt={post.title}
-          fill
-          className="object-cover"
+          
+        className="w-full h-auto object-contain"
           priority
         />
       </div>
@@ -149,8 +149,8 @@ export default async function PostPage({
           <Image
             src={post.images[imageIndex]}
             alt={`${post.title} image ${imageIndex + 1}`}
-            fill
-            className="object-cover"
+          
+            className="w-full h-auto object-contain"
           />
         </div>
       )}
