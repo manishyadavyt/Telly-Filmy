@@ -22,7 +22,7 @@ export function PostCard({ post, variant = 'default', className }: PostCardProps
           <Image
             src={post.imageUrl}
             alt={post.title}
-            fill
+          
             className="w-full h-auto object-contain"
             data-ai-hint={post.imageHint}
             

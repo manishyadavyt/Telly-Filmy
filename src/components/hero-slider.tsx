@@ -40,7 +40,7 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
                     src={post.imageUrl}
                     alt={post.title}
                     fill
-                    className="object-cover"
+                    className="w-full h-auto object-contain"
                     data-ai-hint={post.imageHint}
                     priority
                   />
