@@ -19,13 +19,12 @@ export function PostCard({ post, variant = 'default', className }: PostCardProps
       <Card className={cn("flex flex-row overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all active:scale-[0.98]", className)}>
         {/* Thumbnail (Left) */}
   <Link href={`/posts/${post.slug}`}>
-  <div className="relative w-full overflow-hidden rounded-xl">
+  <div className="relative w-full aspect-video overflow-hidden rounded-xl">
     <Image
       src={post.imageUrl}
       alt={post.title}
-      width={800}
-      height={450}
-      className="w-full h-auto object-cover"
+      fill
+      className="object-cover"
       data-ai-hint={post.imageHint}
     />
   </div>
