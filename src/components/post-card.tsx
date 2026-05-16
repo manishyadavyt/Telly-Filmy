@@ -18,18 +18,18 @@ export function PostCard({ post, variant = 'default', className }: PostCardProps
     return (
       <Card className={cn("flex flex-row overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all active:scale-[0.98]", className)}>
         {/* Thumbnail (Left) */}
-        <Link href={`/posts/${post.slug}`}
-         className="w-full overflow-hidden rounded-xl">
-          <Image
-            src={post.imageUrl}
-            alt={post.title}
-          
-            className="w-full h-auto object-contain"
-            data-ai-hint={post.imageHint}
-            
-            
-          />
-        </Link>
+        <Link href={`/posts/${post.slug}`}>
+  <div className="w-full overflow-hidden">
+    <Image
+      src={post.imageUrl}
+      alt={post.title}
+      width={800}
+      height={600}
+      className="w-full h-auto"
+      data-ai-hint={post.imageHint}
+    />
+  </div>
+</Link>
 
         {/* Content (Right) */}
         <CardContent className="flex flex-1 flex-col justify-center p-3">
