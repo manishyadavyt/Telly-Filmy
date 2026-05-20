@@ -40,6 +40,14 @@ export default function Header() {
             <Link href="/contact">Contact</Link>
           </Button>
         </nav>
+          {/* Search Bar */}
+  <div className="hidden md:block">
+    <input
+      type="text"
+      placeholder="Search..."
+      className="w-48 border border-gray-300 rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-400"
+    />
+  </div>
 
         {/* RIGHT: Mobile Menu */}
         <div className="md:hidden">
@@ -50,6 +58,10 @@ export default function Header() {
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
+             {/* Mobile Search Icon */}
+  <button className="md:hidden p-2 rounded-full border border-gray-300">
+    🔍
+  </button>
 
             <SheetContent side="right" className="w-3/4 p-0">
               <SheetHeader className="border-b p-4">
