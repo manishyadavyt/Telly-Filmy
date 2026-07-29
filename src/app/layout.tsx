@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import "./globals.css";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 
@@ -7,7 +6,10 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Toaster } from "@/components/ui/toaster";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.tellyfilmy.com"),
@@ -28,13 +30,13 @@ export const metadata: Metadata = {
     title: "Telly Filmy – Entertainment News, TV Serials & Bollywood Updates",
     description:
       "Latest TV serials, Bollywood news & trending entertainment stories.",
-    url: "/",
+    url: "https://www.tellyfilmy.com",
     siteName: "Telly Filmy",
     locale: "en_IN",
     type: "website",
     images: [
       {
-        url: "/logo.png",
+        url: "https://www.tellyfilmy.com/logo.png",
         width: 1200,
         height: 630,
         alt: "Telly Filmy",
@@ -47,11 +49,13 @@ export const metadata: Metadata = {
     title: "Telly Filmy – Entertainment News & Bollywood Updates",
     description:
       "Get the latest entertainment news, serial updates & Bollywood buzz.",
-    images: ["/logo.png"],
+    images: ["https://www.tellyfilmy.com/logo.png"],
   },
 
   icons: {
     icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 
@@ -63,12 +67,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        
         {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-7269LC27VB"
           strategy="afterInteractive"
         />
+
         <Script id="google-analytics" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
