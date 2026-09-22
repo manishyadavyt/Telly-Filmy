@@ -1,26 +1,29 @@
-DirectoryIndex index.html index.php
+DirectoryIndex index.php index.html
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # 1. Direct access to real files and directories
+  # 1. Route requests to public_html if folder exists
+  RewriteCond %{REQUEST_URI} !^/public_html/
+  RewriteCond %{DOCUMENT_ROOT}/public_html/index.html -f
+  RewriteRule ^(.*)$ public_html/$1 [L,QSA]
+
+  # 2. Direct access to existing file or directory
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # 2. Clean URLs: match /about to /about.html, /contact to /contact.html
+  # 3. Clean URLs for static HTML
   RewriteCond %{DOCUMENT_ROOT}/$1.html -f
   RewriteRule ^([^/]+)/?$ $1.html [L]
 
-  # 3. Nested clean URLs: /posts/slug to /posts/slug.html
   RewriteCond %{DOCUMENT_ROOT}/$1/$2.html -f
   RewriteRule ^([^/]+)/([^/]+)/?$ $1/$2.html [L]
 
-  # 4. Deeply nested clean URLs: /admin/edit/slug to /admin/edit/slug.html
   RewriteCond %{DOCUMENT_ROOT}/$1/$2/$3.html -f
   RewriteRule ^([^/]+)/([^/]+)/([^/]+)/?$ $1/$2/$3.html [L]
 
-  # 5. 404 handler
-  ErrorDocument 404 /404.html
+  # 4. 404 handler
+  ErrorDocument 404 /public_html/404.html
 </IfModule>
