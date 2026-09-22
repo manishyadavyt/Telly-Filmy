@@ -15,22 +15,20 @@ export function MarqueeSection({ posts }: MarqueeSectionProps) {
   const duplicatedPosts = [...tickerPosts, ...tickerPosts];
 
   return (
-    <div className="w-full bg-white border-b border-rose-100 text-slate-800 py-1.5 sm:py-2.5 px-2.5 sm:px-4 overflow-hidden flex items-center shadow-xs">
-      <div className="container mx-auto flex items-center gap-2 sm:gap-3">
-        {/* Sliding Ticker Content */}
-        <div className="flex-1 overflow-hidden relative">
-          <div className="animate-marquee items-center space-x-6 sm:space-x-8 whitespace-nowrap will-change-transform">
-            {duplicatedPosts.map((post, idx) => (
-              <Link
-                key={`${post.id}-${idx}`}
-                href={`/posts/${post.slug}`}
-                className="inline-flex items-center text-[11px] sm:text-xs text-slate-700 hover:text-[#e11d48] font-semibold transition-colors group mr-6 sm:mr-8"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#e11d48] mr-1.5 sm:mr-2 shrink-0 group-hover:scale-125 transition-transform"></span>
-                <span className="truncate max-w-[200px] sm:max-w-md">{post.title}</span>
-              </Link>
-            ))}
-          </div>
+    <div className="w-full bg-white border-b border-rose-100 text-slate-800 py-2 sm:py-3 overflow-hidden flex items-center shadow-xs">
+      {/* Full-width ticker — no container padding */}
+      <div className="w-full overflow-hidden">
+        <div className="animate-marquee items-center space-x-8 sm:space-x-12 whitespace-nowrap will-change-transform">
+          {duplicatedPosts.map((post, idx) => (
+            <Link
+              key={`${post.id}-${idx}`}
+              href={`/posts/${post.slug}`}
+              className="inline-flex items-center text-[12px] sm:text-[13px] text-slate-700 hover:text-[#e11d48] font-semibold transition-colors group mr-8 sm:mr-12"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[#e11d48] mr-2 shrink-0 group-hover:scale-125 transition-transform"></span>
+              <span>{post.title}</span>
+            </Link>
+          ))}
         </div>
       </div>
     </div>
