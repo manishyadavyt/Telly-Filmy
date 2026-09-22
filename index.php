@@ -1,58 +1,80 @@
 <?php
 /**
- * TellyFilmy Hostinger Entry Point
- * Handles direct serving if repo is cloned directly into public_html
+ * TellyFilmy Universal Hostinger Router
+ * Prevents 404 errors on page refresh for static routes
  */
-if (file_exists(__DIR__ . '/public_html/index.html')) {
-    // If request has a specific file path
-    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $uri = ltrim($uri, '/');
-    
-    if (!empty($uri)) {
-        $targetFile = __DIR__ . '/public_html/' . $uri;
-        if (is_file($targetFile)) {
-            // Serve static asset with appropriate mime type
-            $ext = pathinfo($targetFile, PATHINFO_EXTENSION);
-            $mimes = [
-                'html' => 'text/html',
-                'css'  => 'text/css',
-                'js'   => 'application/javascript',
-                'json' => 'application/json',
-                'png'  => 'image/png',
-                'jpg'  => 'image/jpeg',
-                'jpeg' => 'image/jpeg',
-                'gif'  => 'image/gif',
-                'svg'  => 'image/svg+xml',
-                'ico'  => 'image/x-icon',
-                'xml'  => 'application/xml',
-                'txt'  => 'text/plain',
-            ];
+
+$uri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+$uri = ltrim($uri ?? '', '/');
+
+// Potential candidate paths for the requested resource
+$candidates = [
+    __DIR__ . '/public_html/' . $uri,
+    __DIR__ . '/public_html/' . $uri . '.html',
+    __DIR__ . '/public_html/' . $uri . '/index.html',
+    __DIR__ . '/' . $uri,
+    __DIR__ . '/' . $uri . '.html',
+    __DIR__ . '/' . $uri . '/index.html',
+    __DIR__ . '/out/' . $uri,
+    __DIR__ . '/out/' . $uri . '.html',
+];
+
+$mimes = [
+    'html' => 'text/html; charset=UTF-8',
+    'css'  => 'text/css',
+    'js'   => 'application/javascript',
+    'json' => 'application/json',
+    'png'  => 'image/png',
+    'jpg'  => 'image/jpeg',
+    'jpeg' => 'image/jpeg',
+    'webp' => 'image/webp',
+    'gif'  => 'image/gif',
+    'svg'  => 'image/svg+xml',
+    'ico'  => 'image/x-icon',
+    'xml'  => 'application/xml',
+    'txt'  => 'text/plain',
+];
+
+if (!empty($uri)) {
+    foreach ($candidates as $file) {
+        if (is_file($file)) {
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
             if (isset($mimes[$ext])) {
                 header('Content-Type: ' . $mimes[$ext]);
             }
-            readfile($targetFile);
-            exit;
-        }
-        
-        // Try with .html extension
-        if (is_file($targetFile . '.html')) {
-            header('Content-Type: text/html');
-            readfile($targetFile . '.html');
+            readfile($file);
             exit;
         }
     }
-    
-    // Default to homepage
-    header('Content-Type: text/html');
-    readfile(__DIR__ . '/public_html/index.html');
-    exit;
+} else {
+    // Empty URI -> Homepage
+    $homeFiles = [
+        __DIR__ . '/public_html/index.html',
+        __DIR__ . '/index.html',
+        __DIR__ . '/out/index.html',
+    ];
+    foreach ($homeFiles as $home) {
+        if (is_file($home)) {
+            header('Content-Type: text/html; charset=UTF-8');
+            readfile($home);
+            exit;
+        }
+    }
 }
 
-if (file_exists(__DIR__ . '/index.html')) {
-    header('Content-Type: text/html');
-    readfile(__DIR__ . '/index.html');
-    exit;
-}
-
+// 404 Fallback
 http_response_code(404);
-echo "Site is being deployed. Please refresh in a moment.";
+$notFoundFiles = [
+    __DIR__ . '/public_html/404.html',
+    __DIR__ . '/404.html',
+    __DIR__ . '/out/404.html',
+];
+foreach ($notFoundFiles as $notFound) {
+    if (is_file($notFound)) {
+        header('Content-Type: text/html; charset=UTF-8');
+        readfile($notFound);
+        exit;
+    }
+}
+
+echo "<h1>404 - Page Not Found</h1>";

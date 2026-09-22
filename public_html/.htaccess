@@ -1,26 +1,27 @@
-DirectoryIndex index.html index.php
+DirectoryIndex index.php index.html
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # 1. Direct access to real files and directories
+  # 1. Direct access to existing files and directories
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # 2. Clean URLs: match /about to /about.html, /contact to /contact.html
-  RewriteCond %{DOCUMENT_ROOT}/$1.html -f
-  RewriteRule ^([^/]+)/?$ $1.html [L]
+  # 2. Check if .html file exists for the request
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.*)$ $1.html [L]
 
-  # 3. Nested clean URLs: /posts/slug to /posts/slug.html
-  RewriteCond %{DOCUMENT_ROOT}/$1/$2.html -f
-  RewriteRule ^([^/]+)/([^/]+)/?$ $1/$2.html [L]
+  # 3. Check public_html subfolder if cloned inside public_html
+  RewriteCond %{DOCUMENT_ROOT}/public_html/$1.html -f
+  RewriteRule ^(.*)$ /public_html/$1.html [L]
 
-  # 4. Deeply nested clean URLs: /admin/edit/slug to /admin/edit/slug.html
-  RewriteCond %{DOCUMENT_ROOT}/$1/$2/$3.html -f
-  RewriteRule ^([^/]+)/([^/]+)/([^/]+)/?$ $1/$2/$3.html [L]
+  RewriteCond %{DOCUMENT_ROOT}/public_html/$1 -f
+  RewriteRule ^(.*)$ /public_html/$1 [L]
 
-  # 5. 404 handler
-  ErrorDocument 404 /404.html
+  # 4. Route all remaining clean URLs to index.php
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ /index.php [L,QSA]
 </IfModule>

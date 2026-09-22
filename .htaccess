@@ -4,26 +4,24 @@ DirectoryIndex index.php index.html
   RewriteEngine On
   RewriteBase /
 
-  # 1. Route requests to public_html if folder exists
-  RewriteCond %{REQUEST_URI} !^/public_html/
-  RewriteCond %{DOCUMENT_ROOT}/public_html/index.html -f
-  RewriteRule ^(.*)$ public_html/$1 [L,QSA]
-
-  # 2. Direct access to existing file or directory
+  # 1. Direct access to existing files and directories
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # 3. Clean URLs for static HTML
-  RewriteCond %{DOCUMENT_ROOT}/$1.html -f
-  RewriteRule ^([^/]+)/?$ $1.html [L]
+  # 2. Check if .html file exists for the request
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.*)$ $1.html [L]
 
-  RewriteCond %{DOCUMENT_ROOT}/$1/$2.html -f
-  RewriteRule ^([^/]+)/([^/]+)/?$ $1/$2.html [L]
+  # 3. Check public_html subfolder if cloned inside public_html
+  RewriteCond %{DOCUMENT_ROOT}/public_html/$1.html -f
+  RewriteRule ^(.*)$ /public_html/$1.html [L]
 
-  RewriteCond %{DOCUMENT_ROOT}/$1/$2/$3.html -f
-  RewriteRule ^([^/]+)/([^/]+)/([^/]+)/?$ $1/$2/$3.html [L]
+  RewriteCond %{DOCUMENT_ROOT}/public_html/$1 -f
+  RewriteRule ^(.*)$ /public_html/$1 [L]
 
-  # 4. 404 handler
-  ErrorDocument 404 /public_html/404.html
+  # 4. Route all remaining clean URLs to index.php
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ index.php [L,QSA]
 </IfModule>
