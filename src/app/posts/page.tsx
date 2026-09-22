@@ -17,17 +17,39 @@ export async function generateMetadata({
       title: `Search results for "${search}" | Telly Filmy`,
       description: `Explore all latest news, updates, and articles for ${search} on Telly Filmy.`,
       alternates: {
-        canonical: `https://www.tellyfilmy.com/posts?search=${encodeURIComponent(search)}`,
+        canonical: 'https://www.tellyfilmy.com/posts',
+      },
+      robots: {
+        index: false,
+        follow: true,
       },
     };
   }
 
   return {
-    title: 'Latest Entertainment News, Serials & Bollywood Articles | Telly Filmy',
+    title: 'Latest Entertainment News, TV Serials & Bollywood Articles | Telly Filmy',
     description:
       'Browse all breaking entertainment news, TV serial spoilers, celebrity updates, and Bollywood gossips on Telly Filmy.',
     alternates: {
       canonical: 'https://www.tellyfilmy.com/posts',
+    },
+    openGraph: {
+      title: 'Latest Entertainment News & Bollywood Articles | Telly Filmy',
+      description:
+        'Browse all breaking entertainment news, TV serial spoilers, celebrity updates, and Bollywood gossips on Telly Filmy.',
+      url: 'https://www.tellyfilmy.com/posts',
+      siteName: 'Telly Filmy',
+      type: 'website',
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
   };
 }

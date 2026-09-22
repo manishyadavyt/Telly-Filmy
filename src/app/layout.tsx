@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
-import "./globals.css";
+import './globals.css';
 import { Plus_Jakarta_Sans, Outfit } from 'next/font/google';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { BackToTopButton } from '@/components/back-to-top-button';
 import { MobileBottomNav } from '@/components/mobile-bottom-nav';
+import { WebSiteJsonLd, OrganizationJsonLd } from '@/components/json-ld';
 import Script from 'next/script';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -28,11 +29,27 @@ export const viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.tellyfilmy.com'),
-  title: 'Telly Filmy – Entertainment News, TV Serials & Bollywood Updates',
+  title: {
+    default: 'Telly Filmy – Entertainment News, TV Serials & Bollywood Updates',
+    template: '%s | Telly Filmy',
+  },
   description:
-    'Get the latest TV serial updates, Bollywood news, web stories, and trending entertainment updates on Telly Filmy.',
+    'Get the latest TV serial updates, spoilers, Bollywood news, web stories, and trending entertainment updates on Telly Filmy.',
+  keywords: [
+    'Telly Filmy',
+    'TV Serials',
+    'Bollywood News',
+    'Entertainment News',
+    'TV Spoilers',
+    'OTT Releases',
+    'Celebrity Gossip',
+    'Reality TV',
+  ],
   alternates: {
     canonical: 'https://www.tellyfilmy.com',
+    types: {
+      'application/rss+xml': 'https://www.tellyfilmy.com/feed.xml',
+    },
   },
   openGraph: {
     title: 'Telly Filmy – Entertainment News, TV Serials & Bollywood Updates',
@@ -58,6 +75,17 @@ export const metadata: Metadata = {
       'Get the latest entertainment news, serial updates & Bollywood updates.',
     images: ['/logo.png'],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -68,6 +96,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${plusJakartaSans.variable} ${outfit.variable}`}>
       <head>
+        <WebSiteJsonLd />
+        <OrganizationJsonLd />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-7269LC27VB"
           strategy="afterInteractive"

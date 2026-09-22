@@ -1,7 +1,9 @@
 User-agent: *
+Allow: /
 Disallow: /admin/
 Disallow: /api/
 Disallow: /private/
-Allow: /
+Disallow: /*?search=*
 
 Sitemap: https://www.tellyfilmy.com/sitemap.xml
+Sitemap: https://www.tellyfilmy.com/feed.xml

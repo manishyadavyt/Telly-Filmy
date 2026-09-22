@@ -1,4 +1,5 @@
 import { getPostBySlug, getPosts } from '@/lib/data';
+import { getCategorySlug, findCategoryBySlug } from '@/lib/categories';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -21,11 +22,11 @@ export async function generateMetadata({
   if (!post) return { title: 'Post Not Found | Telly Filmy' };
 
   const baseUrl = 'https://www.tellyfilmy.com';
-  const url = post.canonicalUrl || `${baseUrl}/posts/${post.slug}`;
+  const url = `${baseUrl}/posts/${post.slug}`;
   const images = post.images?.length ? post.images : [post.imageUrl];
   const title = post.metaTitle ? `${post.metaTitle} | Telly Filmy` : `${post.title} | Telly Filmy`;
   const description = post.metaDescription || post.excerpt;
-  const keywords = [post.focusKeyword, ...(post.tags || [])].filter(Boolean) as string[];
+  const keywords = [post.focusKeyword, post.category, ...(post.tags || [])].filter(Boolean) as string[];
 
   return {
     title,
@@ -38,8 +39,13 @@ export async function generateMetadata({
       url,
       siteName: 'Telly Filmy',
       type: 'article',
+      publishedTime: post.date,
+      modifiedTime: post.date,
+      authors: [post.author?.name || 'Telly Filmy'],
+      section: post.category || 'Entertainment',
+      tags: post.tags || [],
       images: images.map((img: string) => ({
-        url: img,
+        url: img.startsWith('http') ? img : `${baseUrl}${img}`,
         width: 1200,
         height: 630,
         alt: post.title,
@@ -49,8 +55,18 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: post.metaTitle || post.title,
       description,
-      images,
+      images: images.map((img: string) => (img.startsWith('http') ? img : `${baseUrl}${img}`)),
       creator: '@TellyFilmy',
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
   };
 }
@@ -74,10 +90,13 @@ export default async function PostPage({
   const paragraphs = post.content.split('\n\n');
   const midPoint = Math.floor(paragraphs.length / 2);
 
+  const categorySlug = getCategorySlug(post.category);
+  const categoryInfo = findCategoryBySlug(categorySlug);
+
   const breadcrumbs = [
     { name: 'Home', item: 'https://www.tellyfilmy.com' },
-    { name: 'Entertainment', item: `https://www.tellyfilmy.com/category/${encodeURIComponent(post.category.toLowerCase())}` },
-    { name: 'Exclusives', item: url },
+    { name: categoryInfo.name, item: `https://www.tellyfilmy.com/category/${categorySlug}` },
+    { name: post.title, item: url },
   ];
 
   return (
@@ -94,14 +113,14 @@ export default async function PostPage({
           <div className="lg:col-span-8 bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-slate-100 space-y-4">
             
             {/* 1. TOP BREADCRUMBS */}
-            <nav className="flex items-center space-x-2 text-xs text-slate-500 font-medium">
-              <Link href="/" className="hover:text-[#e11d48]">Home</Link>
+            <nav className="flex items-center space-x-2 text-xs text-slate-500 font-medium" aria-label="Breadcrumb">
+              <Link href="/" className="hover:text-[#e11d48] transition-colors">Home</Link>
               <span>/</span>
-              <Link href={`/category/${encodeURIComponent(post.category.toLowerCase())}`} className="hover:text-[#e11d48]">
-                Entertainment
+              <Link href={`/category/${categorySlug}`} className="hover:text-[#e11d48] transition-colors">
+                {categoryInfo.name}
               </Link>
               <span>/</span>
-              <span className="text-slate-800 font-semibold">Exclusives</span>
+              <span className="text-slate-800 font-semibold truncate max-w-[200px] sm:max-w-md">{post.title}</span>
             </nav>
 
             {/* 2. MAIN ARTICLE TITLE */}

@@ -72,10 +72,11 @@ export default function Footer() {
           <div className="space-y-3">
             <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Categories</h4>
             <ul className="space-y-2 text-xs font-semibold">
-              <li><Link href="/category/tv-serials" className="hover:text-[#e11d48] transition-colors">TV Serials & Spoilers</Link></li>
-              <li><Link href="/category/bollywood" className="hover:text-[#e11d48] transition-colors">Bollywood & Movies</Link></li>
+              <li><Link href="/category/tv-serials" className="hover:text-[#e11d48] transition-colors">TV Serials &amp; Spoilers</Link></li>
+              <li><Link href="/category/bollywood" className="hover:text-[#e11d48] transition-colors">Bollywood &amp; Movies</Link></li>
+              <li><Link href="/category/reality-tv" className="hover:text-[#e11d48] transition-colors">Reality TV Shows</Link></li>
+              <li><Link href="/category/bhojpuri" className="hover:text-[#e11d48] transition-colors">Bhojpuri Cinema</Link></li>
               <li><Link href="/category/spoilers" className="hover:text-[#e11d48] transition-colors">Trending Stories</Link></li>
-              <li><Link href="/category/web-stories" className="hover:text-[#e11d48] transition-colors">Visual Web Stories</Link></li>
               <li><Link href="/category/ott" className="hover:text-[#e11d48] transition-colors">OTT Releases</Link></li>
             </ul>
           </div>

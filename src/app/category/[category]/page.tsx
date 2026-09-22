@@ -1,11 +1,11 @@
 // src/app/category/[category]/page.tsx
-import { getPosts, CATEGORIES } from '@/lib/data';
+import { getPosts } from '@/lib/data';
+import { findCategoryBySlug } from '@/lib/categories';
 import { PostCard } from '@/components/post-card';
 import { AdSenseSlot } from '@/components/adsense-slot';
 import { BreadcrumbJsonLd } from '@/components/json-ld';
-import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Tag, Sparkles, Film, Tv, Flame, Clapperboard } from 'lucide-react';
+import { Tag } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({
@@ -14,22 +14,46 @@ export async function generateMetadata({
   params: Promise<{ category: string }>;
 }): Promise<Metadata> {
   const { category } = await params;
-  const decoded = decodeURIComponent(category).replace(/-/g, ' ');
-  const formattedCategory = decoded.charAt(0).toUpperCase() + decoded.slice(1);
-  const canonicalUrl = `https://www.tellyfilmy.com/category/${encodeURIComponent(category.toLowerCase())}`;
+  const cat = findCategoryBySlug(category);
+  const canonicalUrl = `https://www.tellyfilmy.com/category/${cat.slug}`;
 
   return {
-    title: `${formattedCategory} News, Spoilers & Latest Updates | Telly Filmy`,
-    description: `Read the latest ${formattedCategory} news, TV updates, exclusive gossip, and spoilers on Telly Filmy.`,
+    title: `${cat.name} News, Spoilers & Latest Updates | Telly Filmy`,
+    description: cat.description,
+    keywords: [cat.name, 'news', 'entertainment', 'tv serials', 'spoilers', 'bollywood', 'updates'],
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${formattedCategory} – Telly Filmy`,
-      description: `Read the latest ${formattedCategory} news and updates on Telly Filmy.`,
+      title: `${cat.name} News & Updates | Telly Filmy`,
+      description: cat.description,
       url: canonicalUrl,
       siteName: 'Telly Filmy',
       type: 'website',
+      images: [
+        {
+          url: '/logo.png',
+          width: 800,
+          height: 600,
+          alt: `${cat.name} on Telly Filmy`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${cat.name} News & Updates | Telly Filmy`,
+      description: cat.description,
+      images: ['/logo.png'],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
   };
 }
@@ -40,28 +64,32 @@ export default async function CategoryPage({
   params: Promise<{ category: string }>;
 }) {
   const { category } = await params;
+  const cat = findCategoryBySlug(category);
   const allPosts = await getPosts();
-  const decoded = decodeURIComponent(category).toLowerCase().replace(/-/g, ' ');
 
   const posts = allPosts.filter((post) => {
-    const postCat = post.category.toLowerCase().replace(/-/g, ' ');
-    return (
-      postCat === decoded ||
-      postCat.includes(decoded) ||
-      decoded.includes(postCat)
-    );
+    const postCat = (post.category || '').toLowerCase().trim();
+    const postCatClean = postCat.replace(/\s+/g, '-');
+    
+    // Check direct match with category name, slug, or aliases
+    if (postCat === cat.name.toLowerCase() || postCatClean === cat.slug) return true;
+    if (cat.aliases.some((alias) => postCat === alias || postCatClean === alias || postCat.includes(alias) || alias.includes(postCat))) {
+      return true;
+    }
+    // For spoilers/trending category
+    if (cat.slug === 'spoilers' && (post.isTrending || post.isTopStory)) {
+      return true;
+    }
+    return false;
   });
 
-  const categoryTitle =
-    posts.length > 0
-      ? posts[0].category
-      : decoded.charAt(0).toUpperCase() + decoded.slice(1);
+  const categoryTitle = cat.name;
 
   const breadcrumbs = [
     { name: 'Home', item: 'https://www.tellyfilmy.com' },
     {
       name: categoryTitle,
-      item: `https://www.tellyfilmy.com/category/${encodeURIComponent(category.toLowerCase())}`,
+      item: `https://www.tellyfilmy.com/category/${cat.slug}`,
     },
   ];
 
@@ -71,8 +99,8 @@ export default async function CategoryPage({
 
       <main className="container mx-auto max-w-7xl py-6 px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center space-x-2 text-xs text-slate-500 font-medium">
-          <Link href="/" className="hover:text-[#e11d48]">
+        <nav className="flex items-center space-x-2 text-xs text-slate-500 font-medium" aria-label="Breadcrumb">
+          <Link href="/" className="hover:text-[#e11d48] transition-colors">
             Home
           </Link>
           <span>/</span>
@@ -94,7 +122,7 @@ export default async function CategoryPage({
               {categoryTitle}
             </h1>
             <p className="text-rose-100 text-xs sm:text-sm font-normal">
-              Explore the latest stories, breaking updates, and exclusive coverage in {categoryTitle}.
+              {cat.description}
             </p>
           </div>
         </div>
@@ -112,10 +140,10 @@ export default async function CategoryPage({
               📂
             </div>
             <h3 className="font-outfit text-lg font-bold text-slate-900">
-              No articles found in {categoryTitle}
+              Latest articles in {categoryTitle} coming soon
             </h3>
             <p className="text-slate-500 text-sm max-w-md mx-auto">
-              New articles in this category will appear here as soon as they are published via the Admin CMS.
+              Check out all latest articles and breaking entertainment news on our homepage.
             </p>
             <Link
               href="/"

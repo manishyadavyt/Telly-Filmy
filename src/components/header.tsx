@@ -17,11 +17,11 @@ import { Button } from '@/components/ui/button';
 const NAV_CATEGORIES = [
   { name: 'HOME', href: '/' },
   { name: 'BOLLYWOOD', href: '/category/bollywood' },
-  { name: 'TV', href: '/category/tv-serials' },
-  { name: 'OTT', href: '/category/ott' },
+  { name: 'TV SERIALS', href: '/category/tv-serials' },
+  { name: 'REALITY TV', href: '/category/reality-tv' },
   { name: 'ENTERTAINMENT', href: '/category/entertainment' },
-  { name: 'MOVIES', href: '/category/movies' },
-  { name: 'SOUTH CINEMA', href: '/category/south-cinema' },
+  { name: 'BHOJPURI', href: '/category/bhojpuri' },
+  { name: 'OTT', href: '/category/ott' },
   { name: '🔥 TRENDING', href: '/category/spoilers', isTrending: true },
 ];
 
