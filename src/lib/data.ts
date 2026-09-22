@@ -1,10 +1,19 @@
 import fs from "fs/promises";
 import path from "path";
-import { randomUUID } from "crypto";
 import type { Post } from "./types";
 
 // ✅ Ensure this always points to the root
 const POSTS_PATH = path.join(process.cwd(), "posts.json");
+
+export const CATEGORIES = [
+  "TV Serials",
+  "Reality Shows",
+  "Bollywood",
+  "OTT Releases",
+  "Celebrity News",
+  "Spoilers",
+  "Reviews",
+] as const;
 
 /**
  * ✅ Safe JSON reader
@@ -70,6 +79,41 @@ export async function getPostBySlug(
 }
 
 /**
- * ✅ Admin / API usage
+ * ✅ Add a new post to the store
  */
+export async function addPostToStore(post: Post): Promise<void> {
+  const posts = await readPosts();
+  posts.unshift(post); // Add to beginning (newest first)
+  await writePosts(posts);
+}
 
+/**
+ * ✅ Update an existing post by slug
+ */
+export async function updatePostInStore(
+  slug: string,
+  updatedData: Partial<Post>
+): Promise<Post | null> {
+  const posts = await readPosts();
+  const index = posts.findIndex((p) => p.slug === slug);
+
+  if (index === -1) return null;
+
+  // Merge updates
+  posts[index] = { ...posts[index], ...updatedData };
+  await writePosts(posts);
+  return posts[index];
+}
+
+/**
+ * ✅ Delete a post by slug
+ */
+export async function deletePostFromStore(slug: string): Promise<boolean> {
+  const posts = await readPosts();
+  const filtered = posts.filter((p) => p.slug !== slug);
+
+  if (filtered.length === posts.length) return false; // Not found
+
+  await writePosts(filtered);
+  return true;
+}

@@ -1,107 +1,164 @@
 'use client';
 
-import Link from "next/link";
-import Image from "next/image";
-import { Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-} from "@/components/ui/sheet";
+import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import { SearchBar } from '@/components/search-bar';
+import { 
+  Menu, 
+  Search,
+  Flame,
+  Globe
+} from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+
+const NAV_CATEGORIES = [
+  { name: 'HOME', href: '/' },
+  { name: 'BOLLYWOOD', href: '/category/bollywood' },
+  { name: 'TV', href: '/category/tv-serials' },
+  { name: 'OTT', href: '/category/ott' },
+  { name: 'ENTERTAINMENT', href: '/category/entertainment' },
+  { name: 'MOVIES', href: '/category/movies' },
+  { name: 'SOUTH CINEMA', href: '/category/south-cinema' },
+  { name: '🔥 TRENDING', href: '/category/spoilers', isTrending: true },
+];
 
 export default function Header() {
-  return (
-    <header className="w-full border-b border-border/40 bg-background/95 backdrop-blur">
-      <div className="container flex h-14 max-w-screen-2xl items-center justify-between px-3">
+  const pathname = usePathname();
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
-        {/* LEFT: Logo */}
-        <Link href="/" className="flex items-center">
+  return (
+    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-rose-100/80 shadow-xs text-slate-800">
+      
+      {/* MAIN TOP HEADER BAR */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+        
+        {/* Brand Original Logo */}
+        <Link href="/" className="flex items-center space-x-2 shrink-0 group">
           <Image
             src="/logo.png"
-            alt="Telly Filmy Logo"
-            width={130}
-            height={36}
+            alt="Telly Filmy"
+            width={160}
+            height={44}
             priority
-            className="h-8 w-auto md:h-9"
+            className="h-8 sm:h-10 w-auto object-contain group-hover:opacity-90 transition-opacity"
           />
         </Link>
 
-        {/* RIGHT: Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-2">
-          <Button variant="ghost" asChild>
-            <Link href="/about">About</Link>
+        {/* Desktop Live Search Bar */}
+        <div className="hidden lg:block flex-1 max-w-sm mx-6">
+          <SearchBar />
+        </div>
+
+        {/* Right Top Actions (Search Pill & Admin Link) */}
+        <div className="hidden sm:flex items-center space-x-3">
+          
+          {/* Quick Search Button */}
+          <button 
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            className="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 transition-colors"
+          >
+            <Search className="w-3.5 h-3.5 text-slate-500" />
+            <span>Search</span>
+          </button>
+
+          {/* Admin Portal Link */}
+          <Link
+            href="/admin"
+            className="text-xs font-bold text-[#e11d48] hover:underline px-2 py-1"
+          >
+            Admin
+          </Link>
+        </div>
+
+        {/* Mobile Actions Menu */}
+        <div className="flex items-center space-x-2 sm:hidden">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            className="text-slate-700 hover:text-[#e11d48]"
+          >
+            <Search className="h-5 w-5" />
           </Button>
 
-          <Button variant="ghost" asChild>
-            <Link href="/contact">Contact</Link>
-          </Button>
-        </nav>
-          {/* Search Bar */}
-  <div className="hidden md:block">
-    <input
-      type="text"
-      placeholder="Search..."
-      className="w-48 border border-gray-300 rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-400"
-    />
-  </div>
-
-        {/* RIGHT: Mobile Menu */}
-        <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
+              <Button variant="ghost" size="icon" className="text-slate-700 hover:text-[#e11d48]">
+                <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-             {/* Mobile Search Icon */}
-  <button className="md:hidden p-2 rounded-full border border-gray-300">
-    🔍
-  </button>
-
-            <SheetContent side="right" className="w-3/4 p-0">
-              <SheetHeader className="border-b p-4">
-                <SheetClose asChild>
-                  <Link href="/" className="flex items-center">
-                    <Image
-                      src="/logo.png"
-                      alt="Telly Filmy Logo"
-                      width={120}
-                      height={34}
-                      priority
-                    />
-                  </Link>
-                </SheetClose>
-                <SheetTitle className="sr-only">Menu</SheetTitle>
-              </SheetHeader>
-
-              <nav className="flex flex-col gap-1 p-4">
-                <SheetClose asChild>
-                  <Button variant="ghost" className="justify-start" asChild>
-                    <Link href="/">Home</Link>
-                  </Button>
-                </SheetClose>
-
-                <SheetClose asChild>
-                  <Button variant="ghost" className="justify-start" asChild>
-                    <Link href="/about">About</Link>
-                  </Button>
-                </SheetClose>
-
-                <SheetClose asChild>
-                  <Button variant="ghost" className="justify-start" asChild>
-                    <Link href="/contact">Contact</Link>
-                  </Button>
-                </SheetClose>
+            <SheetContent side="right" className="bg-white border-rose-100 text-slate-900 w-80 p-6">
+              <SheetTitle className="text-left font-extrabold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-[#e11d48]"></span> Menu
+              </SheetTitle>
+              <div className="mb-6">
+                <SearchBar />
+              </div>
+              <nav className="flex flex-col space-y-2">
+                {NAV_CATEGORIES.map((cat) => {
+                  const isActive = pathname === cat.href;
+                  return (
+                    <Link
+                      key={cat.href}
+                      href={cat.href}
+                      className={`px-3 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-colors ${
+                        isActive 
+                          ? 'bg-rose-50 text-[#e11d48] border-l-4 border-[#e11d48]' 
+                          : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      {cat.name}
+                    </Link>
+                  );
+                })}
               </nav>
+              <div className="mt-8 pt-6 border-t border-slate-100">
+                <Link href="/admin">
+                  <Button className="w-full bg-[#e11d48] hover:bg-[#be123c] text-white font-bold">
+                    Admin Portal
+                  </Button>
+                </Link>
+              </div>
             </SheetContent>
           </Sheet>
         </div>
+
       </div>
+
+      {/* Expandable Mobile Search Bar */}
+      {mobileSearchOpen && (
+        <div className="lg:hidden px-4 pb-3 border-t border-rose-100 pt-3 bg-rose-50/40">
+          <SearchBar />
+        </div>
+      )}
+
+      {/* CATEGORY NAVIGATION TABS (Matching OnscreenBuzz screenshot) */}
+      <div className="border-t border-rose-100/60 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center space-x-6 overflow-x-auto py-2.5 scrollbar-none">
+          {NAV_CATEGORIES.map((cat) => {
+            const isActive = pathname === cat.href;
+            return (
+              <Link
+                key={cat.href}
+                href={cat.href}
+                className={`text-[12px] sm:text-[13px] font-extrabold uppercase tracking-wider whitespace-nowrap transition-colors relative py-1 ${
+                  isActive 
+                    ? 'text-[#e11d48] border-b-2 border-[#e11d48]' 
+                    : cat.isTrending
+                      ? 'text-[#e11d48] hover:text-[#be123c]'
+                      : 'text-slate-700 hover:text-[#e11d48]'
+                }`}
+              >
+                {cat.name}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
     </header>
   );
 }

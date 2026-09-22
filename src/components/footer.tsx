@@ -1,75 +1,120 @@
+'use client';
+
 import Link from 'next/link';
-import { Instagram, Facebook, Twitter, Youtube } from 'lucide-react';
-import { Button } from './ui/button';
-import { Separator } from './ui/separator';
-import { Logo } from './logo';
-import { getPosts } from '@/lib/data';
+import Image from 'next/image';
+import { AdSenseSlot } from '@/components/adsense-slot';
+import { 
+  Instagram, 
+  Twitter, 
+  Facebook, 
+  Youtube, 
+  Send 
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
-export default async function Footer() {
-  const allPosts = await getPosts();
-  const categories = [...new Set(allPosts.map((post) => post.category))];
-
+export default function Footer() {
   return (
-    <footer className="bg-secondary">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-1">
-            <Logo />
-            <p className="text-muted-foreground mt-4 text-sm">
-              “Telly Filmy – Where Entertainment Meets Fun! From TV dramas to the latest show buzz, we bring you everything that keeps your screen—and your mood—lit!”.
+    <footer className="w-full bg-white border-t border-rose-100 text-slate-700 pt-10 pb-8 mt-16">
+      
+      {/* FOOTER AD BANNER */}
+      <div className="container mx-auto px-4 mb-8">
+        <AdSenseSlot type="footer" />
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* 4-COLUMN MAIN FOOTER GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-10 border-b border-slate-100">
+          
+          {/* Col 1: About Telly Filmy */}
+          <div className="space-y-4">
+            <Link href="/" className="flex items-center space-x-2">
+              <Image
+                src="/logo.png"
+                alt="Telly Filmy"
+                width={160}
+                height={44}
+                className="h-8 w-auto object-contain"
+              />
+            </Link>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              Your premier destination for instant TV serial updates, Bollywood news, web stories, celebrity gossip, and exclusive entertainment coverage.
             </p>
+            <div className="flex items-center space-x-3 pt-2">
+              <a href="#" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#e11d48] hover:border-[#e11d48] transition-all">
+                <Twitter className="w-3.5 h-3.5" />
+              </a>
+              <a href="#" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#e11d48] hover:border-[#e11d48] transition-all">
+                <Instagram className="w-3.5 h-3.5" />
+              </a>
+              <a href="#" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#e11d48] hover:border-[#e11d48] transition-all">
+                <Facebook className="w-3.5 h-3.5" />
+              </a>
+              <a href="#" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#e11d48] hover:border-[#e11d48] transition-all">
+                <Youtube className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 md:col-span-2 md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="font-semibold text-foreground">Quick Links</h3>
-              <ul className="mt-4 space-y-2">
-                <li><Link href="/about" className="text-sm text-muted-foreground hover:text-primary">About</Link></li>
-                <li><Link href="/contact" className="text-sm text-muted-foreground hover:text-primary">Contact</Link></li>
-                <li><Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
-              </ul>
-            </div>
+          {/* Col 2: Quick Links */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Quick Navigation</h4>
+            <ul className="space-y-2 text-xs font-semibold">
+              <li><Link href="/" className="hover:text-[#e11d48] transition-colors">Home Dashboard</Link></li>
+              <li><Link href="/posts" className="hover:text-[#e11d48] transition-colors">All Articles</Link></li>
+              <li><Link href="/about" className="hover:text-[#e11d48] transition-colors">About Us</Link></li>
+              <li><Link href="/contact" className="hover:text-[#e11d48] transition-colors">Contact Support</Link></li>
+              <li><Link href="/admin" className="hover:text-[#e11d48] transition-colors">Admin Portal</Link></li>
+            </ul>
+          </div>
 
-            <div>
-              <h3 className="font-semibold text-foreground">Categories</h3>
-              <ul className="mt-4 space-y-2">
-                {categories.map((category) => (
-                  <li key={category}>
-                    <Link
-                      href={`/category/${encodeURIComponent(category.toLowerCase())}`}
-                      className="text-sm text-muted-foreground hover:text-primary"
-                    >
-                      {category}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {/* Col 3: Categories */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Categories</h4>
+            <ul className="space-y-2 text-xs font-semibold">
+              <li><Link href="/category/tv-serials" className="hover:text-[#e11d48] transition-colors">TV Serials & Spoilers</Link></li>
+              <li><Link href="/category/bollywood" className="hover:text-[#e11d48] transition-colors">Bollywood & Movie Buzz</Link></li>
+              <li><Link href="/category/spoilers" className="hover:text-[#e11d48] transition-colors">Trending Stories</Link></li>
+              <li><Link href="/category/web-stories" className="hover:text-[#e11d48] transition-colors">Visual Web Stories</Link></li>
+              <li><Link href="/category/ott" className="hover:text-[#e11d48] transition-colors">OTT Releases</Link></li>
+            </ul>
+          </div>
+
+          {/* Col 4: Newsletter */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Newsletter</h4>
+            <p className="text-xs text-slate-600 font-medium">
+              Get breaking entertainment updates straight to your inbox daily.
+            </p>
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-2">
+              <div className="relative">
+                <Input 
+                  type="email" 
+                  placeholder="Your email address" 
+                  className="bg-slate-50 border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 pr-10 focus:border-[#e11d48]"
+                />
+                <Button size="icon" className="absolute right-1 top-1 h-7 w-7 bg-[#e11d48] hover:bg-[#be123c] text-white">
+                  <Send className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+
+        {/* BOTTOM COPYRIGHT */}
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+          <div>
+            &copy; {new Date().getFullYear()} <span className="text-slate-900 font-bold">Telly Filmy</span>. All rights reserved.
+          </div>
+          <div className="flex items-center space-x-6 text-xs font-medium">
+            <Link href="/privacy-policy" className="hover:text-slate-900 transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-slate-900 transition-colors">Terms of Service</Link>
+            <Link href="/sitemap.xml" className="hover:text-slate-900 transition-colors">Sitemap</Link>
           </div>
         </div>
 
-        <Separator className="my-8 bg-border/60" />
-
-        <div className="flex flex-col md:flex-row items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Telly Filmy. All Rights Reserved.
-          </p>
-
-          <div className="flex items-center gap-2 mt-4 md:mt-0">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="https://x.com/telly_filmy?t=QBCSCWDKfFAkiipz0bH-eg&s=09"><Twitter className="h-4 w-4" /></Link>
-            </Button>
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="https://www.youtube.com/channel/UC1b3PrlMsODBp2lnS7IX4bA"><Youtube className="h-4 w-4" /></Link>
-            </Button>
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="https://www.instagram.com/tellyfilmy?igsh=aGlyanNrY3k5Z2M5"><Instagram className="h-4 w-4" /></Link>
-            </Button>
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="https://www.facebook.com/profile.php?id=61551867691591&mibextid=ZbWKwL"><Facebook className="h-4 w-4" /></Link>
-            </Button>
-          </div>
-        </div>
       </div>
     </footer>
   );

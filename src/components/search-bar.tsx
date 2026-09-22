@@ -1,9 +1,10 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, ArrowRight } from "lucide-react";
 import type { Post } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,16 +14,34 @@ import {
 } from "@/components/ui/popover";
 
 interface SearchBarProps {
-  posts: Post[];
+  posts?: Post[];
+  placeholder?: string;
+  className?: string;
 }
 
-export function SearchBar({ posts }: SearchBarProps) {
+export function SearchBar({ posts: initialPosts, placeholder = "Search articles, serials, actors...", className = "" }: SearchBarProps) {
+  const router = useRouter();
+  const [allPosts, setAllPosts] = useState<Post[]>(initialPosts || []);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
   const [popoverWidth, setPopoverWidth] = useState(0);
+
+  // Sync initial posts or fetch from API if not passed
+  useEffect(() => {
+    if (initialPosts && initialPosts.length > 0) {
+      setAllPosts(initialPosts);
+    } else {
+      fetch("/api/posts")
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) setAllPosts(data);
+        })
+        .catch((err) => console.error("Error loading search posts:", err));
+    }
+  }, [initialPosts]);
 
   // Set popover width to match input
   useEffect(() => {
@@ -33,7 +52,7 @@ export function SearchBar({ posts }: SearchBarProps) {
 
   // Search handler with debounce
   useEffect(() => {
-    if (query.length <= 1) {
+    if (query.trim().length <= 1) {
       setResults([]);
       return;
     }
@@ -43,7 +62,7 @@ export function SearchBar({ posts }: SearchBarProps) {
     const debouncer = setTimeout(() => {
       const lower = query.toLowerCase();
 
-      const filtered = posts.filter((post) => {
+      const filtered = allPosts.filter((post) => {
         const titleMatch = post.title?.toLowerCase().includes(lower);
         const excerptMatch = post.excerpt?.toLowerCase().includes(lower);
         const categoryMatch = post.category?.toLowerCase().includes(lower);
@@ -54,33 +73,43 @@ export function SearchBar({ posts }: SearchBarProps) {
         return titleMatch || excerptMatch || categoryMatch || tagMatch;
       });
 
-      setResults(filtered);
+      setResults(filtered.slice(0, 6));
       setLoading(false);
-    }, 250);
+    }, 200);
 
     return () => clearTimeout(debouncer);
-  }, [query, posts]);
+  }, [query, allPosts]);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) setQuery("");
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && query.trim()) {
+      setIsOpen(false);
+      router.push(`/posts?search=${encodeURIComponent(query.trim())}`);
+    }
+  };
+
   return (
     <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <div className="relative w-full" ref={triggerRef}>
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className={`relative w-full ${className}`} ref={triggerRef}>
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
 
           <Input
             type="search"
-            placeholder="Search posts..."
-            className="w-full pl-9"
+            placeholder={placeholder}
+            className="w-full pl-9 pr-4 py-2 bg-slate-100/90 hover:bg-slate-100 focus:bg-white text-slate-900 placeholder:text-slate-400 rounded-full border-slate-200 text-xs transition-all shadow-xs focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              setIsOpen(true);
+              if (e.target.value.trim().length > 1) {
+                setIsOpen(true);
+              }
             }}
+            onKeyDown={handleKeyDown}
           />
         </div>
       </PopoverTrigger>

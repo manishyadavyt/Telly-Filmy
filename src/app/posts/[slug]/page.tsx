@@ -1,41 +1,40 @@
-// src/app/posts/[slug]/page.tsx
-
-import { getPostBySlug } from '@/lib/data';
+import { getPostBySlug, getPosts } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
-import { Badge } from '@/components/ui/badge';
-import { Tag } from 'lucide-react';
+import { Tag, Clock, Calendar, ChevronRight, Share2, Eye, ChevronLeft, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ShareButtons } from '@/components/share-buttons';
+import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/json-ld';
+import { AdSenseSlot } from '@/components/adsense-slot';
+import { PostCard } from '@/components/post-card';
 
-
-// ✅ Generate SEO Metadata (Supports Multiple Images)
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const post = await getPostBySlug(params.slug);
-
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
   if (!post) return { title: 'Post Not Found | Telly Filmy' };
 
   const baseUrl = 'https://www.tellyfilmy.com';
-  const url = `${baseUrl}/posts/${post.slug}`;
-
-  const images = post.images?.length
-    ? post.images
-    : [post.imageUrl];
+  const url = post.canonicalUrl || `${baseUrl}/posts/${post.slug}`;
+  const images = post.images?.length ? post.images : [post.imageUrl];
+  const title = post.metaTitle ? `${post.metaTitle} | Telly Filmy` : `${post.title} | Telly Filmy`;
+  const description = post.metaDescription || post.excerpt;
+  const keywords = [post.focusKeyword, ...(post.tags || [])].filter(Boolean) as string[];
 
   return {
-    title: `${post.title} | Telly Filmy`,
-    description: post.excerpt,
+    title,
+    description,
+    keywords: keywords.length > 0 ? keywords : ['entertainment', 'bollywood', 'tv serials', 'news'],
     alternates: { canonical: url },
     openGraph: {
-      title: post.title,
-      description: post.excerpt,
+      title: post.metaTitle || post.title,
+      description,
       url,
       siteName: 'Telly Filmy',
       type: 'article',
@@ -48,147 +47,236 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: post.title,
-      description: post.excerpt,
+      title: post.metaTitle || post.title,
+      description,
       images,
       creator: '@TellyFilmy',
     },
   };
 }
 
-
-// ✅ Main Post Page
 export default async function PostPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const post = await getPostBySlug(params.slug);
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
   if (!post) notFound();
 
-  const readingTime = Math.ceil(post.content.split(' ').length / 200);
+  const allPosts = await getPosts();
+  const trendingStories = allPosts
+    .filter((p) => p.isTrending || p.isTopStory)
+    .slice(0, 5);
+
+  const url = `https://www.tellyfilmy.com/posts/${post.slug}`;
+  const readingTime = Math.max(1, Math.ceil(post.content.split(' ').length / 200));
   const paragraphs = post.content.split('\n\n');
-  const midIndex = Math.floor(paragraphs.length / 2);
+  const midPoint = Math.floor(paragraphs.length / 2);
+
+  const breadcrumbs = [
+    { name: 'Home', item: 'https://www.tellyfilmy.com' },
+    { name: 'Entertainment', item: `https://www.tellyfilmy.com/category/${encodeURIComponent(post.category.toLowerCase())}` },
+    { name: 'Exclusives', item: url },
+  ];
 
   return (
-    <article className="container max-w-4xl mx-auto py-6 md:py-10 px-4">
+    <>
+      <ArticleJsonLd post={post} url={url} />
+      <BreadcrumbJsonLd items={breadcrumbs} />
 
-      {/* Category */}
-      <Link href={`/category/${encodeURIComponent(post.category.toLowerCase())}`}>
-        <Badge
-          variant="destructive"
-          className="w-fit cursor-pointer hover:bg-destructive/90 transition-colors uppercase text-[10px] tracking-wider px-2 py-0.5"
-        >
-          {post.category}
-        </Badge>
-      </Link>
+      <main className="container mx-auto max-w-7xl py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
+        
+        {/* 2-COLUMN GRID (Matching Screenshot) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* LEFT 8 COLUMNS: MAIN ARTICLE CONTENT */}
+          <div className="lg:col-span-8 bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-slate-100 space-y-4">
+            
+            {/* 1. TOP BREADCRUMBS */}
+            <nav className="flex items-center space-x-2 text-xs text-slate-500 font-medium">
+              <Link href="/" className="hover:text-[#e11d48]">Home</Link>
+              <span>/</span>
+              <Link href={`/category/${encodeURIComponent(post.category.toLowerCase())}`} className="hover:text-[#e11d48]">
+                Entertainment
+              </Link>
+              <span>/</span>
+              <span className="text-slate-800 font-semibold">Exclusives</span>
+            </nav>
 
-      {/* Title */}
-      <h1 className="text-2xl md:text-4xl font-bold leading-tight mt-4">
-        {post.title}
-      </h1>
+            {/* 2. MAIN ARTICLE TITLE */}
+            <h1 className="font-outfit text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 leading-snug sm:leading-tight tracking-tight pt-2">
+              {post.title}
+            </h1>
 
-      {/* Excerpt */}
-      <p className="text-base md:text-lg text-muted-foreground leading-relaxed mt-3">
-        {post.excerpt}
-      </p>
+            {/* 4. SUBHEADLINE / EXCERPT */}
+            <p className="text-base sm:text-lg text-slate-700 font-normal leading-relaxed">
+              {post.excerpt}
+            </p>
 
-      {/* Date + Reading Time */}
-      <div className="text-xs text-muted-foreground font-medium mt-2">
-        Published: {format(new Date(post.date), 'EEEE, MMMM d, yyyy')} • {readingTime} min read
-      </div>
+            {/* 5. AUTHOR & PUBLISH META BAR */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 pb-3 border-y border-slate-200/80">
+              
+              {/* Left Author & Date info */}
+              <div className="space-y-0.5">
+                <div className="text-xs text-slate-700">
+                  By <span className="font-bold text-slate-900 underline underline-offset-2 cursor-pointer hover:text-[#e11d48]">{post.author?.name || 'GOUTHAM S'}</span>
+                </div>
+                <div className="text-xs text-slate-500 font-medium flex items-center gap-2 flex-wrap">
+                  <span>Published on {format(new Date(post.date), 'MMM d, yyyy | h:mm a')} IST</span>
+                  <span>|</span>
+                  <span className="flex items-center gap-1 text-slate-600 font-semibold">
+                    <Eye className="w-3.5 h-3.5 text-slate-500" /> 9K
+                  </span>
+                </div>
+              </div>
 
-      {/* Author + Share */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-b border-gray-100 py-4 my-6">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border border-gray-200">
-            <AvatarImage src={post.author.avatarUrl} alt={post.author.name} />
-            <AvatarFallback>
-              {post.author.name.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-primary">
-              {post.author.name}
-            </span>
-            <span className="text-[10px] text-muted-foreground">
-              View Profile
-            </span>
+              {/* Right Social & Join Us Action Buttons */}
+              <div className="flex items-center space-x-3 shrink-0">
+                {/* Google News Badge button */}
+                <button title="Follow on Google News" className="w-8 h-8 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-700">
+                  <span className="text-xs font-black text-blue-600">G</span><span className="text-xs font-black text-rose-500">N</span>
+                </button>
+                {/* Share Button */}
+                <button title="Share Story" className="w-8 h-8 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-700">
+                  <Share2 className="w-4 h-4 text-slate-700" />
+                </button>
+                {/* WhatsApp Join Us Pill */}
+                <a 
+                  href="#"
+                  className="flex items-center space-x-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-700 font-bold text-xs px-3.5 py-1.5 rounded-full transition-colors"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
+                  <span>JOIN US</span>
+                </a>
+              </div>
+
+            </div>
+
+            {/* 6. MAIN FEATURED BANNER IMAGE */}
+            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden shadow-xs bg-slate-100 my-4 border border-slate-100">
+              <Image
+                src={post.imageUrl}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+
+            {/* 7. ARTICLE BODY TEXT */}
+            <div className="font-sans text-slate-800 text-[16px] sm:text-[18px] leading-[1.85] space-y-6 font-normal pt-2">
+              {paragraphs.map((para, i) => {
+                const imageIndex = Math.floor(i / 2);
+                return (
+                  <div key={i}>
+                    <p className="mb-6 text-slate-800 leading-[1.85]">{para}</p>
+
+                    {/* Mid Ad banner */}
+                    {i === midPoint && post.enableAds !== false && (
+                      <AdSenseSlot type="in-feed" className="my-6" />
+                    )}
+
+                    {/* Extra gallery images */}
+                    {post.images?.[imageIndex] && i % 2 === 1 && (
+                      <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden shadow-xs my-6 bg-slate-100 border border-slate-100">
+                        <Image
+                          src={post.images[imageIndex]}
+                          alt={`${post.title} image ${imageIndex + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* OPTIONAL YOUTUBE EMBED */}
+            {post.videoUrl && (
+              <div className="my-8 relative w-full aspect-[16/9] rounded-xl overflow-hidden shadow-md border border-slate-200">
+                <iframe
+                  src={post.videoUrl}
+                  title={post.title}
+                  className="w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            )}
+
+            {/* TAGS */}
+            {post.tags && post.tags.length > 0 && (
+              <div className="pt-6 border-t border-slate-200/80">
+                <div className="flex items-center gap-2 mb-3">
+                  <Tag className="h-4 w-4 text-[#e11d48]" />
+                  <h3 className="font-outfit text-xs font-bold text-slate-900 uppercase tracking-wider">Related Tags</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {post.tags.map((tag) => (
+                    <Link key={tag} href={`/posts?search=${encodeURIComponent(tag)}`}>
+                      <span className="inline-block bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-[#e11d48] text-xs font-semibold px-3 py-1 rounded-full border border-slate-200 transition-colors">
+                        #{tag}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
           </div>
-        </div>
 
-        <ShareButtons
-          url={`https://www.tellyfilmy.com/posts/${post.slug}`}
-          title={post.title}
-        />
-      </div>
+          {/* RIGHT 4 COLUMNS: TRENDING STORIES SIDEBAR (Matching Screenshot) */}
+          <div className="lg:col-span-4 sticky top-24 space-y-6">
+            
+            <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-100 space-y-5">
+              {/* Header */}
+              <h3 className="font-outfit text-xl font-extrabold text-slate-900 border-b border-slate-200/80 pb-3">
+                Trending Stories
+              </h3>
 
-      {/* ✅ Featured Image (Main Image) */}
-      <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-sm mb-8 bg-gray-100">
-        <Image
-          src={post.imageUrl}
-          alt={post.title}
-          fill
-        className="w-full h-auto object-contain"
-          priority
-        />
-      </div>
+              {/* List of Trending Stories */}
+              <div className="flex flex-col space-y-4 divide-y divide-slate-100">
+                {trendingStories.map((story) => (
+                  <Link
+                    key={story.id}
+                    href={`/posts/${story.slug}`}
+                    className="group flex items-start space-x-3 pt-3 first:pt-0"
+                  >
+                    {/* Square Thumbnail */}
+                    <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-slate-100">
+                      <Image
+                        src={story.imageUrl}
+                        alt={story.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
 
-      {/* ✅ Article Content With Mid Image */}
-      <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed">
-        {paragraphs.map((para: string, i: number) => {
-  const imageIndex = Math.floor(i / 2);
+                    {/* Content */}
+                    <div className="flex-1 space-y-1 min-w-0">
+                      <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-wider block">
+                        ENTERTAINMENT
+                      </span>
+                      <h4 className="font-outfit text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#e11d48] line-clamp-2 leading-snug transition-colors">
+                        {story.title}
+                      </h4>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
 
-  return (
-    <div key={i}>
-      <p className="mb-6">{para}</p>
+            {/* Sidebar AdSense Slot */}
+            {post.enableAds !== false && <AdSenseSlot type="sidebar" />}
 
-      {/* Auto Insert Images After Every 2 Paragraphs */}
-      {post.images?.[imageIndex] && i % 2 === 1 && (
-        <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-md my-8 bg-gray-100">
-          <Image
-            src={post.images[imageIndex]}
-            alt={`${post.title} image ${imageIndex + 1}`}
-          fill
-            className="w-full h-auto object-contain"
-          />
-        </div>
-      )}
-    </div>
-  );
-})}
-      </div>
-
-      {/* Optional Video */}
-      {post.videoUrl && (
-        <div className="my-12 relative w-full aspect-video rounded-xl overflow-hidden shadow-lg">
-          <iframe
-            src={post.videoUrl}
-            title={post.title}
-            className="w-full h-full"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
-      )}
-
-      {/* Tags */}
-      {post.tags?.length > 0 && (
-        <div className="mt-12 pt-6 border-t">
-          <div className="flex items-center gap-2 mb-4">
-            <Tag className="h-4 w-4 text-primary" />
-            <h3 className="text-base font-semibold">Tags</h3>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {post.tags.map((tag: string) => (
-              <Badge key={tag} variant="secondary" className="px-3 py-1 font-normal">
-                {tag}
-              </Badge>
-            ))}
-          </div>
+
         </div>
-      )}
-    </article>
+
+      </main>
+    </>
   );
 }

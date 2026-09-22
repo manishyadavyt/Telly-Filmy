@@ -1,86 +1,116 @@
-
 import { HeroSlider } from '@/components/hero-slider';
 import { MarqueeSection } from '@/components/marquee-section';
-import { RecentPosts } from '@/components/recent-posts';
 import { PostCard } from '@/components/post-card';
 import { getPosts } from '@/lib/data';
+import { AdSenseSlot } from '@/components/adsense-slot';
+import { OrganizationJsonLd } from '@/components/json-ld';
 import Link from 'next/link';
-import Image from 'next/image';
+import { Flame, Film, Tv, Sparkles, ArrowRight } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export default async function Home() {
   const allPosts = await getPosts();
-  const topStories = allPosts.filter((post) => post.isTopStory);
-  const recentPosts = [...allPosts].sort(
+  
+  const sortedPosts = [...allPosts].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
+  const topStories = sortedPosts.filter((post) => post.isTopStory);
+  const trendingPosts = sortedPosts.filter((post) => post.isTrending);
+  const bollywoodPosts = sortedPosts.filter((post) => post.category.toLowerCase().includes('bollywood'));
+  const tvPosts = sortedPosts.filter((post) => post.category.toLowerCase().includes('tv'));
+  const latestPosts = sortedPosts.slice(0, 8);
+
   return (
     <>
-      <MarqueeSection posts={recentPosts} />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
+      <OrganizationJsonLd />
+      
+      {/* 1. TICKER BAR */}
+      <MarqueeSection posts={sortedPosts} />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         
-        {/* MOBILE VIEW */}
-        <div className="md:hidden flex flex-col gap-6">
-          {/* Featured / Breaking Post */}
-          {topStories.length > 0 && (
-            <div className="flex flex-col gap-3">
-              <Link href={`/posts/${topStories[0].slug}`} className="relative aspect-video w-full overflow-hidden rounded-xl shadow-sm">
-                <Image
-                  src={topStories[0].imageUrl}
-                  alt={topStories[0].title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </Link>
-              <div className="space-y-2">
-                 <div className="flex items-center gap-2">
-                    <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
-                      Breaking
-                    </span>
-                    <span className="text-xs text-muted-foreground font-medium">
-                      {new Date(topStories[0].date).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </span>
-                 </div>
-                 <Link href={`/posts/${topStories[0].slug}`}>
-                   <h2 className="text-lg font-bold leading-tight text-gray-900">
-                     {topStories[0].title}
-                   </h2>
-                 </Link>
-                 <p className="text-sm text-gray-600 line-clamp-2">
-                    {topStories[0].excerpt}
-                 </p>
-              </div>
-            </div>
-          )}
+        {/* 2. LEADERBOARD AD */}
+        <AdSenseSlot type="leaderboard" />
 
-          {/* List of Recent Posts */}
-          <div className="flex flex-col gap-4">
-             {recentPosts.slice(1, 10).map((post) => (
-                <PostCard key={post.id} post={post} variant="horizontal" />
-             ))}
-          </div>
-          
-           <div className="text-center mt-4">
-               <Link href="/news" className="text-sm font-medium text-primary underline">
-                  View More News
-               </Link>
-           </div>
-        </div>
+        {/* 3. HERO SLIDER GRID (Matching OnscreenBuzz screenshot) */}
+        <HeroSlider topStories={topStories.length > 0 ? topStories : sortedPosts.slice(0, 5)} />
 
-        {/* DESKTOP VIEW */}
-        <div className="hidden md:grid grid-cols-1">
-          <div className="md:col-span-12">
-            <HeroSlider topStories={topStories} />
-            <div className="mt-12">
-              <RecentPosts posts={allPosts} />
+        {/* 4. SECTION 1: BOLLYWOOD SECTION (Matching Screenshot) */}
+        <section className="my-10 space-y-5">
+          <div className="flex items-center justify-between pb-2 border-b-2 border-rose-100">
+            <div className="flex items-center space-x-2">
+              <span className="w-1.5 h-6 bg-[#e11d48] rounded-xs"></span>
+              <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <Film className="w-5 h-5 text-[#e11d48]" /> BOLLYWOOD
+              </h2>
             </div>
+            <Link 
+              href="/category/bollywood" 
+              className="text-xs font-extrabold text-[#e11d48] hover:underline uppercase tracking-wider flex items-center gap-1"
+            >
+              VIEW ALL BOLLYWOOD &rarr;
+            </Link>
           </div>
-        </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {(bollywoodPosts.length > 0 ? bollywoodPosts : sortedPosts).slice(0, 4).map((post) => (
+              <PostCard key={post.id} post={post} variant="grid" />
+            ))}
+          </div>
+        </section>
+
+        {/* IN-FEED AD BANNER */}
+        <AdSenseSlot type="in-feed" />
+
+        {/* 5. SECTION 2: TV SERIALS SECTION */}
+        <section className="my-10 space-y-5">
+          <div className="flex items-center justify-between pb-2 border-b-2 border-rose-100">
+            <div className="flex items-center space-x-2">
+              <span className="w-1.5 h-6 bg-[#e11d48] rounded-xs"></span>
+              <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <Tv className="w-5 h-5 text-[#e11d48]" /> TV SERIALS & SPOILERS
+              </h2>
+            </div>
+            <Link 
+              href="/category/tv-serials" 
+              className="text-xs font-extrabold text-[#e11d48] hover:underline uppercase tracking-wider flex items-center gap-1"
+            >
+              VIEW ALL TV &rarr;
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {(tvPosts.length > 0 ? tvPosts : sortedPosts).slice(0, 4).map((post) => (
+              <PostCard key={post.id} post={post} variant="grid" />
+            ))}
+          </div>
+        </section>
+
+        {/* 6. SECTION 3: LATEST STORIES FEED */}
+        <section className="my-10 space-y-5">
+          <div className="flex items-center justify-between pb-2 border-b-2 border-rose-100">
+            <div className="flex items-center space-x-2">
+              <span className="w-1.5 h-6 bg-[#e11d48] rounded-xs"></span>
+              <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#e11d48]" /> LATEST ENTERTAINMENT
+              </h2>
+            </div>
+            <Link 
+              href="/posts" 
+              className="text-xs font-extrabold text-[#e11d48] hover:underline uppercase tracking-wider flex items-center gap-1"
+            >
+              VIEW ALL ARTICLES &rarr;
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {latestPosts.map((post) => (
+              <PostCard key={post.id} post={post} variant="grid" />
+            ))}
+          </div>
+        </section>
+
       </div>
     </>
   );

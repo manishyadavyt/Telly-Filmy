@@ -66,3 +66,21 @@
 .animate-marquee {
   animation: marquee 500s linear infinite;
 }
+
+.font-outfit {
+  font-family: var(--font-outfit), sans-serif;
+}
+
+.font-sans {
+  font-family: var(--font-sans), sans-serif;
+}
+
+/* Hide scrollbar for clean horizontal swiping on mobile */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

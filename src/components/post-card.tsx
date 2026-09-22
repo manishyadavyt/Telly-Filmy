@@ -1,120 +1,125 @@
-import Image from 'next/image';
+'use client';
+
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Post } from '@/lib/types';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from './ui/button';
-import { ArrowRight } from 'lucide-react';
-import { Badge } from './ui/badge';
-import { cn } from '@/lib/utils';
+import { Calendar } from 'lucide-react';
 
 interface PostCardProps {
   post: Post;
-  variant?: 'default' | 'horizontal';
-  className?: string; // Add className prop for flexibility
+  variant?: 'grid' | 'horizontal' | 'compact';
 }
 
-export function PostCard({ post, variant = 'default', className }: PostCardProps) {
+export function PostCard({ post, variant = 'grid' }: PostCardProps) {
+  const formattedDate = new Date(post.date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric'
+  });
+
   if (variant === 'horizontal') {
     return (
-      <Card className={cn("flex flex-row overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all active:scale-[0.98]", className)}>
-        {/* Thumbnail (Left) */}
-<Link href={`/posts/${post.slug}`}>
-  <div className="relative w-[140px] h-[100px] overflow-hidden rounded-l-xl flex-shrink-0">
-    <Image
-      src={post.imageUrl}
-      alt={post.title}
-      fill
-      className="object-cover"
-    />
-  </div>
-</Link>
-
-        {/* Content (Right) */}
-        <CardContent className="flex flex-1 flex-col justify-center p-3">
-           <Link
-              href={`/category/${encodeURIComponent(post.category.toLowerCase())}`}
-              className="mb-1 w-fit"
-           >
-              {/* Optional: Show category or breaking badge if needed. For list, usually minimal. */}
-              {post.isTopStory && (
-                  <Badge variant="destructive" className="h-5 px-1.5 text-[9px] uppercase tracking-wider">
-                      Breaking
-                  </Badge>
-              )}
-           </Link>
-
-          <h3 className="line-clamp-2 text-sm font-bold leading-tight text-foreground sm:text-base">
-            <Link href={`/posts/${post.slug}`}>
+      <Link 
+        href={`/posts/${post.slug}`}
+        className="group flex gap-3 p-3 rounded-2xl bg-white hover:bg-rose-50/40 border border-rose-100/80 shadow-xs hover:shadow-md transition-all duration-200"
+      >
+        <div className="relative w-28 h-24 sm:w-44 sm:h-32 rounded-xl overflow-hidden shrink-0 bg-slate-100">
+          <Image
+            src={post.imageUrl}
+            alt={post.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        </div>
+        <div className="flex flex-col justify-between flex-1 min-w-0 space-y-1">
+          <div className="space-y-1">
+            <span className="inline-block bg-[#e11d48] text-white text-[9px] font-extrabold px-2 py-0.5 rounded-xs uppercase tracking-wider">
+              {post.category}
+            </span>
+            <h3 className="font-outfit text-xs sm:text-base font-bold text-slate-900 group-hover:text-[#e11d48] leading-snug transition-colors line-clamp-2">
               {post.title}
-            </Link>
-          </h3>
-          
-           <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
-              <span>{post.category}</span>
-              <span>•</span>
-              <span>{new Date(post.date).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-              })}</span>
-           </div>
-        </CardContent>
-      </Card>
+            </h3>
+            <p className="hidden sm:block text-xs text-slate-600 line-clamp-2 leading-relaxed">
+              {post.excerpt}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 font-medium">
+            <span>By {post.author?.name || 'Telly Filmy'}</span>
+            <span>•</span>
+            <span>{formattedDate}</span>
+          </div>
+        </div>
+      </Link>
     );
   }
 
-  // Default Vertical Card
+  // DEFAULT MOBILE RESPONSIVE CARD
+  // On mobile (< sm): Horizontal list format so multiple articles fit on screen cleanly!
+  // On tablet & desktop (>= sm): Grid card format!
   return (
-    <Card className={cn("group flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:bg-gray-900 shadow-sm transition-all hover:shadow-md hover:-translate-y-1 duration-200", className)}>
+    <article className="group flex flex-row sm:flex-col rounded-2xl bg-white hover:bg-rose-50/20 border border-rose-100/80 shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden p-2.5 sm:p-0">
+      
       {/* Thumbnail */}
-      <Link href={`/posts/${post.slug}`} className="block relative aspect-[16/9] overflow-hidden">
+      <Link 
+        href={`/posts/${post.slug}`} 
+        className="relative w-28 h-24 sm:w-full sm:aspect-video rounded-xl sm:rounded-none overflow-hidden bg-slate-100 shrink-0"
+      >
         <Image
           src={post.imageUrl}
           alt={post.title}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          data-ai-hint={post.imageHint}
-          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
+        <div className="hidden sm:block absolute top-3 left-3">
+          <span className="bg-[#e11d48] text-white text-[9px] font-extrabold px-2 py-0.5 rounded-xs uppercase tracking-wider shadow-xs">
+            {post.category}
+          </span>
+        </div>
       </Link>
 
-      {/* Content */}
-      <CardContent className="flex flex-col p-4">
-        <Link
-          href={`/category/${encodeURIComponent(post.category.toLowerCase())}`}
-          className="w-fit"
-        >
-          <Badge
-            variant="secondary"
-            className="text-[11px] font-medium cursor-pointer hover:bg-secondary/80 transition-colors"
-          >
-            {post.category}
-          </Badge>
-        </Link>
+      {/* Details */}
+      <div className="p-2 sm:p-5 flex flex-col justify-between flex-1 min-w-0 space-y-1.5 sm:space-y-3">
+        <div className="space-y-1 sm:space-y-2">
+          
+          <div className="flex sm:hidden items-center justify-between">
+            <span className="bg-[#e11d48] text-white text-[8px] font-extrabold px-1.5 py-0.2 rounded-xs uppercase tracking-wider">
+              {post.category}
+            </span>
+            <span className="text-[9px] text-slate-400 font-medium">
+              {formattedDate}
+            </span>
+          </div>
 
-        <h3 className="mt-2 text-lg font-semibold leading-snug text-foreground line-clamp-2">
-          <Link href={`/posts/${post.slug}`} className="hover:text-primary transition-colors">
-            {post.title}
-          </Link>
-        </h3>
+          <div className="hidden sm:flex items-center text-[11px] text-slate-400 space-x-2">
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-rose-400" /> {formattedDate}
+            </span>
+            <span>•</span>
+            <span>3 min read</span>
+          </div>
 
-        <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-          {post.excerpt}
-        </p>
-      </CardContent>
-
-      {/* Footer */}
-      <CardFooter className="p-4 pt-0">
-        <Button
-          variant="link"
-          className="p-0 text-sm font-medium text-primary"
-          asChild
-        >
           <Link href={`/posts/${post.slug}`}>
-            Read More <ArrowRight className="ml-1 h-3 w-3" />
+            <h3 className="font-outfit text-xs sm:text-base font-extrabold text-slate-900 group-hover:text-[#e11d48] leading-snug transition-colors line-clamp-2">
+              {post.title}
+            </h3>
           </Link>
-        </Button>
-      </CardFooter>
-    </Card>
+
+          <p className="hidden sm:block text-xs text-slate-600 line-clamp-2 leading-relaxed">
+            {post.excerpt}
+          </p>
+        </div>
+
+        <div className="pt-1.5 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span className="text-slate-500 text-[9px] sm:text-[11px]">
+            By <span className="text-slate-800 font-bold">{post.author?.name || 'Telly Filmy'}</span>
+          </span>
+          <Link 
+            href={`/posts/${post.slug}`} 
+            className="text-[#e11d48] hover:text-[#be123c] font-extrabold text-[10px] sm:text-[11px] flex items-center gap-0.5"
+          >
+            Read &rarr;
+          </Link>
+        </div>
+      </div>
+    </article>
   );
 }
