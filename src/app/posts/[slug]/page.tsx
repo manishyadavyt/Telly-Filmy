@@ -12,6 +12,13 @@ import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/json-ld';
 import { AdSenseSlot } from '@/components/adsense-slot';
 import { PostCard } from '@/components/post-card';
 
+export async function generateStaticParams() {
+  const posts = await getPosts();
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
+
 export async function generateMetadata({
   params,
 }: {

@@ -1,11 +1,17 @@
 // src/app/category/[category]/page.tsx
 import { getPosts } from '@/lib/data';
-import { findCategoryBySlug } from '@/lib/categories';
+import { findCategoryBySlug, CATEGORY_LIST } from '@/lib/categories';
 import { PostCard } from '@/components/post-card';
 import { AdSenseSlot } from '@/components/adsense-slot';
 import { BreadcrumbJsonLd } from '@/components/json-ld';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+
+export async function generateStaticParams() {
+  return CATEGORY_LIST.map((cat) => ({
+    category: cat.slug,
+  }));
+}
 
 export async function generateMetadata({
   params,
