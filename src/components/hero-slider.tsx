@@ -55,7 +55,7 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
         >
           <Link 
             href={`/posts/${currentPost.slug}`}
-            className="group relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-[#080c16] flex flex-col justify-end min-h-[300px] sm:min-h-[440px] transition-transform duration-300 border border-slate-900"
+            className="group relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-[#080c16] flex flex-col justify-end min-h-[220px] sm:min-h-[440px] transition-transform duration-300 border border-slate-900"
           >
             {/* Background Image with smooth transition */}
             <Image
@@ -67,27 +67,27 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
               priority
             />
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#080c16] via-[#080c16]/60 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#080c16] via-[#080c16]/70 to-transparent"></div>
 
             {/* Overlaid Content */}
-            <div className="relative z-10 p-4 sm:p-7 space-y-2 sm:space-y-3">
+            <div className="relative z-10 p-3.5 sm:p-7 space-y-1.5 sm:space-y-3">
               <div className="flex items-center gap-2 sm:gap-3">
-                <span className="bg-[#e11d48] text-white font-black text-[9px] sm:text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-xs shadow-xs">
+                <span className="bg-[#e11d48] text-white font-black text-[8px] sm:text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-xs shadow-xs">
                   {currentPost.category}
                 </span>
-                <span className="text-[11px] sm:text-xs text-slate-300 font-medium flex items-center gap-1">
-                  <Calendar className="w-3 h-3 text-rose-400" />
+                <span className="text-[10px] sm:text-xs text-slate-300 font-medium flex items-center gap-1">
+                  <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-rose-400" />
                   {new Date(currentPost.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </span>
               </div>
 
-              <h2 className="font-outfit text-base sm:text-2xl md:text-3xl font-extrabold leading-snug sm:leading-tight text-white group-hover:text-rose-300 transition-colors line-clamp-3">
+              <h2 className="font-outfit text-sm sm:text-2xl md:text-3xl font-extrabold leading-snug sm:leading-tight text-white group-hover:text-rose-300 transition-colors line-clamp-2 sm:line-clamp-3">
                 {currentPost.title}
               </h2>
 
               {/* Slider Pagination Dots & Navigation Controls */}
-              <div className="flex items-center justify-between pt-2">
-                <div className="flex items-center space-x-1.5">
+              <div className="flex items-center justify-between pt-1 sm:pt-2">
+                <div className="flex items-center space-x-1 sm:space-x-1.5">
                   {sliderPosts.map((_, idx) => (
                     <button
                       key={idx}
@@ -98,32 +98,32 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
                         e.stopPropagation();
                         setCurrentIndex(idx);
                       }}
-                      className={`h-1.5 rounded-full transition-all ${
+                      className={`h-1 sm:h-1.5 rounded-full transition-all ${
                         idx === currentIndex 
-                          ? 'w-6 bg-[#e11d48]' 
-                          : 'w-2 bg-white/40 hover:bg-white/70'
+                          ? 'w-4 sm:w-6 bg-[#e11d48]' 
+                          : 'w-1.5 sm:w-2 bg-white/40 hover:bg-white/70'
                       }`}
                     />
                   ))}
                 </div>
 
                 {/* Left / Right Arrow Buttons */}
-                <div className="flex items-center space-x-1.5">
+                <div className="flex items-center space-x-1 sm:space-x-1.5">
                   <button
                     type="button"
                     aria-label="Previous Story"
                     onClick={prevSlide}
-                    className="w-7 h-7 rounded-full bg-black/50 hover:bg-[#e11d48] text-white flex items-center justify-center backdrop-blur-md transition-colors border border-white/20"
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/50 hover:bg-[#e11d48] text-white flex items-center justify-center backdrop-blur-md transition-colors border border-white/20"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
                   <button
                     type="button"
                     aria-label="Next Story"
                     onClick={nextSlide}
-                    className="w-7 h-7 rounded-full bg-black/50 hover:bg-[#e11d48] text-white flex items-center justify-center backdrop-blur-md transition-colors border border-white/20"
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/50 hover:bg-[#e11d48] text-white flex items-center justify-center backdrop-blur-md transition-colors border border-white/20"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
                 </div>
               </div>
@@ -134,16 +134,16 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
 
         {/* RIGHT 4 COLS: TRENDING STORIES CARD */}
         <div className="lg:col-span-4 flex">
-          <div className="w-full bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-rose-100/80 flex flex-col justify-between space-y-3 sm:space-y-4">
+          <div className="w-full bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-xs border border-rose-100/80 flex flex-col justify-between space-y-3 sm:space-y-4">
             
             {/* Header */}
-            <div className="flex items-center justify-between pb-2.5 border-b border-rose-100/60">
+            <div className="flex items-center justify-between pb-2 border-b border-rose-100/60">
               <h3 className="font-outfit text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                <Flame className="w-4 h-4 text-[#e11d48] fill-[#e11d48]" /> TRENDING STORIES
+                <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#e11d48] fill-[#e11d48]" /> TRENDING STORIES
               </h3>
               <Link 
                 href="/posts" 
-                className="text-[10px] font-extrabold text-[#e11d48] hover:underline uppercase tracking-wider"
+                className="text-[9px] sm:text-[10px] font-extrabold text-[#e11d48] hover:underline uppercase tracking-wider"
               >
                 VIEW ALL &rarr;
               </Link>
@@ -158,7 +158,7 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
                   className="group flex gap-2.5 sm:gap-3 items-center"
                 >
                   {/* Thumbnail / Number Badge */}
-                  <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden shrink-0 bg-slate-900 flex items-center justify-center shadow-xs">
+                  <div className="relative w-11 h-11 sm:w-14 sm:h-14 rounded-lg overflow-hidden shrink-0 bg-slate-900 flex items-center justify-center shadow-xs">
                     {post.imageUrl ? (
                       <Image
                         src={post.imageUrl}
@@ -167,7 +167,7 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
                         className="object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     ) : null}
-                    <span className="absolute top-0.5 left-0.5 bg-[#e11d48] text-white text-[8px] font-black px-1 py-0.1 rounded-xs shadow-xs">
+                    <span className="absolute top-0.5 left-0.5 bg-[#e11d48] text-white text-[7px] sm:text-[8px] font-black px-1 py-0.1 rounded-xs shadow-xs">
                       #{idx + 1}
                     </span>
                   </div>
@@ -177,7 +177,7 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
                     <span className="text-[8px] sm:text-[9px] font-extrabold text-[#e11d48] uppercase tracking-wider">
                       {post.category}
                     </span>
-                    <h4 className="font-outfit text-xs font-bold text-slate-900 group-hover:text-[#e11d48] line-clamp-2 leading-snug transition-colors">
+                    <h4 className="font-outfit text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-[#e11d48] line-clamp-2 leading-snug transition-colors">
                       {post.title}
                     </h4>
                   </div>
