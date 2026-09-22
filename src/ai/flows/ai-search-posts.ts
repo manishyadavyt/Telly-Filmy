@@ -1,5 +1,3 @@
-'use server';
-
 /**
  * @fileOverview An AI-powered post search flow.
  *

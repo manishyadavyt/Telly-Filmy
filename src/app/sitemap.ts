@@ -3,6 +3,8 @@ import { MetadataRoute } from 'next';
 import { getPosts } from '@/lib/data';
 import { CATEGORY_LIST } from '@/lib/categories';
 
+export const dynamic = 'force-static';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.tellyfilmy.com';
   const posts = await getPosts();

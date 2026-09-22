@@ -1,9 +1,7 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
-  // Node.js standalone deployment for Hostinger
-  /* config options here */
+  output: 'export', // Static export for Hostinger static hosting
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -11,6 +9,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    unoptimized: true, // Required for static export
     remotePatterns: [
       {
         protocol: 'https',

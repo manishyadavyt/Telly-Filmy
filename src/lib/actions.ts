@@ -1,8 +1,4 @@
-'use server';
-
-import { revalidatePath } from 'next/cache';
 import type { Post } from './types';
-import { addPostToStore, updatePostInStore, deletePostFromStore } from './data';
 
 type AddPostInput = Omit<Post, 'id' | 'author' | 'views'>;
 
@@ -28,10 +24,16 @@ export async function addPost(
       views: 0,
     };
 
-    await addPostToStore(newPost);
-
-    // Revalidate the entire site to ensure new post appears everywhere
-    revalidatePath('/', 'layout');
+    if (typeof window !== 'undefined') {
+      try {
+        const local = localStorage.getItem('tellyfilmy_posts');
+        const posts: Post[] = local ? JSON.parse(local) : [];
+        posts.unshift(newPost);
+        localStorage.setItem('tellyfilmy_posts', JSON.stringify(posts));
+      } catch (e) {
+        console.warn('LocalStorage save failed:', e);
+      }
+    }
 
     return { success: true, slug: newPost.slug };
   } catch (error) {
@@ -47,7 +49,6 @@ export async function updatePost(
   postData: UpdatePostInput
 ): Promise<{ success: boolean }> {
   try {
-    // If title changed, generate new slug unless slug explicitly provided
     let newSlug = postData.slug || slug;
     if (!postData.slug && postData.title) {
       newSlug = postData.title
@@ -58,19 +59,19 @@ export async function updatePost(
         .replace(/^-|-$/g, '');
     }
 
-    const updatedData = {
-      ...postData,
-      slug: newSlug,
-      id: newSlug,
-    };
-
-    const result = await updatePostInStore(slug, updatedData);
-
-    if (!result) {
-      return { success: false };
+    if (typeof window !== 'undefined') {
+      try {
+        const local = localStorage.getItem('tellyfilmy_posts');
+        if (local) {
+          let posts: Post[] = JSON.parse(local);
+          posts = posts.map((p) => (p.slug === slug ? { ...p, ...postData, slug: newSlug } : p));
+          localStorage.setItem('tellyfilmy_posts', JSON.stringify(posts));
+        }
+      } catch (e) {
+        console.warn('LocalStorage update failed:', e);
+      }
     }
 
-    revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Failed to update post:', error);
@@ -82,13 +83,19 @@ export async function deletePost(
   slug: string
 ): Promise<{ success: boolean }> {
   try {
-    const result = await deletePostFromStore(slug);
-
-    if (!result) {
-      return { success: false };
+    if (typeof window !== 'undefined') {
+      try {
+        const local = localStorage.getItem('tellyfilmy_posts');
+        if (local) {
+          let posts: Post[] = JSON.parse(local);
+          posts = posts.filter((p) => p.slug !== slug);
+          localStorage.setItem('tellyfilmy_posts', JSON.stringify(posts));
+        }
+      } catch (e) {
+        console.warn('LocalStorage delete failed:', e);
+      }
     }
 
-    revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Failed to delete post:', error);

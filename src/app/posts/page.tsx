@@ -6,73 +6,38 @@ import Link from 'next/link';
 import { Sparkles, Search, Newspaper } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ search?: string }>;
-}): Promise<Metadata> {
-  const { search } = await searchParams;
-  if (search) {
-    return {
-      title: `Search results for "${search}" | Telly Filmy`,
-      description: `Explore all latest news, updates, and articles for ${search} on Telly Filmy.`,
-      alternates: {
-        canonical: 'https://www.tellyfilmy.com/posts',
-      },
-      robots: {
-        index: false,
-        follow: true,
-      },
-    };
-  }
-
-  return {
-    title: 'Latest Entertainment News, TV Serials & Bollywood Articles | Telly Filmy',
+export const metadata: Metadata = {
+  title: 'Latest Entertainment News, TV Serials & Bollywood Articles | Telly Filmy',
+  description:
+    'Browse all breaking entertainment news, TV serial spoilers, celebrity updates, and Bollywood gossips on Telly Filmy.',
+  alternates: {
+    canonical: 'https://www.tellyfilmy.com/posts',
+  },
+  openGraph: {
+    title: 'Latest Entertainment News & Bollywood Articles | Telly Filmy',
     description:
       'Browse all breaking entertainment news, TV serial spoilers, celebrity updates, and Bollywood gossips on Telly Filmy.',
-    alternates: {
-      canonical: 'https://www.tellyfilmy.com/posts',
-    },
-    openGraph: {
-      title: 'Latest Entertainment News & Bollywood Articles | Telly Filmy',
-      description:
-        'Browse all breaking entertainment news, TV serial spoilers, celebrity updates, and Bollywood gossips on Telly Filmy.',
-      url: 'https://www.tellyfilmy.com/posts',
-      siteName: 'Telly Filmy',
-      type: 'website',
-    },
-    robots: {
+    url: 'https://www.tellyfilmy.com/posts',
+    siteName: 'Telly Filmy',
+    type: 'website',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
       index: true,
       follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
-  };
-}
+  },
+};
 
-export default async function AllPostsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ search?: string }>;
-}) {
-  const { search } = await searchParams;
+
+export default async function AllPostsPage() {
   const allPosts = await getPosts();
-
-  const filteredPosts = search
-    ? allPosts.filter((post) => {
-        const q = search.toLowerCase();
-        return (
-          post.title.toLowerCase().includes(q) ||
-          post.excerpt.toLowerCase().includes(q) ||
-          post.category.toLowerCase().includes(q) ||
-          post.tags?.some((t) => t.toLowerCase().includes(q))
-        );
-      })
-    : allPosts;
+  const filteredPosts = allPosts;
+  const search = '';
 
   const breadcrumbs = [
     { name: 'Home', item: 'https://www.tellyfilmy.com' },
