@@ -22,7 +22,7 @@ const NAV_CATEGORIES = [
   { name: 'ENTERTAINMENT', href: '/category/entertainment' },
   { name: 'BHOJPURI', href: '/category/bhojpuri' },
   { name: 'OTT', href: '/category/ott' },
-  { name: '🔥 TRENDING', href: '/category/spoilers', isTrending: true },
+  { name: '🔥 TRENDING', href: '/category/trending', isTrending: true },
 ];
 
 export default function Header() {

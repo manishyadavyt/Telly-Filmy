@@ -7,11 +7,8 @@ import {
   Instagram, 
   Twitter, 
   Facebook, 
-  Youtube, 
-  Send 
+  Youtube 
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 
 export default function Footer() {
   return (
@@ -24,8 +21,8 @@ export default function Footer() {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* 4-COLUMN MAIN FOOTER GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-10 border-b border-slate-100">
+        {/* 3-COLUMN MAIN FOOTER GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 pb-10 border-b border-slate-100">
           
           {/* Col 1: About Telly Filmy */}
           <div className="space-y-4">
@@ -60,7 +57,7 @@ export default function Footer() {
           {/* Col 2: Quick Links */}
           <div className="space-y-3">
             <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Quick Navigation</h4>
-            <ul className="space-y-2 text-xs font-semibold">
+            <ul className="space-y-2.5 text-xs font-semibold">
               <li><Link href="/" className="hover:text-[#e11d48] transition-colors">Home Dashboard</Link></li>
               <li><Link href="/posts" className="hover:text-[#e11d48] transition-colors">All Articles</Link></li>
               <li><Link href="/about" className="hover:text-[#e11d48] transition-colors">About Us</Link></li>
@@ -70,35 +67,15 @@ export default function Footer() {
 
           {/* Col 3: Categories */}
           <div className="space-y-3">
-            <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Categories</h4>
-            <ul className="space-y-2 text-xs font-semibold">
-              <li><Link href="/category/tv-serials" className="hover:text-[#e11d48] transition-colors">TV Serials &amp; Spoilers</Link></li>
-              <li><Link href="/category/bollywood" className="hover:text-[#e11d48] transition-colors">Bollywood &amp; Movies</Link></li>
+            <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Popular Categories</h4>
+            <ul className="space-y-2.5 text-xs font-semibold">
+              <li><Link href="/category/tv-serials" className="hover:text-[#e11d48] transition-colors">TV Serials &amp; Updates</Link></li>
+              <li><Link href="/category/bollywood" className="hover:text-[#e11d48] transition-colors">Bollywood &amp; Cinema</Link></li>
               <li><Link href="/category/reality-tv" className="hover:text-[#e11d48] transition-colors">Reality TV Shows</Link></li>
-              <li><Link href="/category/bhojpuri" className="hover:text-[#e11d48] transition-colors">Bhojpuri Cinema</Link></li>
-              <li><Link href="/category/spoilers" className="hover:text-[#e11d48] transition-colors">Trending Stories</Link></li>
+              <li><Link href="/category/bhojpuri" className="hover:text-[#e11d48] transition-colors">Bhojpuri Entertainment</Link></li>
+              <li><Link href="/category/trending" className="hover:text-[#e11d48] transition-colors">Trending Stories</Link></li>
               <li><Link href="/category/ott" className="hover:text-[#e11d48] transition-colors">OTT Releases</Link></li>
             </ul>
-          </div>
-
-          {/* Col 4: Newsletter */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Newsletter</h4>
-            <p className="text-xs text-slate-600 font-medium">
-              Get breaking entertainment updates straight to your inbox daily.
-            </p>
-            <form onSubmit={(e) => e.preventDefault()} className="space-y-2">
-              <div className="relative">
-                <Input 
-                  type="email" 
-                  placeholder="Your email address" 
-                  className="bg-slate-50 border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 pr-10 focus:border-[#e11d48]"
-                />
-                <Button size="icon" className="absolute right-1 top-1 h-7 w-7 bg-[#e11d48] hover:bg-[#be123c] text-white">
-                  <Send className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            </form>
           </div>
 
         </div>

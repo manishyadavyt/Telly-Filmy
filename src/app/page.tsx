@@ -24,7 +24,7 @@ export default async function Home() {
     <>
       <OrganizationJsonLd />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-1 sm:pt-2 pb-6">
         
         {/* 2. LEADERBOARD AD */}
         <AdSenseSlot type="leaderboard" />
@@ -33,7 +33,7 @@ export default async function Home() {
         <HeroSlider topStories={topStories.length > 0 ? topStories : sortedPosts.slice(0, 5)} />
 
         {/* 4. SECTION 1: BOLLYWOOD SECTION (Matching Screenshot) */}
-        <section className="my-10 space-y-5">
+        <section className="my-8 sm:my-10 space-y-5">
           <div className="flex items-center justify-between pb-2 border-b-2 border-rose-100">
             <div className="flex items-center space-x-2">
               <span className="w-1.5 h-6 bg-[#e11d48] rounded-xs"></span>
@@ -60,12 +60,12 @@ export default async function Home() {
         <AdSenseSlot type="in-feed" />
 
         {/* 5. SECTION 2: TV SERIALS SECTION */}
-        <section className="my-10 space-y-5">
+        <section className="my-8 sm:my-10 space-y-5">
           <div className="flex items-center justify-between pb-2 border-b-2 border-rose-100">
             <div className="flex items-center space-x-2">
               <span className="w-1.5 h-6 bg-[#e11d48] rounded-xs"></span>
               <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
-                <Tv className="w-5 h-5 text-[#e11d48]" /> TV SERIALS & SPOILERS
+                <Tv className="w-5 h-5 text-[#e11d48]" /> TV SERIALS & UPDATES
               </h2>
             </div>
             <Link 

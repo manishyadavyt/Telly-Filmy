@@ -9,14 +9,14 @@ export const CATEGORY_LIST: CategoryMeta[] = [
   {
     name: 'Bollywood',
     slug: 'bollywood',
-    description: 'Latest Bollywood news, movie reviews, box office updates, and celebrity gossip.',
+    description: 'Latest Bollywood news, movie reviews, box office updates, and celebrity interviews.',
     aliases: ['bollywood', 'movies', 'cinema'],
   },
   {
     name: 'TV Serials',
     slug: 'tv-serials',
-    description: 'Daily TV serial updates, upcoming twist spoilers, cast interviews, and ratings.',
-    aliases: ['tv-serials', 'television', 'tv', 'tv serials', 'tv serials & spoilers', 'tv-shows'],
+    description: 'Daily TV serial updates, upcoming twists, cast interviews, and episode highlights.',
+    aliases: ['tv-serials', 'television', 'tv', 'tv serials', 'tv shows', 'tv-shows', 'tv-serials-updates'],
   },
   {
     name: 'Entertainment',
@@ -27,13 +27,13 @@ export const CATEGORY_LIST: CategoryMeta[] = [
   {
     name: 'Reality TV',
     slug: 'reality-tv',
-    description: 'Reality TV show updates, voting trends, contestants gossip, and highlights.',
+    description: 'Reality TV show updates, voting trends, contestants buzz, and highlights.',
     aliases: ['reality-tv', 'reality tv', 'reality shows', 'reality-shows'],
   },
   {
     name: 'Bhojpuri',
     slug: 'bhojpuri',
-    description: 'Bhojpuri cinema news, song releases, actor interviews, and industry buzz.',
+    description: 'Bhojpuri cinema news, song releases, actor interviews, and regional industry buzz.',
     aliases: ['bhojpuri', 'bhojpuri-cinema'],
   },
   {
@@ -45,7 +45,7 @@ export const CATEGORY_LIST: CategoryMeta[] = [
   {
     name: 'Business',
     slug: 'business',
-    description: 'Entertainment business, brand sponsorships, industry acquisitions, and box office economics.',
+    description: 'Entertainment business, brand sponsorships, industry acquisitions, and economics.',
     aliases: ['business', 'finance', 'industry'],
   },
   {
@@ -55,10 +55,10 @@ export const CATEGORY_LIST: CategoryMeta[] = [
     aliases: ['ott', 'ott releases', 'ott-releases', 'web-series', 'web-stories'],
   },
   {
-    name: 'Spoilers & Trending',
-    slug: 'spoilers',
-    description: 'Top trending spoilers, plot twists, leaks, and hot viral discussions.',
-    aliases: ['spoilers', 'trending', 'trending stories', 'spoilers & trending'],
+    name: 'Trending Stories',
+    slug: 'trending',
+    description: 'Hottest trending stories, viral buzz, breaking entertainment updates, and top exclusives.',
+    aliases: ['trending', 'trending stories', 'spoilers', 'spoilers & trending', 'hot', 'viral'],
   },
 ];
 
@@ -100,7 +100,7 @@ export function findCategoryBySlug(slug: string): CategoryMeta {
   return {
     name,
     slug: clean,
-    description: `Read the latest ${name} news, TV serial updates, exclusive gossip, and spoilers on Telly Filmy.`,
+    description: `Read the latest ${name} news, TV updates, exclusive gossip, and entertainment stories on Telly Filmy.`,
     aliases: [clean, decoded],
   };
 }
