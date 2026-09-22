@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getPosts, getPostBySlug } from '@/lib/data';
 
+export const dynamic = 'force-static';
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const slug = searchParams.get('slug');

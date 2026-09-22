@@ -2,6 +2,7 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  // Node.js standalone deployment for Hostinger
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,

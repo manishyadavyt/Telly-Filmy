@@ -1,5 +1,7 @@
 import { getPosts } from '@/lib/data';
 
+export const dynamic = 'force-static';
+
 function escapeXml(unsafe: string): string {
   return unsafe
     .replace(/&/g, '&amp;')
