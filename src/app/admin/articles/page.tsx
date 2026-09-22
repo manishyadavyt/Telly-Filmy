@@ -14,6 +14,17 @@ import { Post } from '@/lib/types';
 
 const ITEMS_PER_PAGE = 15;
 
+function formatDisplayDate(dateStr?: string) {
+  if (!dateStr) return 'Recent';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 'Recent';
+    return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch {
+    return 'Recent';
+  }
+}
+
 type SortField = 'date' | 'title' | 'category';
 type SortDir = 'asc' | 'desc';
 
@@ -36,9 +47,12 @@ export default function ArticlesPage() {
         const res = await fetch('/api/posts');
         if (res.ok) {
           const data = await res.json();
-          setPosts(data);
+          setPosts(Array.isArray(data) ? data : []);
+        } else {
+          setPosts([]);
         }
       } catch {
+        setPosts([]);
         toast({ title: 'Error fetching articles', variant: 'destructive' });
       } finally {
         setLoading(false);
@@ -55,26 +69,28 @@ export default function ArticlesPage() {
     if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
     try {
       await deletePost(slug);
-      setPosts((prev) => prev.filter((p) => p.slug !== slug));
+      setPosts((prev) => (Array.isArray(prev) ? prev.filter((p) => p.slug !== slug) : []));
       toast({ title: 'Article deleted' });
     } catch {
       toast({ title: 'Failed to delete', variant: 'destructive' });
     }
   };
 
+  const safePosts = Array.isArray(posts) ? posts : [];
+
   const categories = useMemo(
-    () => Array.from(new Set(posts.map((p) => p.category))).filter(Boolean).sort(),
-    [posts]
+    () => Array.from(new Set(safePosts.map((p) => p?.category).filter(Boolean))).sort(),
+    [safePosts]
   );
 
   const filteredPosts = useMemo(() => {
-    let result = posts.filter((post) => {
+    let result = safePosts.filter((post) => {
       const q = search.toLowerCase();
       const matchSearch =
         !search ||
-        post.title.toLowerCase().includes(q) ||
-        post.category.toLowerCase().includes(q) ||
-        post.tags?.some((t) => t.toLowerCase().includes(q));
+        post.title?.toLowerCase().includes(q) ||
+        post.category?.toLowerCase().includes(q) ||
+        post.tags?.some((t) => t?.toLowerCase().includes(q));
       const matchCat = categoryFilter === 'all' || post.category === categoryFilter;
       const matchStatus =
         statusFilter === 'all' ||
@@ -85,14 +101,20 @@ export default function ArticlesPage() {
 
     result.sort((a, b) => {
       let cmp = 0;
-      if (sortField === 'date') cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
-      else if (sortField === 'title') cmp = a.title.localeCompare(b.title);
-      else if (sortField === 'category') cmp = a.category.localeCompare(b.category);
+      if (sortField === 'date') {
+        const timeA = a.date ? new Date(a.date).getTime() : 0;
+        const timeB = b.date ? new Date(b.date).getTime() : 0;
+        cmp = timeA - timeB;
+      } else if (sortField === 'title') {
+        cmp = (a.title || '').localeCompare(b.title || '');
+      } else if (sortField === 'category') {
+        cmp = (a.category || '').localeCompare(b.category || '');
+      }
       return sortDir === 'asc' ? cmp : -cmp;
     });
 
     return result;
-  }, [posts, search, categoryFilter, statusFilter, sortField, sortDir]);
+  }, [safePosts, search, categoryFilter, statusFilter, sortField, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPosts.length / ITEMS_PER_PAGE));
   const paginated = filteredPosts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -231,9 +253,9 @@ export default function ArticlesPage() {
                 </div>
               </div>
               <div className="p-4">
-                <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[10px] mb-2">{post.category}</Badge>
+                <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[10px] mb-2">{post.category || 'General'}</Badge>
                 <h3 className="text-sm font-semibold text-white line-clamp-2 leading-snug mb-2">{post.title}</h3>
-                <p className="text-xs text-slate-500 mb-3">{new Date(post.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                <p className="text-xs text-slate-500 mb-3">{formatDisplayDate(post.date)}</p>
                 <div className="flex gap-2">
                   <Link href={`/admin/edit/${post.slug}`} className="flex-1">
                     <button className="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg flex items-center justify-center gap-1 transition-colors border border-slate-700">
@@ -276,7 +298,7 @@ export default function ArticlesPage() {
                     <td className="px-5 py-3.5">
                       <div className="relative w-12 h-9 rounded-lg overflow-hidden bg-slate-800">
                         {post.imageUrl ? (
-                          <Image src={post.imageUrl} alt={post.title} fill className="object-cover" sizes="48px" />
+                          <Image src={post.imageUrl} alt={post.title || 'Thumb'} fill className="object-cover" sizes="48px" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-slate-600">
                             <FileText className="w-4 h-4" />
@@ -289,10 +311,10 @@ export default function ArticlesPage() {
                       <p className="text-xs text-slate-600 truncate max-w-[280px]">/{post.slug}</p>
                     </td>
                     <td className="px-5 py-3.5">
-                      <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-xs">{post.category}</Badge>
+                      <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-xs">{post.category || 'General'}</Badge>
                     </td>
                     <td className="px-5 py-3.5 text-xs text-slate-400 whitespace-nowrap">
-                      {new Date(post.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {formatDisplayDate(post.date)}
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex gap-1.5">
@@ -324,7 +346,7 @@ export default function ArticlesPage() {
               <div key={post.id} className="bg-slate-900 border border-slate-700/50 rounded-xl p-3.5 flex gap-3">
                 <div className="relative w-20 h-16 rounded-xl overflow-hidden bg-slate-800 shrink-0">
                   {post.imageUrl ? (
-                    <Image src={post.imageUrl} alt={post.title} fill className="object-cover" sizes="80px" />
+                    <Image src={post.imageUrl} alt={post.title || 'Thumb'} fill className="object-cover" sizes="80px" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center"><FileText className="w-5 h-5 text-slate-700" /></div>
                   )}
@@ -332,8 +354,8 @@ export default function ArticlesPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-white line-clamp-2 leading-snug">{post.title}</p>
                   <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                    <span className="text-[10px] text-slate-500">{new Date(post.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
-                    <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[9px] px-1.5 py-0">{post.category}</Badge>
+                    <span className="text-[10px] text-slate-500">{formatDisplayDate(post.date)}</span>
+                    <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[9px] px-1.5 py-0">{post.category || 'General'}</Badge>
                     {post.isTopStory && <Badge className="bg-orange-500/15 text-orange-400 border-orange-500/25 text-[9px] px-1.5 py-0">Top</Badge>}
                     {post.isTrending && <Badge className="bg-rose-500/15 text-rose-400 border-rose-500/25 text-[9px] px-1.5 py-0">Trending</Badge>}
                   </div>

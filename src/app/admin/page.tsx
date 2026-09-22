@@ -14,10 +14,22 @@ import { Post } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
+function formatDisplayDate(dateStr?: string) {
+  if (!dateStr) return 'Recent';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 'Recent';
+    return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch {
+    return 'Recent';
+  }
+}
+
 export default function AdminDashboard() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [todayDate, setTodayDate] = useState('');
   const router = useRouter();
   const { toast } = useToast();
 
@@ -27,10 +39,13 @@ export default function AdminDashboard() {
       const response = await fetch('/api/posts');
       if (response.ok) {
         const data = await response.json();
-        setPosts(data);
+        setPosts(Array.isArray(data) ? data : []);
+      } else {
+        setPosts([]);
       }
     } catch (error) {
       console.error('Failed to fetch posts:', error);
+      setPosts([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -39,6 +54,18 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchPosts();
+    try {
+      setTodayDate(
+        new Date().toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      );
+    } catch {
+      setTodayDate('');
+    }
   }, []);
 
   const handleDelete = async (slug: string) => {
@@ -52,12 +79,12 @@ export default function AdminDashboard() {
     }
   };
 
-  const totalArticles = posts.length;
-  const categories = new Set(posts.map((p) => p.category)).size;
-  const topStories = posts.filter((p) => p.isTopStory).length;
-  const trending = posts.filter((p) => p.isTrending).length;
-
-  const recentPosts = posts.slice(0, 8);
+  const safePosts = Array.isArray(posts) ? posts : [];
+  const totalArticles = safePosts.length;
+  const categories = new Set(safePosts.map((p) => p?.category || 'General')).size;
+  const topStories = safePosts.filter((p) => p?.isTopStory).length;
+  const trending = safePosts.filter((p) => p?.isTrending).length;
+  const recentPosts = safePosts.slice(0, 8);
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -67,27 +94,27 @@ export default function AdminDashboard() {
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Welcome back 👋
           </h1>
-          <p className="text-slate-400 mt-1 text-sm">
-            {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          <p className="text-slate-400 mt-1 text-sm font-medium">
+            {todayDate || 'TellyFilmy Admin Dashboard'}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => fetchPosts(true)}
             disabled={refreshing}
-            className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-lg text-sm transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-lg text-sm transition-colors cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            <span>Refresh</span>
           </button>
           <Link href="/" target="_blank">
-            <button className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-lg text-sm transition-colors">
-              <ExternalLink className="w-4 h-4" /> View Site
+            <button className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-lg text-sm transition-colors cursor-pointer">
+              <ExternalLink className="w-4 h-4" /> <span>View Site</span>
             </button>
           </Link>
           <Link href="/admin/create">
-            <button className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white font-bold rounded-lg text-sm transition-all shadow-lg shadow-orange-500/20">
-              <Plus className="w-4 h-4" /> New Article
+            <button className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white font-bold rounded-lg text-sm transition-all shadow-lg shadow-orange-500/20 cursor-pointer">
+              <Plus className="w-4 h-4" /> <span>New Article</span>
             </button>
           </Link>
         </div>
@@ -95,10 +122,10 @@ export default function AdminDashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard title="Total Articles" value={loading ? undefined : totalArticles} icon={FileText} gradient="from-blue-600 to-cyan-600" glow="cyan" />
-        <StatCard title="Categories" value={loading ? undefined : categories} icon={Layers} gradient="from-purple-600 to-pink-600" glow="purple" />
-        <StatCard title="Top Stories" value={loading ? undefined : topStories} icon={Star} gradient="from-orange-600 to-amber-600" glow="orange" />
-        <StatCard title="Trending" value={loading ? undefined : trending} icon={TrendingUp} gradient="from-rose-600 to-pink-600" glow="rose" />
+        <StatCard title="Total Articles" value={loading ? undefined : totalArticles} icon={FileText} gradient="from-blue-600 to-cyan-600" />
+        <StatCard title="Categories" value={loading ? undefined : categories} icon={Layers} gradient="from-purple-600 to-pink-600" />
+        <StatCard title="Top Stories" value={loading ? undefined : topStories} icon={Star} gradient="from-orange-600 to-amber-600" />
+        <StatCard title="Trending" value={loading ? undefined : trending} icon={TrendingUp} gradient="from-rose-600 to-pink-600" />
       </div>
 
       {/* Quick Actions */}
@@ -161,7 +188,7 @@ export default function AdminDashboard() {
             <p className="text-slate-400 font-medium">No articles yet</p>
             <p className="text-slate-600 text-sm mt-1">Create your first article to get started</p>
             <Link href="/admin/create">
-              <button className="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg text-sm transition-colors">
+              <button className="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg text-sm transition-colors cursor-pointer">
                 + Write Article
               </button>
             </Link>
@@ -187,7 +214,7 @@ export default function AdminDashboard() {
                       <td className="px-5 py-3.5">
                         <div className="relative w-12 h-9 rounded-lg overflow-hidden bg-slate-800">
                           {post.imageUrl ? (
-                            <Image src={post.imageUrl} alt={post.title} fill className="object-cover" />
+                            <Image src={post.imageUrl} alt={post.title || 'Thumbnail'} fill className="object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-slate-600">
                               <FileText className="w-4 h-4" />
@@ -201,11 +228,11 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-5 py-3.5">
                         <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-xs">
-                          {post.category}
+                          {post.category || 'General'}
                         </Badge>
                       </td>
                       <td className="px-5 py-3.5 text-xs text-slate-400 whitespace-nowrap">
-                        {new Date(post.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {formatDisplayDate(post.date)}
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex gap-1.5">
@@ -216,13 +243,13 @@ export default function AdminDashboard() {
                       <td className="px-5 py-3.5">
                         <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Link href={`/admin/edit/${post.slug}`}>
-                            <button className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
+                            <button className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors cursor-pointer">
                               <Edit className="w-4 h-4" />
                             </button>
                           </Link>
                           <button
                             onClick={() => handleDelete(post.slug)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -240,7 +267,7 @@ export default function AdminDashboard() {
                 <div key={post.id} className="p-4 flex gap-3">
                   <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-800 shrink-0">
                     {post.imageUrl ? (
-                      <Image src={post.imageUrl} alt={post.title} fill className="object-cover" />
+                      <Image src={post.imageUrl} alt={post.title || 'Thumbnail'} fill className="object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <FileText className="w-5 h-5 text-slate-600" />
@@ -251,22 +278,22 @@ export default function AdminDashboard() {
                     <p className="text-sm font-semibold text-white line-clamp-2 leading-snug">{post.title}</p>
                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <span className="text-[10px] text-slate-500">
-                        {new Date(post.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                        {formatDisplayDate(post.date)}
                       </span>
                       <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[9px] px-1.5 py-0">
-                        {post.category}
+                        {post.category || 'General'}
                       </Badge>
                       {post.isTopStory && <Badge className="bg-orange-500/15 text-orange-400 border-orange-500/25 text-[9px] px-1.5 py-0">Top</Badge>}
                     </div>
                     <div className="flex gap-2 mt-2">
                       <Link href={`/admin/edit/${post.slug}`} className="flex-1">
-                        <button className="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg flex items-center justify-center gap-1 transition-colors border border-slate-700">
+                        <button className="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg flex items-center justify-center gap-1 transition-colors border border-slate-700 cursor-pointer">
                           <Edit className="w-3.5 h-3.5" /> Edit
                         </button>
                       </Link>
                       <button
                         onClick={() => handleDelete(post.slug)}
-                        className="flex-1 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-medium rounded-lg flex items-center justify-center gap-1 transition-colors border border-rose-500/20"
+                        className="flex-1 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-medium rounded-lg flex items-center justify-center gap-1 transition-colors border border-rose-500/20 cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" /> Delete
                       </button>
@@ -287,16 +314,14 @@ function StatCard({
   value,
   icon: Icon,
   gradient,
-  glow,
 }: {
   title: string;
   value?: number;
   icon: any;
   gradient: string;
-  glow: string;
 }) {
   return (
-    <div className={`relative overflow-hidden rounded-xl bg-slate-900 border border-slate-700/50 p-4 sm:p-5 hover:border-slate-600/50 transition-colors group`}>
+    <div className="relative overflow-hidden rounded-xl bg-slate-900 border border-slate-700/50 p-4 sm:p-5 hover:border-slate-600/50 transition-colors group">
       <div className={`absolute -top-4 -right-4 w-20 h-20 rounded-full bg-gradient-to-br ${gradient} opacity-10 group-hover:opacity-20 blur-xl transition-opacity`} />
       <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-3`}>
         <Icon className="w-5 h-5 text-white" />
