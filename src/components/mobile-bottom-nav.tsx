@@ -76,17 +76,6 @@ export function MobileBottomNav() {
           </div>
         </SheetContent>
       </Sheet>
-
-      {/* Admin Link */}
-      <Link
-        href="/admin"
-        className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${
-          pathname?.startsWith('/admin') ? 'text-[#e11d48] font-black' : 'text-slate-500 font-semibold hover:text-slate-900'
-        }`}
-      >
-        <UserCheck className="w-5 h-5" />
-        <span className="text-[10px] mt-0.5 tracking-tight">Admin</span>
-      </Link>
     </div>
   );
 }

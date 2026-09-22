@@ -1,36 +1,69 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Post } from '@/lib/types';
-import { Flame, Calendar, ArrowRight } from 'lucide-react';
+import { Flame, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface HeroSliderProps {
   topStories: Post[];
 }
 
 export function HeroSlider({ topStories }: HeroSliderProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
   if (!topStories || topStories.length === 0) return null;
 
-  const mainPost = topStories[0];
+  const sliderPosts = topStories.slice(0, 5);
   const sidePosts = topStories.slice(1, 6);
+  const currentPost = sliderPosts[currentIndex] || sliderPosts[0];
+
+  // Auto-advance hero slider every 4.5 seconds
+  useEffect(() => {
+    if (sliderPosts.length <= 1 || isPaused) return;
+
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % sliderPosts.length);
+    }, 4500);
+
+    return () => clearInterval(timer);
+  }, [sliderPosts.length, isPaused]);
+
+  const prevSlide = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev - 1 + sliderPosts.length) % sliderPosts.length);
+  };
+
+  const nextSlide = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % sliderPosts.length);
+  };
 
   return (
     <section className="w-full my-4 sm:my-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
         
-        {/* LEFT HERO CARD (8 Cols) */}
-        <div className="lg:col-span-8 flex">
+        {/* LEFT HERO SLIDER (8 Cols) */}
+        <div 
+          className="lg:col-span-8 flex relative"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
           <Link 
-            href={`/posts/${mainPost.slug}`}
-            className="group relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-[#080c16] flex flex-col justify-end min-h-[280px] sm:min-h-[420px] transition-transform duration-300 border border-slate-900"
+            href={`/posts/${currentPost.slug}`}
+            className="group relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-[#080c16] flex flex-col justify-end min-h-[300px] sm:min-h-[440px] transition-transform duration-300 border border-slate-900"
           >
-            {/* Background Image */}
+            {/* Background Image with smooth transition */}
             <Image
-              src={mainPost.imageUrl}
-              alt={mainPost.title}
+              key={currentPost.id}
+              src={currentPost.imageUrl}
+              alt={currentPost.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out opacity-90"
+              className="object-cover group-hover:scale-105 transition-all duration-700 ease-out opacity-90"
               priority
             />
             {/* Gradient Overlay */}
@@ -39,38 +72,74 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
             {/* Overlaid Content */}
             <div className="relative z-10 p-4 sm:p-7 space-y-2 sm:space-y-3">
               <div className="flex items-center gap-2 sm:gap-3">
-                <span className="bg-[#e11d48] text-white font-extrabold text-[9px] sm:text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-xs shadow-xs">
-                  {mainPost.category}
+                <span className="bg-[#e11d48] text-white font-black text-[9px] sm:text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-xs shadow-xs">
+                  {currentPost.category}
                 </span>
                 <span className="text-[11px] sm:text-xs text-slate-300 font-medium flex items-center gap-1">
                   <Calendar className="w-3 h-3 text-rose-400" />
-                  {new Date(mainPost.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  {new Date(currentPost.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </span>
               </div>
 
               <h2 className="font-outfit text-base sm:text-2xl md:text-3xl font-extrabold leading-snug sm:leading-tight text-white group-hover:text-rose-300 transition-colors line-clamp-3">
-                {mainPost.title}
+                {currentPost.title}
               </h2>
 
-              {/* Slider Pagination Dots */}
-              <div className="flex items-center justify-center space-x-1.5 pt-1 sm:pt-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
-                <span className="w-4 h-1.5 rounded-full bg-[#e11d48]"></span>
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+              {/* Slider Pagination Dots & Navigation Controls */}
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center space-x-1.5">
+                  {sliderPosts.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      aria-label={`Go to slide ${idx + 1}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setCurrentIndex(idx);
+                      }}
+                      className={`h-1.5 rounded-full transition-all ${
+                        idx === currentIndex 
+                          ? 'w-6 bg-[#e11d48]' 
+                          : 'w-2 bg-white/40 hover:bg-white/70'
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                {/* Left / Right Arrow Buttons */}
+                <div className="flex items-center space-x-1.5">
+                  <button
+                    type="button"
+                    aria-label="Previous Story"
+                    onClick={prevSlide}
+                    className="w-7 h-7 rounded-full bg-black/50 hover:bg-[#e11d48] text-white flex items-center justify-center backdrop-blur-md transition-colors border border-white/20"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Next Story"
+                    onClick={nextSlide}
+                    className="w-7 h-7 rounded-full bg-black/50 hover:bg-[#e11d48] text-white flex items-center justify-center backdrop-blur-md transition-colors border border-white/20"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
+
             </div>
           </Link>
         </div>
 
-        {/* RIGHT 4 COLS: TRENDING BUZZ CARD */}
+        {/* RIGHT 4 COLS: TRENDING STORIES CARD */}
         <div className="lg:col-span-4 flex">
           <div className="w-full bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-rose-100/80 flex flex-col justify-between space-y-3 sm:space-y-4">
             
             {/* Header */}
             <div className="flex items-center justify-between pb-2.5 border-b border-rose-100/60">
               <h3 className="font-outfit text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                <Flame className="w-4 h-4 text-[#e11d48] fill-[#e11d48]" /> TRENDING BUZZ
+                <Flame className="w-4 h-4 text-[#e11d48] fill-[#e11d48]" /> TRENDING STORIES
               </h3>
               <Link 
                 href="/posts" 
@@ -80,7 +149,7 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
               </Link>
             </div>
 
-            {/* List of 5 Trending Stories */}
+            {/* List of Trending Stories */}
             <div className="flex flex-col space-y-2.5 sm:space-y-3.5 flex-1 justify-around">
               {sidePosts.map((post, idx) => (
                 <Link

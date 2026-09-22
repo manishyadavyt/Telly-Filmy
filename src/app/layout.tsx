@@ -28,7 +28,7 @@ export const viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.tellyfilmy.com'),
-  title: 'Telly Filmy – Entertainment News, TV Serials & Bollywood Buzz',
+  title: 'Telly Filmy – Entertainment News, TV Serials & Bollywood Updates',
   description:
     'Get the latest TV serial updates, Bollywood news, web stories, and trending entertainment updates on Telly Filmy.',
   alternates: {
@@ -53,9 +53,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Telly Filmy – Entertainment News & Bollywood Buzz',
+    title: 'Telly Filmy – Entertainment News & Bollywood Updates',
     description:
-      'Get the latest entertainment news, serial updates & Bollywood buzz.',
+      'Get the latest entertainment news, serial updates & Bollywood updates.',
     images: ['/logo.png'],
   },
 };

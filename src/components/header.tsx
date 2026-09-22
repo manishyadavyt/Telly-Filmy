@@ -52,9 +52,8 @@ export default function Header() {
           <SearchBar />
         </div>
 
-        {/* Right Top Actions (Search Pill & Admin Link) */}
+        {/* Right Top Actions (Search Pill) */}
         <div className="hidden sm:flex items-center space-x-3">
-          
           {/* Quick Search Button */}
           <button 
             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
@@ -63,14 +62,6 @@ export default function Header() {
             <Search className="w-3.5 h-3.5 text-slate-500" />
             <span>Search</span>
           </button>
-
-          {/* Admin Portal Link */}
-          <Link
-            href="/admin"
-            className="text-xs font-bold text-[#e11d48] hover:underline px-2 py-1"
-          >
-            Admin
-          </Link>
         </div>
 
         {/* Mobile Actions Menu */}
@@ -115,13 +106,6 @@ export default function Header() {
                   );
                 })}
               </nav>
-              <div className="mt-8 pt-6 border-t border-slate-100">
-                <Link href="/admin">
-                  <Button className="w-full bg-[#e11d48] hover:bg-[#be123c] text-white font-bold">
-                    Admin Portal
-                  </Button>
-                </Link>
-              </div>
             </SheetContent>
           </Sheet>
         </div>
@@ -135,7 +119,7 @@ export default function Header() {
         </div>
       )}
 
-      {/* CATEGORY NAVIGATION TABS (Matching OnscreenBuzz screenshot) */}
+      {/* CATEGORY NAVIGATION TABS */}
       <div className="border-t border-rose-100/60 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center space-x-6 overflow-x-auto py-2.5 scrollbar-none">
           {NAV_CATEGORIES.map((cat) => {

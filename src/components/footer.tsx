@@ -65,7 +65,6 @@ export default function Footer() {
               <li><Link href="/posts" className="hover:text-[#e11d48] transition-colors">All Articles</Link></li>
               <li><Link href="/about" className="hover:text-[#e11d48] transition-colors">About Us</Link></li>
               <li><Link href="/contact" className="hover:text-[#e11d48] transition-colors">Contact Support</Link></li>
-              <li><Link href="/admin" className="hover:text-[#e11d48] transition-colors">Admin Portal</Link></li>
             </ul>
           </div>
 
@@ -74,7 +73,7 @@ export default function Footer() {
             <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Categories</h4>
             <ul className="space-y-2 text-xs font-semibold">
               <li><Link href="/category/tv-serials" className="hover:text-[#e11d48] transition-colors">TV Serials & Spoilers</Link></li>
-              <li><Link href="/category/bollywood" className="hover:text-[#e11d48] transition-colors">Bollywood & Movie Buzz</Link></li>
+              <li><Link href="/category/bollywood" className="hover:text-[#e11d48] transition-colors">Bollywood & Movies</Link></li>
               <li><Link href="/category/spoilers" className="hover:text-[#e11d48] transition-colors">Trending Stories</Link></li>
               <li><Link href="/category/web-stories" className="hover:text-[#e11d48] transition-colors">Visual Web Stories</Link></li>
               <li><Link href="/category/ott" className="hover:text-[#e11d48] transition-colors">OTT Releases</Link></li>

@@ -85,7 +85,7 @@ export default async function AllPostsPage({
               {search ? `Results for "${search}"` : 'Latest Entertainment News'}
             </h1>
             <p className="text-rose-100 text-xs sm:text-sm font-normal">
-              Found {filteredPosts.length} article{filteredPosts.length === 1 ? '' : 's'}. Stay updated with real-time TV serial buzz and Bollywood gossips.
+              Found {filteredPosts.length} article{filteredPosts.length === 1 ? '' : 's'}. Stay updated with real-time TV serial updates and Bollywood gossips.
             </p>
           </div>
         </div>

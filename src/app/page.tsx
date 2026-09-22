@@ -33,7 +33,7 @@ export default async function Home() {
         {/* 2. LEADERBOARD AD */}
         <AdSenseSlot type="leaderboard" />
 
-        {/* 3. HERO SLIDER GRID (Matching OnscreenBuzz screenshot) */}
+        {/* 3. HERO SLIDER GRID */}
         <HeroSlider topStories={topStories.length > 0 ? topStories : sortedPosts.slice(0, 5)} />
 
         {/* 4. SECTION 1: BOLLYWOOD SECTION (Matching Screenshot) */}

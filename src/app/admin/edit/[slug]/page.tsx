@@ -116,6 +116,7 @@ export default function EditArticlePage() {
 
         setTitle(post.title || '');
         setCustomSlug(post.slug || '');
+        setSlugEdited(true);
         setExcerpt(post.excerpt || '');
         setContent(post.content || '');
         setVideoUrl(post.videoUrl || '');

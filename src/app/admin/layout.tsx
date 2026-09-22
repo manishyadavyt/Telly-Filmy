@@ -31,10 +31,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     document.title = 'Admin Panel | TellyFilmy';
-    const auth = localStorage.getItem('tf_admin_auth') === 'true';
-    setIsAuthenticated(auth);
-    if (!auth && pathname !== '/admin/login') {
-      router.push('/admin/login');
+    const isAuth =
+      typeof window !== 'undefined' &&
+      (localStorage.getItem('tf_admin_auth') === 'true' ||
+        sessionStorage.getItem('tf_admin_auth') === 'true');
+    
+    setIsAuthenticated(isAuth);
+    if (!isAuth && pathname !== '/admin/login') {
+      router.replace('/admin/login');
     }
   }, [pathname, router]);
 
@@ -51,8 +55,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <div className="min-h-screen bg-[#0B1120] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-400 text-sm">Loading admin panel...</p>
+          <div className="w-8 h-8 border-2 border-[#e11d48] border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-400 text-xs font-mono">Authenticating admin...</p>
         </div>
       </div>
     );
@@ -60,7 +64,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = () => {
     localStorage.removeItem('tf_admin_auth');
-    router.push('/admin/login');
+    sessionStorage.removeItem('tf_admin_auth');
+    setIsAuthenticated(false);
+    window.location.href = '/admin/login';
   };
 
   const isActive = (href: string, exact?: boolean) =>
