@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
-import { Tag, Clock, Calendar, ChevronRight, Share2, Eye, ChevronLeft, MessageSquare } from 'lucide-react';
+import { Tag, Clock, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ShareButtons } from '@/components/share-buttons';
@@ -129,51 +129,38 @@ export default async function PostPage({
             </h1>
 
             {/* 4. SUBHEADLINE / EXCERPT */}
-            <p className="text-base sm:text-lg text-slate-700 font-normal leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-700 font-medium leading-relaxed">
               {post.excerpt}
             </p>
 
             {/* 5. AUTHOR & PUBLISH META BAR */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 pb-3 border-y border-slate-200/80">
-              
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 pb-4 border-y border-slate-200/80">
               {/* Left Author & Date info */}
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 <div className="text-xs text-slate-700">
-                  By <span className="font-bold text-slate-900 underline underline-offset-2 cursor-pointer hover:text-[#e11d48]">{post.author?.name || 'GOUTHAM S'}</span>
+                  By <span className="font-bold text-slate-900 hover:text-[#e11d48] transition-colors">{post.author?.name || 'Telly Filmy Team'}</span>
                 </div>
                 <div className="text-xs text-slate-500 font-medium flex items-center gap-2 flex-wrap">
-                  <span>Published on {format(new Date(post.date), 'MMM d, yyyy | h:mm a')} IST</span>
-                  <span>|</span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    {format(new Date(post.date), 'MMM d, yyyy | h:mm a')} IST
+                  </span>
+                  <span>•</span>
                   <span className="flex items-center gap-1 text-slate-600 font-semibold">
-                    <Eye className="w-3.5 h-3.5 text-slate-500" /> 9K
+                    <Clock className="w-3.5 h-3.5 text-slate-400" /> {readingTime} min read
                   </span>
                 </div>
               </div>
 
-              {/* Right Social & Join Us Action Buttons */}
-              <div className="flex items-center space-x-3 shrink-0">
-                {/* Google News Badge button */}
-                <button title="Follow on Google News" className="w-8 h-8 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-700">
-                  <span className="text-xs font-black text-blue-600">G</span><span className="text-xs font-black text-rose-500">N</span>
-                </button>
-                {/* Share Button */}
-                <button title="Share Story" className="w-8 h-8 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-700">
-                  <Share2 className="w-4 h-4 text-slate-700" />
-                </button>
-                {/* WhatsApp Join Us Pill */}
-                <a 
-                  href="#"
-                  className="flex items-center space-x-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-700 font-bold text-xs px-3.5 py-1.5 rounded-full transition-colors"
-                >
-                  <MessageSquare className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
-                  <span>JOIN US</span>
-                </a>
+              {/* Right Social Share Buttons */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider hidden sm:inline-block">Share:</span>
+                <ShareButtons url={url} title={post.title} />
               </div>
-
             </div>
 
             {/* 6. MAIN FEATURED BANNER IMAGE */}
-            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden shadow-xs bg-slate-100 my-4 border border-slate-100">
+            <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-xs bg-slate-100 my-4 border border-slate-100">
               <Image
                 src={post.imageUrl}
                 alt={post.title}
@@ -184,12 +171,12 @@ export default async function PostPage({
             </div>
 
             {/* 7. ARTICLE BODY TEXT */}
-            <div className="font-sans text-slate-800 text-[16px] sm:text-[18px] leading-[1.85] space-y-6 font-normal pt-2">
+            <div className="font-sans text-slate-800 text-[17px] sm:text-[19px] leading-[1.85] sm:leading-[1.9] space-y-6 font-normal pt-2">
               {paragraphs.map((para, i) => {
                 const imageIndex = Math.floor(i / 2);
                 return (
                   <div key={i}>
-                    <p className="mb-6 text-slate-800 leading-[1.85]">{para}</p>
+                    <p className="mb-6 text-slate-800 leading-[1.85] sm:leading-[1.9]">{para}</p>
 
                     {/* Mid Ad banner */}
                     {i === midPoint && post.enableAds !== false && (
@@ -198,7 +185,7 @@ export default async function PostPage({
 
                     {/* Extra gallery images */}
                     {post.images?.[imageIndex] && i % 2 === 1 && (
-                      <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden shadow-xs my-6 bg-slate-100 border border-slate-100">
+                      <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-xs my-6 bg-slate-100 border border-slate-100">
                         <Image
                           src={post.images[imageIndex]}
                           alt={`${post.title} image ${imageIndex + 1}`}
@@ -212,9 +199,18 @@ export default async function PostPage({
               })}
             </div>
 
+            {/* BOTTOM ARTICLE SHARE BAR */}
+            <div className="my-6 p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-center sm:text-left">
+                <h4 className="font-outfit text-sm font-bold text-slate-900">Enjoyed this story?</h4>
+                <p className="text-xs text-slate-500 font-medium">Share it with your friends and family on social media</p>
+              </div>
+              <ShareButtons url={url} title={post.title} />
+            </div>
+
             {/* OPTIONAL YOUTUBE EMBED */}
             {post.videoUrl && (
-              <div className="my-8 relative w-full aspect-[16/9] rounded-xl overflow-hidden shadow-md border border-slate-200">
+              <div className="my-8 relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-md border border-slate-200">
                 <iframe
                   src={post.videoUrl}
                   title={post.title}
