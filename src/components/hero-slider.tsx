@@ -55,7 +55,7 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
         >
           <Link 
             href={`/posts/${currentPost.slug}`}
-            className="group relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-[#080c16] flex flex-col justify-end min-h-[220px] sm:min-h-[440px] transition-transform duration-300 border border-slate-900"
+            className="group relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-[#080c16] flex flex-col justify-end min-h-[300px] sm:min-h-[520px] transition-transform duration-300 border border-slate-900"
           >
             {/* Background Image with smooth transition */}
             <Image
