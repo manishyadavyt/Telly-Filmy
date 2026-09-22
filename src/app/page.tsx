@@ -1,5 +1,4 @@
 import { HeroSlider } from '@/components/hero-slider';
-import { MarqueeSection } from '@/components/marquee-section';
 import { PostCard } from '@/components/post-card';
 import { getPosts } from '@/lib/data';
 import { AdSenseSlot } from '@/components/adsense-slot';
@@ -24,9 +23,6 @@ export default async function Home() {
   return (
     <>
       <OrganizationJsonLd />
-      
-      {/* 1. TICKER BAR */}
-      <MarqueeSection posts={sortedPosts} />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         
