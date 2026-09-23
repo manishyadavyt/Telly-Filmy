@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { Home, Sparkles, Film, Tv, ArrowLeft } from 'lucide-react';
+import { Home, Sparkles, Film, Tv } from 'lucide-react';
+import { LivePostView } from '@/components/live-post-view';
 
 export default function NotFound() {
-  return (
+  const fallbackUI = (
     <main className="container mx-auto max-w-4xl py-16 sm:py-24 px-4 text-center space-y-8">
       <div className="space-y-4">
         <div className="inline-flex items-center gap-2 bg-rose-50 text-[#e11d48] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
@@ -67,4 +68,6 @@ export default function NotFound() {
       </div>
     </main>
   );
+
+  return <LivePostView fallbackNotFound={fallbackUI} />;
 }
