@@ -1,14 +1,22 @@
 <?php
 /**
- * TellyFilmy Post Save Handler
- * Saves new/updated/deleted posts to posts.json on the Hostinger server
+ * TellyFilmy Universal Post Save Handler
+ * Saves new/updated/deleted posts to posts.json across all server locations
  * Called by the admin panel when publishing/editing/deleting articles
  */
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
-define('UPLOAD_SECRET', 'tellyfilmy_upload_2024'); // Must match image-input.tsx and actions.ts
-define('POSTS_FILE', __DIR__ . '/posts.json');
-// ───────────────────────────────────────────────────────────────────────────
+define('UPLOAD_SECRET', 'tellyfilmy_upload_2024');
+
+// All candidate paths for posts.json on Hostinger
+$candidate_paths = [
+    __DIR__ . '/posts.json',
+    __DIR__ . '/public_html/posts.json',
+    __DIR__ . '/public/posts.json',
+    dirname(__DIR__) . '/public_html/posts.json',
+    dirname(__DIR__) . '/posts.json',
+    dirname(__DIR__) . '/public/posts.json',
+];
 
 // CORS headers
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -25,6 +33,7 @@ if (in_array($origin, $allowed_origins, true)) {
 }
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, X-Upload-Secret');
+header('Cache-Control: no-store, no-cache, must-revalidate');
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -58,13 +67,15 @@ if (!$data || !isset($data['action'])) {
 
 $action = $data['action']; // 'add' | 'update' | 'delete'
 
-// Read existing posts
+// Find the best existing posts.json to read from
 $posts = [];
-if (file_exists(POSTS_FILE)) {
-    $raw = file_get_contents(POSTS_FILE);
-    $decoded = json_decode($raw, true);
-    if (is_array($decoded)) {
-        $posts = $decoded;
+foreach ($candidate_paths as $p) {
+    if (file_exists($p) && is_readable($p)) {
+        $raw = file_get_contents($p);
+        $decoded = json_decode($raw, true);
+        if (is_array($decoded) && count($decoded) > count($posts)) {
+            $posts = $decoded;
+        }
     }
 }
 
@@ -126,12 +137,25 @@ if ($action === 'add') {
     exit;
 }
 
-// Write back to posts.json
-$written = file_put_contents(POSTS_FILE, json_encode($posts, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-if ($written === false) {
+// Write back to ALL existing candidate paths
+$jsonContent = json_encode($posts, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+$successCount = 0;
+
+foreach ($candidate_paths as $p) {
+    $dir = dirname($p);
+    if (is_dir($dir)) {
+        $w = @file_put_contents($p, $jsonContent);
+        if ($w !== false) {
+            @chmod($p, 0666);
+            $successCount++;
+        }
+    }
+}
+
+if ($successCount === 0) {
     http_response_code(500);
-    echo json_encode(['error' => 'Failed to write posts.json. Check file permissions.']);
+    echo json_encode(['error' => 'Failed to write posts.json. Please check server folder write permissions.']);
     exit;
 }
 
-echo json_encode(['success' => true, 'count' => count($posts)]);
+echo json_encode(['success' => true, 'count' => count($posts), 'synced_files' => $successCount]);
