@@ -4,6 +4,10 @@ DirectoryIndex index.php index.html
   RewriteEngine On
   RewriteBase /
 
+  # 0. Force www canonical — fixes "Page with redirect" GSC issue
+  RewriteCond %{HTTP_HOST} ^tellyfilmy\.com$ [NC]
+  RewriteRule ^(.*)$ https://www.tellyfilmy.com/$1 [R=301,L]
+
   # 1. Direct access to existing files and directories
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
@@ -25,3 +29,6 @@ DirectoryIndex index.php index.html
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^(.*)$ index.php [L,QSA]
 </IfModule>
+
+# Proper 404 error page
+ErrorDocument 404 /404.html
