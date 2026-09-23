@@ -60,9 +60,10 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
             {/* Background Image with smooth transition */}
             <Image
               key={currentPost.id}
-              src={currentPost.imageUrl}
+              src={currentPost.imageUrl || '/logo.png'}
               alt={currentPost.title}
               fill
+              unoptimized
               className="object-cover group-hover:scale-105 transition-all duration-700 ease-out opacity-90"
               priority
             />
@@ -164,6 +165,7 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
                         src={post.imageUrl}
                         alt={post.title}
                         fill
+                        unoptimized
                         className="object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     ) : null}

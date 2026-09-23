@@ -105,10 +105,40 @@ export default function EditArticleClient() {
   useEffect(() => {
     async function fetchPost() {
       try {
-        const res = await fetch('/api/posts');
-        if (!res.ok) throw new Error('Failed to fetch post');
-        const data = await res.json();
-        const post = Array.isArray(data) ? data.find((p: any) => p.slug === slug) : (data.slug === slug ? data : null);
+        let post: any = null;
+        // 1. Check localStorage first
+        try {
+          const local = localStorage.getItem('tellyfilmy_posts');
+          if (local) {
+            const localPosts = JSON.parse(local);
+            if (Array.isArray(localPosts)) {
+              post = localPosts.find((p: any) => p.slug === slug);
+            }
+          }
+        } catch {}
+
+        // 2. Check /posts.json if not in localStorage
+        if (!post) {
+          try {
+            const res = await fetch('/posts.json', { cache: 'no-store' });
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data)) {
+                post = data.find((p: any) => p.slug === slug);
+              }
+            }
+          } catch {}
+        }
+
+        // 3. Fallback to /api/posts
+        if (!post) {
+          const res = await fetch('/api/posts');
+          if (res.ok) {
+            const data = await res.json();
+            post = Array.isArray(data) ? data.find((p: any) => p.slug === slug) : null;
+          }
+        }
+
         if (!post) throw new Error('Post not found');
 
         setTitle(post.title || '');

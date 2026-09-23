@@ -169,9 +169,10 @@ export default async function PostPage({
             {/* 6. MAIN FEATURED BANNER IMAGE */}
             <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-xs bg-slate-100 my-4 border border-slate-100">
               <Image
-                src={post.imageUrl}
+                src={post.imageUrl || '/logo.png'}
                 alt={post.title}
                 fill
+                unoptimized
                 className="object-cover"
                 priority
               />
@@ -197,6 +198,7 @@ export default async function PostPage({
                           src={post.images[imageIndex]}
                           alt={`${post.title} image ${imageIndex + 1}`}
                           fill
+                          unoptimized
                           className="object-cover"
                         />
                       </div>

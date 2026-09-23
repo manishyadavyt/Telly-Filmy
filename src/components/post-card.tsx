@@ -24,9 +24,10 @@ export function PostCard({ post, variant = 'grid' }: PostCardProps) {
       >
         <div className="relative w-28 h-24 sm:w-44 sm:h-32 rounded-xl overflow-hidden shrink-0 bg-slate-100">
           <Image
-            src={post.imageUrl}
+            src={post.imageUrl || '/logo.png'}
             alt={post.title}
             fill
+            unoptimized
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
@@ -64,9 +65,10 @@ export function PostCard({ post, variant = 'grid' }: PostCardProps) {
         className="relative w-28 h-24 sm:w-full sm:aspect-video rounded-xl sm:rounded-none overflow-hidden bg-slate-100 shrink-0"
       >
         <Image
-          src={post.imageUrl}
+          src={post.imageUrl || '/logo.png'}
           alt={post.title}
           fill
+          unoptimized
           className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
         <div className="hidden sm:block absolute top-3 left-3">

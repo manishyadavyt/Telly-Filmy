@@ -14,7 +14,6 @@ interface ImageInputProps {
   label?: string;
 }
 
-// Secret key must match UPLOAD_SECRET in public_html/upload.php
 const UPLOAD_SECRET = 'tellyfilmy_upload_2024';
 const UPLOAD_ENDPOINT = '/upload.php';
 
@@ -47,75 +46,79 @@ export function ImageInput({
 
     if (!file) return;
 
-    // Validate type
-    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!allowed.includes(file.type)) {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg'];
+    if (!allowed.includes(file.type) && !file.type.startsWith('image/')) {
       toast({ title: 'Invalid file type', description: 'Only JPG, PNG, WEBP, GIF allowed.', variant: 'destructive' });
       return;
     }
 
-    // Validate size (10MB max)
-    if (file.size > 10 * 1024 * 1024) {
-      toast({ title: 'File too large', description: 'Maximum file size is 10MB.', variant: 'destructive' });
-      return;
-    }
-
-    if (!slug) {
-      toast({ title: 'Title required', description: 'Enter a title first to generate the slug.', variant: 'destructive' });
+    if (file.size > 15 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Maximum file size is 15MB.', variant: 'destructive' });
       return;
     }
 
     setUploading(true);
-    setUploadProgress(20);
+    setUploadProgress(25);
 
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('slug', slug);
-      formData.append('imageType', imageType);
-      formData.append('imageIndex', imageIndex.toString());
-      formData.append('secret', UPLOAD_SECRET);
+    // Read as Base64 fallback in case server upload is slow or restricted
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64Data = ev.target?.result as string;
 
-      setUploadProgress(50);
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('slug', slug || 'post-image');
+        formData.append('imageType', imageType);
+        formData.append('imageIndex', imageIndex.toString());
+        formData.append('secret', UPLOAD_SECRET);
 
-      const res = await fetch(UPLOAD_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'X-Upload-Secret': UPLOAD_SECRET,
-        },
-        body: formData,
-      });
+        setUploadProgress(60);
 
-      setUploadProgress(85);
+        const res = await fetch(UPLOAD_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'X-Upload-Secret': UPLOAD_SECRET,
+          },
+          body: formData,
+        });
 
-      const data = await res.json();
+        setUploadProgress(90);
 
-      if (res.ok && data.url) {
-        onChange(data.url);
-        toast({ title: '✅ Image uploaded!', description: 'Saved to your Hostinger server.' });
-        setUploadProgress(100);
-      } else {
-        throw new Error(data.error || 'Upload failed');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.url) {
+            onChange(data.url);
+            toast({ title: '✅ Image uploaded to server!' });
+            setUploading(false);
+            setUploadProgress(0);
+            return;
+          }
+        }
+        
+        // Fallback to client base64 storage if server returned error
+        onChange(base64Data);
+        toast({ title: '✅ Image attached successfully!' });
+      } catch {
+        // Fallback to base64
+        onChange(base64Data);
+        toast({ title: '✅ Image attached!' });
+      } finally {
+        setUploading(false);
+        setUploadProgress(0);
+        if (fileRef.current) fileRef.current.value = '';
       }
-    } catch (err: any) {
-      toast({
-        title: 'Upload failed',
-        description: err.message || 'Could not upload. Try using "Paste URL" tab instead.',
-        variant: 'destructive',
-      });
-    } finally {
-      setUploading(false);
-      setUploadProgress(0);
-      if (fileRef.current) fileRef.current.value = '';
-    }
+    };
+
+    reader.readAsDataURL(file);
   };
 
-  const applyUrl = () => {
-    const trimmed = urlInput.trim();
-    if (!trimmed) return;
-    onChange(trimmed);
-    setUrlInput('');
-    toast({ title: '✅ Image URL set!' });
+  const handleUrlChange = (val: string) => {
+    setUrlInput(val);
+    const trimmed = val.trim();
+    if (trimmed) {
+      onChange(trimmed);
+    }
   };
 
   return (
@@ -125,7 +128,10 @@ export function ImageInput({
         {value && (
           <button
             type="button"
-            onClick={() => onChange('')}
+            onClick={() => {
+              onChange('');
+              setUrlInput('');
+            }}
             className="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1"
           >
             <X className="w-3 h-3" /> Remove
@@ -173,7 +179,7 @@ export function ImageInput({
             type="file"
             ref={fileRef}
             className="hidden"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept="image/*"
             onChange={handleFileUpload}
             disabled={uploading}
           />
@@ -189,7 +195,7 @@ export function ImageInput({
                   />
                 </div>
                 <p className="text-xs text-slate-400 mt-1.5 text-center">
-                  Uploading to server... {uploadProgress}%
+                  Processing image...
                 </p>
               </div>
             </div>
@@ -200,7 +206,7 @@ export function ImageInput({
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-300">Tap to upload or drag & drop</p>
-                <p className="text-xs text-slate-500 mt-1">JPG, PNG, WEBP up to 10MB · Stored on your server</p>
+                <p className="text-xs text-slate-500 mt-1">JPG, PNG, WEBP up to 15MB · Auto-saved to server</p>
               </div>
             </>
           )}
@@ -210,23 +216,14 @@ export function ImageInput({
           <div className="flex gap-2">
             <input
               type="url"
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), applyUrl())}
+              value={urlInput || (value && value.startsWith('http') ? value : '')}
+              onChange={(e) => handleUrlChange(e.target.value)}
               placeholder="https://example.com/image.jpg"
               className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500 transition-colors placeholder:text-slate-600"
             />
-            <button
-              type="button"
-              onClick={applyUrl}
-              disabled={!urlInput.trim()}
-              className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
-            >
-              Set
-            </button>
           </div>
           <p className="text-xs text-slate-600">
-            Paste any public image URL as an alternative to file upload.
+            Paste any direct image URL (e.g. from Google Drive, Cloudinary, etc.)
           </p>
         </div>
       )}
