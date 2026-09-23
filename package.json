@@ -8,6 +8,7 @@
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
     "postbuild": "node scripts/copy-to-hostinger.js",
+    "hostinger-build": "echo Static files are pre-built in public_html/. No build needed.",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
