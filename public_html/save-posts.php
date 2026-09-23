@@ -76,7 +76,7 @@ if ($action === 'add') {
         exit;
     }
     // Remove existing post with same slug (prevent duplicates)
-    $posts = array_values(array_filter($posts, fn($p) => $p['slug'] !== $post['slug']));
+    $posts = array_values(array_filter($posts, fn($p) => isset($p['slug']) && $p['slug'] !== $post['slug']));
     // Add new post at beginning
     array_unshift($posts, $post);
 
@@ -88,19 +88,27 @@ if ($action === 'add') {
         echo json_encode(['error' => 'Missing slug or post data']);
         exit;
     }
+    $targetSlug = $updates['slug'] ?? $slug;
     $found = false;
     foreach ($posts as &$p) {
-        if ($p['slug'] === $slug) {
+        if (isset($p['slug']) && ($p['slug'] === $slug || $p['slug'] === $targetSlug)) {
             $p = array_merge($p, $updates);
             $found = true;
             break;
         }
     }
     unset($p);
+
+    // If not found in posts.json (e.g. was a static build post), upsert it!
     if (!$found) {
-        http_response_code(404);
-        echo json_encode(['error' => 'Post not found: ' . $slug]);
-        exit;
+        $newPost = array_merge([
+            'id' => $targetSlug,
+            'slug' => $targetSlug,
+            'date' => date('c'),
+            'author' => ['name' => 'TellyFilmy', 'avatarUrl' => '/logo.png'],
+            'views' => 0
+        ], $updates);
+        array_unshift($posts, $newPost);
     }
 
 } elseif ($action === 'delete') {
@@ -110,7 +118,7 @@ if ($action === 'add') {
         echo json_encode(['error' => 'Missing slug']);
         exit;
     }
-    $posts = array_values(array_filter($posts, fn($p) => $p['slug'] !== $slug));
+    $posts = array_values(array_filter($posts, fn($p) => isset($p['slug']) && $p['slug'] !== $slug));
 
 } else {
     http_response_code(400);

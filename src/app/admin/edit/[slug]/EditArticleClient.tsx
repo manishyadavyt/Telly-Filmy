@@ -120,7 +120,7 @@ export default function EditArticleClient() {
         // 2. Check /posts.json if not in localStorage
         if (!post) {
           try {
-            const res = await fetch('/posts.json', { cache: 'no-store' });
+            const res = await fetch(`/posts.json?t=${Date.now()}`, { cache: 'no-store' });
             if (res.ok) {
               const data = await res.json();
               if (Array.isArray(data)) {

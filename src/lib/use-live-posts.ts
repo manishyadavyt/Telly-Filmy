@@ -31,9 +31,9 @@ export function useLivePosts(initialPosts: Post[] = []) {
         console.warn('Failed reading localStorage posts:', e);
       }
 
-      // 2. Fetch server /posts.json (for all visitors)
+      // 2. Fetch server /posts.json with cache buster
       try {
-        const res = await fetch('/posts.json', { cache: 'no-store' });
+        const res = await fetch(`/posts.json?t=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
           const serverPosts: Post[] = await res.json();
           if (Array.isArray(serverPosts)) {
@@ -49,7 +49,7 @@ export function useLivePosts(initialPosts: Post[] = []) {
         // Silent fallback
       }
 
-      // 3. Add initial static posts that haven't been added yet
+      // 3. Add initial static posts that haven't been modified or added yet
       const basePosts: Post[] = [];
       for (const ip of initialPosts) {
         if (ip && ip.slug) {
@@ -60,7 +60,7 @@ export function useLivePosts(initialPosts: Post[] = []) {
         }
       }
 
-      // Put newly added dynamic posts at the FRONT, followed by base posts
+      // Put dynamic/edited posts at the FRONT, followed by base posts
       const finalCombined = [...dynamicNewPosts, ...basePosts];
 
       if (isMounted) {
@@ -79,7 +79,7 @@ export function useLivePosts(initialPosts: Post[] = []) {
 }
 
 /**
- * Finds a post by slug from initial, localStorage, or server posts.json
+ * Finds a post by slug from localStorage, or server posts.json
  */
 export async function fetchLivePostBySlug(slug: string): Promise<Post | null> {
   // 1. Check localStorage
@@ -88,19 +88,23 @@ export async function fetchLivePostBySlug(slug: string): Promise<Post | null> {
       const local = localStorage.getItem('tellyfilmy_posts');
       if (local) {
         const posts: Post[] = JSON.parse(local);
-        const found = posts.find((p) => p.slug === slug);
-        if (found) return found;
+        if (Array.isArray(posts)) {
+          const found = posts.find((p) => p && p.slug === slug);
+          if (found) return found;
+        }
       }
     } catch {}
   }
 
-  // 2. Check /posts.json
+  // 2. Check /posts.json with cache buster
   try {
-    const res = await fetch('/posts.json', { cache: 'no-store' });
+    const res = await fetch(`/posts.json?t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) {
       const posts: Post[] = await res.json();
-      const found = posts.find((p) => p.slug === slug);
-      if (found) return found;
+      if (Array.isArray(posts)) {
+        const found = posts.find((p) => p && p.slug === slug);
+        if (found) return found;
+      }
     }
   } catch {}
 

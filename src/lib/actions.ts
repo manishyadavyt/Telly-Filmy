@@ -29,7 +29,10 @@ export async function addPost(
     if (typeof window !== 'undefined') {
       try {
         const local = localStorage.getItem('tellyfilmy_posts');
-        const posts: Post[] = local ? JSON.parse(local) : [];
+        let posts: Post[] = local ? JSON.parse(local) : [];
+        if (!Array.isArray(posts)) posts = [];
+        // Remove existing post with same slug to avoid duplicate
+        posts = posts.filter((p) => p && p.slug !== slug);
         posts.unshift(newPost);
         localStorage.setItem('tellyfilmy_posts', JSON.stringify(posts));
       } catch (e) {
@@ -66,7 +69,7 @@ type UpdatePostInput = Partial<Omit<Post, 'id' | 'author' | 'views'>>;
 export async function updatePost(
   slug: string,
   postData: UpdatePostInput
-): Promise<{ success: boolean }> {
+): Promise<{ success: boolean; newSlug?: string }> {
   try {
     let newSlug = postData.slug || slug;
     if (!postData.slug && postData.title) {
@@ -78,14 +81,45 @@ export async function updatePost(
         .replace(/^-|-$/g, '');
     }
 
+    const updatedData: Partial<Post> = {
+      ...postData,
+      slug: newSlug,
+      id: newSlug,
+    };
+
     if (typeof window !== 'undefined') {
       try {
         const local = localStorage.getItem('tellyfilmy_posts');
-        if (local) {
-          let posts: Post[] = JSON.parse(local);
-          posts = posts.map((p) => (p.slug === slug ? { ...p, ...postData, slug: newSlug } : p));
-          localStorage.setItem('tellyfilmy_posts', JSON.stringify(posts));
+        let posts: Post[] = local ? JSON.parse(local) : [];
+        if (!Array.isArray(posts)) posts = [];
+
+        const existingIndex = posts.findIndex(
+          (p) => p && (p.slug === slug || (newSlug && p.slug === newSlug))
+        );
+
+        if (existingIndex >= 0) {
+          posts[existingIndex] = {
+            ...posts[existingIndex],
+            ...updatedData,
+          } as Post;
+        } else {
+          // If not in localStorage yet, add as updated post entry
+          posts.unshift({
+            author: { name: 'TellyFilmy', avatarUrl: '/logo.png' },
+            date: new Date().toISOString(),
+            views: 0,
+            ...updatedData,
+          } as Post);
         }
+
+        // If slug changed, clean up any remaining old slug entry
+        if (newSlug !== slug) {
+          posts = posts.filter(
+            (p, idx) => (existingIndex >= 0 && idx === existingIndex) || (p && p.slug !== slug)
+          );
+        }
+
+        localStorage.setItem('tellyfilmy_posts', JSON.stringify(posts));
       } catch (e) {
         console.warn('LocalStorage update failed:', e);
       }
@@ -101,7 +135,7 @@ export async function updatePost(
           body: JSON.stringify({
             action: 'update',
             slug,
-            post: { ...postData, slug: newSlug },
+            post: updatedData,
           }),
         });
       } catch (e) {
@@ -109,7 +143,7 @@ export async function updatePost(
       }
     }
 
-    return { success: true };
+    return { success: true, newSlug };
   } catch (error) {
     console.error('Failed to update post:', error);
     return { success: false };
@@ -125,8 +159,10 @@ export async function deletePost(
         const local = localStorage.getItem('tellyfilmy_posts');
         if (local) {
           let posts: Post[] = JSON.parse(local);
-          posts = posts.filter((p) => p.slug !== slug);
-          localStorage.setItem('tellyfilmy_posts', JSON.stringify(posts));
+          if (Array.isArray(posts)) {
+            posts = posts.filter((p) => p && p.slug !== slug);
+            localStorage.setItem('tellyfilmy_posts', JSON.stringify(posts));
+          }
         }
       } catch (e) {
         console.warn('LocalStorage delete failed:', e);
