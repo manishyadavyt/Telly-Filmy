@@ -23,9 +23,13 @@ export function LivePostView({ slug, fallbackNotFound }: LivePostViewProps) {
   useEffect(() => {
     let activeSlug = slug;
     if (!activeSlug && typeof window !== 'undefined') {
-      const match = window.location.pathname.match(/\/posts\/([^/]+)/);
+      const pathname = window.location.pathname;
+      const match = pathname.match(/\/posts\/([^/?#]+)/);
       if (match && match[1]) {
-        activeSlug = decodeURIComponent(match[1]);
+        activeSlug = decodeURIComponent(match[1])
+          .replace(/\.html$/, '')
+          .replace(/\/$/, '')
+          .trim();
       }
     }
 

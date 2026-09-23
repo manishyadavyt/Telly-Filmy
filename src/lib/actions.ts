@@ -36,31 +36,32 @@ export async function addPost(
         posts.unshift(newPost);
         localStorage.setItem('tellyfilmy_posts', JSON.stringify(posts));
       } catch (e) {
-        console.warn('LocalStorage save failed:', e);
+        console.warn('LocalStorage save warning:', e);
       }
 
-      // Persist to Hostinger server
-      try {
-        await fetch('/save-posts.php', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Upload-Secret': UPLOAD_SECRET,
-          },
-          body: JSON.stringify({
-            action: 'add',
-            post: newPost,
-          }),
-        });
-      } catch (e) {
-        console.warn('Server save-posts.php sync failed:', e);
+      // Persist to Hostinger server so ALL devices see the post immediately
+      const res = await fetch('/save-posts.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Upload-Secret': UPLOAD_SECRET,
+        },
+        body: JSON.stringify({
+          action: 'add',
+          post: newPost,
+        }),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || `Server save failed (${res.status})`);
       }
     }
 
     return { success: true, slug: newPost.slug };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to add post:', error);
-    return { success: false };
+    throw error;
   }
 }
 
@@ -103,7 +104,6 @@ export async function updatePost(
             ...updatedData,
           } as Post;
         } else {
-          // If not in localStorage yet, add as updated post entry
           posts.unshift({
             author: { name: 'TellyFilmy', avatarUrl: '/logo.png' },
             date: new Date().toISOString(),
@@ -112,7 +112,7 @@ export async function updatePost(
           } as Post);
         }
 
-        // If slug changed, clean up any remaining old slug entry
+        // If slug changed, remove old slug entry
         if (newSlug !== slug) {
           posts = posts.filter(
             (p, idx) => (existingIndex >= 0 && idx === existingIndex) || (p && p.slug !== slug)
@@ -121,32 +121,33 @@ export async function updatePost(
 
         localStorage.setItem('tellyfilmy_posts', JSON.stringify(posts));
       } catch (e) {
-        console.warn('LocalStorage update failed:', e);
+        console.warn('LocalStorage update warning:', e);
       }
 
-      // Persist to Hostinger server
-      try {
-        await fetch('/save-posts.php', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Upload-Secret': UPLOAD_SECRET,
-          },
-          body: JSON.stringify({
-            action: 'update',
-            slug,
-            post: updatedData,
-          }),
-        });
-      } catch (e) {
-        console.warn('Server save-posts.php sync failed:', e);
+      // Persist to Hostinger server so ALL devices see the updated post
+      const res = await fetch('/save-posts.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Upload-Secret': UPLOAD_SECRET,
+        },
+        body: JSON.stringify({
+          action: 'update',
+          slug,
+          post: updatedData,
+        }),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || `Server update failed (${res.status})`);
       }
     }
 
     return { success: true, newSlug };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to update post:', error);
-    return { success: false };
+    throw error;
   }
 }
 
@@ -165,30 +166,31 @@ export async function deletePost(
           }
         }
       } catch (e) {
-        console.warn('LocalStorage delete failed:', e);
+        console.warn('LocalStorage delete warning:', e);
       }
 
       // Persist to Hostinger server
-      try {
-        await fetch('/save-posts.php', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Upload-Secret': UPLOAD_SECRET,
-          },
-          body: JSON.stringify({
-            action: 'delete',
-            slug,
-          }),
-        });
-      } catch (e) {
-        console.warn('Server save-posts.php sync failed:', e);
+      const res = await fetch('/save-posts.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Upload-Secret': UPLOAD_SECRET,
+        },
+        body: JSON.stringify({
+          action: 'delete',
+          slug,
+        }),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || `Server delete failed (${res.status})`);
       }
     }
 
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to delete post:', error);
-    return { success: false };
+    throw error;
   }
 }
