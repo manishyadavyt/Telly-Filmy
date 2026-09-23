@@ -3,9 +3,6 @@
 import { useState, useEffect } from 'react';
 import type { Post } from './types';
 
-/**
- * Merges static build-time posts with any dynamic/new posts from localStorage and /posts.json
- */
 export function useLivePosts(initialPosts: Post[] = []) {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
 
@@ -13,24 +10,19 @@ export function useLivePosts(initialPosts: Post[] = []) {
     let isMounted = true;
 
     async function syncPosts() {
-      let combined: Post[] = [...initialPosts];
-      const seenSlugs = new Set(combined.map((p) => p.slug));
+      const dynamicNewPosts: Post[] = [];
+      const seenSlugs = new Set<string>();
 
-      // 1. Check localStorage first (instant for author/admin)
+      // 1. Check localStorage first (instant for creator/admin)
       try {
         const local = localStorage.getItem('tellyfilmy_posts');
         if (local) {
           const localPosts: Post[] = JSON.parse(local);
           if (Array.isArray(localPosts)) {
             for (const lp of localPosts) {
-              if (lp && lp.slug) {
-                if (seenSlugs.has(lp.slug)) {
-                  // Replace with updated version
-                  combined = combined.map((p) => (p.slug === lp.slug ? lp : p));
-                } else {
-                  combined.unshift(lp);
-                  seenSlugs.add(lp.slug);
-                }
+              if (lp && lp.slug && !seenSlugs.has(lp.slug)) {
+                dynamicNewPosts.push(lp);
+                seenSlugs.add(lp.slug);
               }
             }
           }
@@ -39,33 +31,40 @@ export function useLivePosts(initialPosts: Post[] = []) {
         console.warn('Failed reading localStorage posts:', e);
       }
 
-      // 2. Fetch server posts.json in background (for other visitors)
+      // 2. Fetch server /posts.json (for all visitors)
       try {
         const res = await fetch('/posts.json', { cache: 'no-store' });
         if (res.ok) {
           const serverPosts: Post[] = await res.json();
           if (Array.isArray(serverPosts)) {
             for (const sp of serverPosts) {
-              if (sp && sp.slug) {
-                if (seenSlugs.has(sp.slug)) {
-                  combined = combined.map((p) => (p.slug === sp.slug ? { ...p, ...sp } : p));
-                } else {
-                  combined.unshift(sp);
-                  seenSlugs.add(sp.slug);
-                }
+              if (sp && sp.slug && !seenSlugs.has(sp.slug)) {
+                dynamicNewPosts.push(sp);
+                seenSlugs.add(sp.slug);
               }
             }
           }
         }
       } catch {
-        // Fallback silently if offline or posts.json not directly reachable
+        // Silent fallback
       }
 
-      // Sort newest first
-      combined.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+      // 3. Add initial static posts that haven't been added yet
+      const basePosts: Post[] = [];
+      for (const ip of initialPosts) {
+        if (ip && ip.slug) {
+          if (!seenSlugs.has(ip.slug)) {
+            basePosts.push(ip);
+            seenSlugs.add(ip.slug);
+          }
+        }
+      }
+
+      // Put newly added dynamic posts at the FRONT, followed by base posts
+      const finalCombined = [...dynamicNewPosts, ...basePosts];
 
       if (isMounted) {
-        setPosts(combined);
+        setPosts(finalCombined);
       }
     }
 

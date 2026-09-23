@@ -44,13 +44,42 @@ export default function ArticlesPage() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await fetch('/api/posts');
-        if (res.ok) {
-          const data = await res.json();
-          setPosts(Array.isArray(data) ? data : []);
-        } else {
-          setPosts([]);
-        }
+        let combined: Post[] = [];
+        const seenSlugs = new Set<string>();
+
+        // 1. Check localStorage first
+        try {
+          const local = localStorage.getItem('tellyfilmy_posts');
+          if (local) {
+            const localPosts: Post[] = JSON.parse(local);
+            if (Array.isArray(localPosts)) {
+              for (const lp of localPosts) {
+                if (lp && lp.slug && !seenSlugs.has(lp.slug)) {
+                  combined.push(lp);
+                  seenSlugs.add(lp.slug);
+                }
+              }
+            }
+          }
+        } catch {}
+
+        // 2. Check /posts.json or /api/posts
+        try {
+          const res = await fetch('/posts.json', { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) {
+              for (const sp of data) {
+                if (sp && sp.slug && !seenSlugs.has(sp.slug)) {
+                  combined.push(sp);
+                  seenSlugs.add(sp.slug);
+                }
+              }
+            }
+          }
+        } catch {}
+
+        setPosts(combined);
       } catch {
         setPosts([]);
         toast({ title: 'Error fetching articles', variant: 'destructive' });
