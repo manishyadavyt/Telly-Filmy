@@ -1,1 +1,1 @@
-{"error":"File upload is only available in local development mode"}
+{"message":"Image uploads use imgbb client-side API. Set NEXT_PUBLIC_IMGBB_API_KEY in .env.local.","docs":"https://api.imgbb.com/"}

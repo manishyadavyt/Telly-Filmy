@@ -10,6 +10,13 @@ import {
   Youtube 
 } from 'lucide-react';
 
+const SOCIAL_LINKS = {
+  twitter: 'https://x.com/telly_filmy?t=QBCSCWDKfFAkiipz0bH-eg&s=09',
+  instagram: 'https://www.instagram.com/tellyfilmy?igsh=aGlyanNrY3k5Z2M5',
+  facebook: 'https://www.facebook.com/profile.php?id=61551867691591&mibextid=ZbWKwL',
+  youtube: 'https://www.youtube.com/@telly.filmy',
+};
+
 export default function Footer() {
   return (
     <footer className="w-full bg-white border-t border-rose-100 text-slate-700 pt-10 pb-8 mt-16">
@@ -39,16 +46,16 @@ export default function Footer() {
               Your premier destination for instant TV serial updates, Bollywood news, web stories, celebrity gossip, and exclusive entertainment coverage.
             </p>
             <div className="flex items-center space-x-3 pt-2">
-              <a href="#" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#e11d48] hover:border-[#e11d48] transition-all">
+              <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noopener noreferrer" aria-label="Follow us on X (Twitter)" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#e11d48] hover:border-[#e11d48] transition-all">
                 <Twitter className="w-3.5 h-3.5" />
               </a>
-              <a href="#" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#e11d48] hover:border-[#e11d48] transition-all">
+              <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#e11d48] hover:border-[#e11d48] transition-all">
                 <Instagram className="w-3.5 h-3.5" />
               </a>
-              <a href="#" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#e11d48] hover:border-[#e11d48] transition-all">
+              <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer" aria-label="Follow us on Facebook" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#e11d48] hover:border-[#e11d48] transition-all">
                 <Facebook className="w-3.5 h-3.5" />
               </a>
-              <a href="#" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#e11d48] hover:border-[#e11d48] transition-all">
+              <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noopener noreferrer" aria-label="Subscribe on YouTube" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#e11d48] hover:border-[#e11d48] transition-all">
                 <Youtube className="w-3.5 h-3.5" />
               </a>
             </div>
