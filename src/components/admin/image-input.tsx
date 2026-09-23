@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
-import { Upload, Link2, Loader2, X, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { Upload, Link2, Loader2, X, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ImageInputProps {
@@ -14,9 +14,9 @@ interface ImageInputProps {
   label?: string;
 }
 
-// imgbb free image hosting — set NEXT_PUBLIC_IMGBB_API_KEY in your .env.local
-// Get a free key at: https://api.imgbb.com/
-const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY ?? '';
+// Secret key must match UPLOAD_SECRET in public_html/upload.php
+const UPLOAD_SECRET = 'tellyfilmy_upload_2024';
+const UPLOAD_ENDPOINT = '/upload.php';
 
 export function ImageInput({
   value,
@@ -26,7 +26,7 @@ export function ImageInput({
   imageIndex = 0,
   label = 'Featured Image',
 }: ImageInputProps) {
-  const [tab, setTab] = useState<'upload' | 'url'>(IMGBB_API_KEY ? 'upload' : 'url');
+  const [tab, setTab] = useState<'upload' | 'url'>('upload');
   const [urlInput, setUrlInput] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -47,82 +47,60 @@ export function ImageInput({
 
     if (!file) return;
 
-    // Validate file size (max 32MB for imgbb free tier)
-    if (file.size > 32 * 1024 * 1024) {
-      toast({
-        title: 'File too large',
-        description: 'Please use an image under 32MB.',
-        variant: 'destructive',
-      });
+    // Validate type
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowed.includes(file.type)) {
+      toast({ title: 'Invalid file type', description: 'Only JPG, PNG, WEBP, GIF allowed.', variant: 'destructive' });
       return;
     }
 
-    if (!IMGBB_API_KEY) {
-      toast({
-        title: 'imgbb API key missing',
-        description:
-          'Add NEXT_PUBLIC_IMGBB_API_KEY to your .env.local file. Get a free key at api.imgbb.com',
-        variant: 'destructive',
-      });
-      // Auto-switch to URL tab so user can still use the URL option
-      setTab('url');
+    // Validate size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Maximum file size is 10MB.', variant: 'destructive' });
+      return;
+    }
+
+    if (!slug) {
+      toast({ title: 'Title required', description: 'Enter a title first to generate the slug.', variant: 'destructive' });
       return;
     }
 
     setUploading(true);
-    setUploadProgress(10);
+    setUploadProgress(20);
 
     try {
-      // Convert file to base64
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result as string;
-          // Strip the data:image/...;base64, prefix
-          resolve(result.split(',')[1]);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file!);
-      });
-
-      setUploadProgress(40);
-
-      // Generate a descriptive image name
-      const ext = file.name.split('.').pop() || 'jpg';
-      const imageName = slug
-        ? `${slug}-${imageType}${imageIndex > 0 ? `-${imageIndex}` : ''}.${ext}`
-        : `upload-${Date.now()}.${ext}`;
-
-      // Upload to imgbb
       const formData = new FormData();
-      formData.append('key', IMGBB_API_KEY);
-      formData.append('image', base64);
-      formData.append('name', imageName);
+      formData.append('file', file);
+      formData.append('slug', slug);
+      formData.append('imageType', imageType);
+      formData.append('imageIndex', imageIndex.toString());
+      formData.append('secret', UPLOAD_SECRET);
 
-      setUploadProgress(60);
+      setUploadProgress(50);
 
-      const res = await fetch('https://api.imgbb.com/1/upload', {
+      const res = await fetch(UPLOAD_ENDPOINT, {
         method: 'POST',
+        headers: {
+          'X-Upload-Secret': UPLOAD_SECRET,
+        },
         body: formData,
       });
 
-      setUploadProgress(90);
+      setUploadProgress(85);
 
       const data = await res.json();
 
-      if (data.success && data.data?.url) {
-        // Prefer display_url (direct image link without HTML wrapper)
-        const imageUrl: string = data.data.display_url || data.data.url;
-        onChange(imageUrl);
-        toast({ title: '✅ Image uploaded successfully!' });
+      if (res.ok && data.url) {
+        onChange(data.url);
+        toast({ title: '✅ Image uploaded!', description: 'Saved to your Hostinger server.' });
         setUploadProgress(100);
       } else {
-        throw new Error(data.error?.message || 'imgbb upload failed');
+        throw new Error(data.error || 'Upload failed');
       }
     } catch (err: any) {
       toast({
         title: 'Upload failed',
-        description: err.message || 'Could not upload to imgbb. Try pasting an image URL instead.',
+        description: err.message || 'Could not upload. Try using "Paste URL" tab instead.',
         variant: 'destructive',
       });
     } finally {
@@ -139,8 +117,6 @@ export function ImageInput({
     setUrlInput('');
     toast({ title: '✅ Image URL set!' });
   };
-
-  const noApiKey = !IMGBB_API_KEY;
 
   return (
     <div className="space-y-3">
@@ -161,28 +137,6 @@ export function ImageInput({
       {value && (
         <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-800 border border-slate-700">
           <Image src={value} alt="Preview" fill className="object-cover" unoptimized />
-        </div>
-      )}
-
-      {/* API key missing warning banner */}
-      {noApiKey && tab === 'upload' && (
-        <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-          <AlertCircle className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
-          <div className="text-xs text-amber-300">
-            <p className="font-semibold">imgbb API key not configured</p>
-            <p className="mt-0.5 text-amber-400/80">
-              Add <code className="bg-black/30 px-1 rounded">NEXT_PUBLIC_IMGBB_API_KEY</code> to{' '}
-              <code className="bg-black/30 px-1 rounded">.env.local</code>.{' '}
-              <a
-                href="https://api.imgbb.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-amber-200"
-              >
-                Get a free key →
-              </a>
-            </p>
-          </div>
         </div>
       )}
 
@@ -219,7 +173,7 @@ export function ImageInput({
             type="file"
             ref={fileRef}
             className="hidden"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/gif"
             onChange={handleFileUpload}
             disabled={uploading}
           />
@@ -230,12 +184,12 @@ export function ImageInput({
               <div className="w-full max-w-[200px]">
                 <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-orange-500 rounded-full transition-all duration-300"
+                    className="h-full bg-orange-500 rounded-full transition-all duration-500"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
-                <p className="text-xs text-slate-400 mt-1 text-center">
-                  Uploading to imgbb... {uploadProgress}%
+                <p className="text-xs text-slate-400 mt-1.5 text-center">
+                  Uploading to server... {uploadProgress}%
                 </p>
               </div>
             </div>
@@ -245,12 +199,8 @@ export function ImageInput({
                 <ImageIcon className="w-6 h-6 text-slate-400 group-hover:text-orange-400 transition-colors" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-300">
-                  {noApiKey ? 'Configure API key to enable upload' : 'Tap to upload or drag & drop'}
-                </p>
-                <p className="text-xs text-slate-500 mt-1">
-                  {noApiKey ? 'Or use the "Paste URL" tab' : 'PNG, JPG, WEBP up to 32MB · Hosted on imgbb'}
-                </p>
+                <p className="text-sm font-medium text-slate-300">Tap to upload or drag & drop</p>
+                <p className="text-xs text-slate-500 mt-1">JPG, PNG, WEBP up to 10MB · Stored on your server</p>
               </div>
             </>
           )}
@@ -276,7 +226,7 @@ export function ImageInput({
             </button>
           </div>
           <p className="text-xs text-slate-600">
-            Paste any public image URL (Google Drive, Cloudinary, imgbb, etc.)
+            Paste any public image URL as an alternative to file upload.
           </p>
         </div>
       )}
