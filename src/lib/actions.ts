@@ -1,5 +1,7 @@
 import type { Post } from './types';
 
+const UPLOAD_SECRET = 'tellyfilmy_upload_2024';
+
 type AddPostInput = Omit<Post, 'id' | 'author' | 'views'>;
 
 export async function addPost(
@@ -32,6 +34,23 @@ export async function addPost(
         localStorage.setItem('tellyfilmy_posts', JSON.stringify(posts));
       } catch (e) {
         console.warn('LocalStorage save failed:', e);
+      }
+
+      // Persist to Hostinger server
+      try {
+        await fetch('/save-posts.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Upload-Secret': UPLOAD_SECRET,
+          },
+          body: JSON.stringify({
+            action: 'add',
+            post: newPost,
+          }),
+        });
+      } catch (e) {
+        console.warn('Server save-posts.php sync failed:', e);
       }
     }
 
@@ -70,6 +89,24 @@ export async function updatePost(
       } catch (e) {
         console.warn('LocalStorage update failed:', e);
       }
+
+      // Persist to Hostinger server
+      try {
+        await fetch('/save-posts.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Upload-Secret': UPLOAD_SECRET,
+          },
+          body: JSON.stringify({
+            action: 'update',
+            slug,
+            post: { ...postData, slug: newSlug },
+          }),
+        });
+      } catch (e) {
+        console.warn('Server save-posts.php sync failed:', e);
+      }
     }
 
     return { success: true };
@@ -93,6 +130,23 @@ export async function deletePost(
         }
       } catch (e) {
         console.warn('LocalStorage delete failed:', e);
+      }
+
+      // Persist to Hostinger server
+      try {
+        await fetch('/save-posts.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Upload-Secret': UPLOAD_SECRET,
+          },
+          body: JSON.stringify({
+            action: 'delete',
+            slug,
+          }),
+        });
+      } catch (e) {
+        console.warn('Server save-posts.php sync failed:', e);
       }
     }
 
