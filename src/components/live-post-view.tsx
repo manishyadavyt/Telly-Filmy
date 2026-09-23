@@ -6,10 +6,11 @@ import Link from 'next/link';
 import type { Post } from '@/lib/types';
 import { getCategorySlug, findCategoryBySlug } from '@/lib/categories';
 import { format } from 'date-fns';
-import { Tag, Clock, Calendar, ArrowLeft } from 'lucide-react';
+import { Tag, Clock, Calendar, ArrowRight, Sparkles, Flame, Film } from 'lucide-react';
 import { ShareButtons } from '@/components/share-buttons';
 import { AdSenseSlot } from '@/components/adsense-slot';
-import { fetchLivePostBySlug } from '@/lib/use-live-posts';
+import { fetchLivePostBySlug, useLivePosts } from '@/lib/use-live-posts';
+import { PostCard } from '@/components/post-card';
 
 interface LivePostViewProps {
   slug?: string;
@@ -19,6 +20,7 @@ interface LivePostViewProps {
 export function LivePostView({ slug, fallbackNotFound }: LivePostViewProps) {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
+  const livePosts = useLivePosts([]);
 
   useEffect(() => {
     let activeSlug = slug;
@@ -67,8 +69,16 @@ export function LivePostView({ slug, fallbackNotFound }: LivePostViewProps) {
   const paragraphs = (post.content || '').split('\n\n');
   const midPoint = Math.floor(paragraphs.length / 2);
 
+  const otherPosts = livePosts.filter((p) => p && p.slug !== post.slug);
+  const nextPost = otherPosts[0];
+  const relatedPosts = otherPosts
+    .filter((p) => (p.category || '').toLowerCase() === (post.category || '').toLowerCase())
+    .slice(0, 4);
+  const latestPosts = otherPosts.slice(0, 8);
+  const trendingStories = otherPosts.filter((p) => p.isTrending || p.isTopStory).slice(0, 5);
+
   return (
-    <main className="container mx-auto max-w-7xl py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
+    <main className="container mx-auto max-w-7xl py-4 sm:py-8 px-4 sm:px-6 lg:px-8 space-y-10">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Main Article */}
         <div className="lg:col-span-8 bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-slate-100 space-y-4">
@@ -169,25 +179,136 @@ export function LivePostView({ slug, fallbackNotFound }: LivePostViewProps) {
               </div>
             </div>
           )}
+
+          {/* UP NEXT STORY PREVIEW BANNER */}
+          {nextPost && (
+            <div className="mt-8 pt-6 border-t-2 border-rose-100">
+              <div className="flex items-center gap-2 text-xs font-extrabold text-[#e11d48] uppercase tracking-wider mb-3">
+                <ArrowRight className="w-4 h-4 animate-pulse" /> UP NEXT STORY
+              </div>
+              <Link
+                href={`/posts/${nextPost.slug}`}
+                className="group flex flex-col sm:flex-row gap-4 p-4 rounded-2xl bg-gradient-to-r from-rose-50/80 to-pink-50/50 hover:from-rose-100/80 hover:to-pink-100/60 border border-rose-200/80 transition-all duration-300 shadow-xs hover:shadow-md"
+              >
+                <div className="relative w-full sm:w-44 aspect-[16/9] sm:aspect-video rounded-xl overflow-hidden shrink-0 bg-slate-100">
+                  <Image
+                    src={nextPost.imageUrl || '/logo.png'}
+                    alt={nextPost.title}
+                    fill
+                    unoptimized
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <div className="flex flex-col justify-between flex-1 min-w-0 space-y-2">
+                  <div>
+                    <h3 className="font-outfit text-base sm:text-lg font-bold text-slate-900 group-hover:text-[#e11d48] leading-snug line-clamp-2 transition-colors">
+                      {nextPost.title}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#e11d48]">
+                    <span>Read Next Story</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}
         <div className="lg:col-span-4 sticky top-24 space-y-6">
-          <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-100 space-y-4">
-            <h3 className="font-outfit text-lg font-extrabold text-slate-900 border-b border-slate-200/80 pb-3">
-              Explore More Stories
-            </h3>
-            <Link
-              href="/posts"
-              className="inline-flex items-center gap-2 text-xs font-bold text-[#e11d48] hover:underline"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" /> Back to All Articles
-            </Link>
+          <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-100 space-y-5">
+            <div className="flex items-center space-x-2 border-b border-slate-200/80 pb-3">
+              <span className="w-1.5 h-5 bg-[#e11d48] rounded-xs"></span>
+              <h3 className="font-outfit text-lg font-extrabold text-slate-900 flex items-center gap-1.5">
+                <Flame className="w-4 h-4 text-[#e11d48]" /> Trending Stories
+              </h3>
+            </div>
+
+            <div className="flex flex-col space-y-4 divide-y divide-slate-100">
+              {(trendingStories.length > 0 ? trendingStories : otherPosts.slice(0, 5)).map((story) => (
+                <Link
+                  key={story.id || story.slug}
+                  href={`/posts/${story.slug}`}
+                  className="group flex items-start space-x-3 pt-3 first:pt-0"
+                >
+                  <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-slate-100">
+                    <Image
+                      src={story.imageUrl || '/logo.png'}
+                      alt={story.title}
+                      fill
+                      unoptimized
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1 min-w-0">
+                    <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-wider block">
+                      {story.category?.toUpperCase() || 'ENTERTAINMENT'}
+                    </span>
+                    <h4 className="font-outfit text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#e11d48] line-clamp-2 leading-snug transition-colors">
+                      {story.title}
+                    </h4>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
 
           {post.enableAds !== false && <AdSenseSlot type="sidebar" />}
         </div>
       </div>
+
+      {/* Related Stories */}
+      {relatedPosts.length > 0 && (
+        <section className="pt-6 border-t-2 border-rose-100 space-y-5">
+          <div className="flex items-center justify-between pb-2 border-b-2 border-rose-100">
+            <div className="flex items-center space-x-2">
+              <span className="w-1.5 h-6 bg-[#e11d48] rounded-xs"></span>
+              <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#e11d48]" /> MORE STORIES IN {post.category?.toUpperCase() || 'ENTERTAINMENT'}
+              </h2>
+            </div>
+            <Link
+              href={`/category/${categorySlug}`}
+              className="text-xs font-extrabold text-[#e11d48] hover:underline uppercase tracking-wider flex items-center gap-1"
+            >
+              VIEW ALL &rarr;
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {relatedPosts.map((rPost) => (
+              <PostCard key={rPost.id || rPost.slug} post={rPost} variant="grid" />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Latest Entertainment Feed */}
+      {latestPosts.length > 0 && (
+        <section className="space-y-5 pb-6">
+          <div className="flex items-center justify-between pb-2 border-b-2 border-rose-100">
+            <div className="flex items-center space-x-2">
+              <span className="w-1.5 h-6 bg-[#e11d48] rounded-xs"></span>
+              <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <Film className="w-5 h-5 text-[#e11d48]" /> LATEST ENTERTAINMENT STORIES
+              </h2>
+            </div>
+            <Link
+              href="/posts"
+              className="text-xs font-extrabold text-[#e11d48] hover:underline uppercase tracking-wider flex items-center gap-1"
+            >
+              EXPLORE ALL &rarr;
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {latestPosts.map((lPost) => (
+              <PostCard key={lPost.id || lPost.slug} post={lPost} variant="grid" />
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

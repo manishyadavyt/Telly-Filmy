@@ -98,7 +98,7 @@ export default async function PostPage({
     <>
       <ArticleJsonLd post={post} url={`https://www.tellyfilmy.com/posts/${post.slug}`} />
       <BreadcrumbJsonLd items={breadcrumbs} />
-      <SinglePostContent initialPost={post} trendingStories={trendingStories} />
+      <SinglePostContent initialPost={post} initialPosts={allPosts} trendingStories={trendingStories} />
     </>
   );
 }
