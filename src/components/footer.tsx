@@ -14,7 +14,7 @@ const SOCIAL_LINKS = {
   twitter: 'https://x.com/telly_filmy?t=QBCSCWDKfFAkiipz0bH-eg&s=09',
   instagram: 'https://www.instagram.com/tellyfilmy?igsh=aGlyanNrY3k5Z2M5',
   facebook: 'https://www.facebook.com/profile.php?id=61551867691591&mibextid=ZbWKwL',
-  youtube: 'https://www.youtube.com/@telly.filmy',
+  youtube: 'https://www.youtube.com/@telly.filmy.',
 };
 
 export default function Footer() {
