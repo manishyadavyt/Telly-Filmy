@@ -40,8 +40,15 @@ export function SinglePostContent({
   const url = typeof window !== 'undefined' ? window.location.href : `https://www.tellyfilmy.com/posts/${post.slug}`;
   const readingTime = Math.max(1, Math.ceil((post.content || '').split(/\s+/).length / 200));
 
+  // Clean raw content by removing broken/empty <img> tags and markdown placeholders
+  const sanitizedContent = (post.content || '')
+    .replace(/<img[^>]*src=["']https?:\/\/["'][^>]*\/?>/gi, '')
+    .replace(/<img[^>]*src=["']["'][^>]*\/?>/gi, '')
+    .replace(/!\[.*?\]\((?:https?:\/\/)?\)/gi, '')
+    .trim();
+
   // Split content into clean blocks for paragraph and mid-ad placement
-  const contentBlocks = (post.content || '')
+  const contentBlocks = sanitizedContent
     .split(/\n\n+/)
     .map((b) => b.trim())
     .filter(Boolean);
