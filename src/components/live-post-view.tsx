@@ -68,6 +68,9 @@ export function LivePostView({ slug, fallbackNotFound }: LivePostViewProps) {
   const readingTime = Math.max(1, Math.ceil((post.content || '').split(' ').length / 200));
   const paragraphs = (post.content || '').split('\n\n');
   const midPoint = Math.floor(paragraphs.length / 2);
+  const inArticleImages = Array.isArray(post.images)
+    ? post.images.filter((img) => img && img !== post.imageUrl && !(post.content || '').includes(img))
+    : [];
 
   const otherPosts = livePosts.filter((p) => p && p.slug !== post.slug);
   const nextPost = otherPosts[0];
@@ -137,14 +140,40 @@ export function LivePostView({ slug, fallbackNotFound }: LivePostViewProps) {
             </div>
           )}
 
-          {/* Content */}
+          {/* Content with In-Between Images */}
           <div className="font-sans text-slate-800 text-[17px] sm:text-[19px] leading-[1.85] sm:leading-[1.9] space-y-6 font-normal pt-2">
-            {paragraphs.map((para, i) => (
-              <div key={i}>
-                <p className="mb-6 text-slate-800 leading-[1.85] sm:leading-[1.9]">{para}</p>
-                {i === midPoint && post.enableAds !== false && <AdSenseSlot type="in-feed" className="my-6" />}
-              </div>
-            ))}
+            {paragraphs.map((para, i) => {
+              const isHTML = /<[a-z][\s\S]*>/i.test(para);
+              const inBetweenImage = inArticleImages[i];
+
+              return (
+                <div key={i}>
+                  {isHTML ? (
+                    <div
+                      className="rich-article-content space-y-4"
+                      dangerouslySetInnerHTML={{ __html: para }}
+                    />
+                  ) : (
+                    <p className="mb-6 text-slate-800 leading-[1.85] sm:leading-[1.9]">{para}</p>
+                  )}
+
+                  {/* In-between article image */}
+                  {inBetweenImage && (
+                    <div className="my-6 relative w-full aspect-[16/9] sm:aspect-video rounded-2xl overflow-hidden shadow-xs bg-slate-100 border border-slate-200">
+                      <Image
+                        src={inBetweenImage}
+                        alt={`${post.title} - Photo ${i + 1}`}
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+
+                  {i === midPoint && post.enableAds !== false && <AdSenseSlot type="in-feed" className="my-6" />}
+                </div>
+              );
+            })}
           </div>
 
           {/* YouTube Video */}

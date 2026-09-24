@@ -18,7 +18,10 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
 
   const sliderPosts = topStories.slice(0, 5);
   const sidePosts = topStories.slice(1, 6);
-  const currentPost = sliderPosts[currentIndex] || sliderPosts[0];
+  const safeIndex = currentIndex < sliderPosts.length ? currentIndex : 0;
+  const currentPost = sliderPosts[safeIndex] || sliderPosts[0];
+
+  if (!currentPost) return null;
 
   // Auto-advance hero slider every 4.5 seconds
   useEffect(() => {
@@ -30,6 +33,13 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
 
     return () => clearInterval(timer);
   }, [sliderPosts.length, isPaused]);
+
+  // Adjust index if list shrinks
+  useEffect(() => {
+    if (currentIndex >= sliderPosts.length) {
+      setCurrentIndex(0);
+    }
+  }, [sliderPosts.length, currentIndex]);
 
   const prevSlide = (e: React.MouseEvent) => {
     e.preventDefault();

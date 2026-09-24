@@ -6,7 +6,7 @@ import Link from 'next/link';
 import type { Post } from '@/lib/types';
 import { getCategorySlug, findCategoryBySlug } from '@/lib/categories';
 import { format } from 'date-fns';
-import { Tag, Clock, Calendar, ArrowRight, Sparkles, Flame, Film, Images as ImagesIcon } from 'lucide-react';
+import { Tag, Clock, Calendar, ArrowRight, Sparkles, Flame, Film } from 'lucide-react';
 import { ShareButtons } from '@/components/share-buttons';
 import { AdSenseSlot } from '@/components/adsense-slot';
 import { fetchLivePostBySlug, useLivePosts } from '@/lib/use-live-posts';
@@ -71,9 +71,9 @@ export function SinglePostContent({
     trendingStories.length > 0 ? trendingStories : livePosts.filter((p) => p.isTrending || p.isTopStory)
   ).filter((p) => p.slug !== post.slug).slice(0, 5);
 
-  // Multiple article gallery images
-  const galleryImages = Array.isArray(post.images)
-    ? post.images.filter((img) => img && img !== post.imageUrl)
+  // Extra article images to interweave naturally between paragraphs (if not already embedded in the content HTML)
+  const inArticleImages = Array.isArray(post.images)
+    ? post.images.filter((img) => img && img !== post.imageUrl && !(post.content || '').includes(img))
     : [];
 
   return (
@@ -148,10 +148,11 @@ export function SinglePostContent({
             />
           </div>
 
-          {/* 6. ARTICLE BODY TEXT & RICH CONTENT */}
+          {/* 6. ARTICLE BODY TEXT & RICH CONTENT WITH IN-BETWEEN IMAGES */}
           <div className="font-sans text-slate-800 text-[17px] sm:text-[19px] leading-[1.85] sm:leading-[1.9] space-y-6 font-normal pt-2">
             {contentBlocks.map((block, i) => {
               const isHTML = /<[a-z][\s\S]*>/i.test(block);
+              const inBetweenImage = inArticleImages[i];
 
               return (
                 <div key={i}>
@@ -164,40 +165,25 @@ export function SinglePostContent({
                     <p className="mb-6 text-slate-800 leading-[1.85] sm:leading-[1.9]">{block}</p>
                   )}
 
+                  {/* In-between article image */}
+                  {inBetweenImage && (
+                    <div className="my-6 relative w-full aspect-[16/9] sm:aspect-video rounded-2xl overflow-hidden shadow-xs bg-slate-100 border border-slate-200">
+                      <Image
+                        src={inBetweenImage}
+                        alt={`${post.title} - Photo ${i + 1}`}
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+
                   {/* In-feed ad at article midPoint */}
                   {i === midPoint && post.enableAds !== false && <AdSenseSlot type="in-feed" className="my-6" />}
                 </div>
               );
             })}
           </div>
-
-          {/* 7. MULTIPLE ARTICLE GALLERY IMAGES */}
-          {galleryImages.length > 0 && (
-            <div className="my-8 pt-6 border-t-2 border-rose-100 space-y-4">
-              <div className="flex items-center gap-2">
-                <ImagesIcon className="w-5 h-5 text-[#e11d48]" />
-                <h3 className="font-outfit text-lg sm:text-xl font-black text-slate-900 uppercase tracking-wider">
-                  Inside Pictures & Gallery
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {galleryImages.map((imgUrl, gIdx) => (
-                  <div
-                    key={gIdx}
-                    className="relative aspect-video rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80 shadow-xs hover:shadow-md transition-all group"
-                  >
-                    <Image
-                      src={imgUrl}
-                      alt={`${post.title} - Photo ${gIdx + 1}`}
-                      fill
-                      unoptimized
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* OPTIONAL YOUTUBE EMBED */}
           {post.videoUrl && (
