@@ -12,15 +12,15 @@ if (existsSync(outDir)) {
     cpSync(path.join(outDir, item), path.join(destDir, item), { recursive: true, force: true });
   });
 
-  // Ensure index.php, save-posts.php, upload.php, and .htaccess exist in public_html and root
+  // Ensure index.php, save-posts.php, upload.php, and .htaccess are synced from root to public_html, public, and out
   const vitalFiles = ['index.php', 'save-posts.php', 'upload.php', '.htaccess'];
   vitalFiles.forEach((file) => {
-    const srcFile = path.join(rootDir, 'public', file);
-    if (existsSync(srcFile)) {
-      copyFileSync(srcFile, path.join(destDir, file));
-      copyFileSync(srcFile, path.join(rootDir, file));
+    const rootSrc = path.join(rootDir, file);
+    if (existsSync(rootSrc)) {
+      copyFileSync(rootSrc, path.join(destDir, file));
+      copyFileSync(rootSrc, path.join(rootDir, 'public', file));
       if (existsSync(outDir)) {
-        copyFileSync(srcFile, path.join(outDir, file));
+        copyFileSync(rootSrc, path.join(outDir, file));
       }
     }
   });
