@@ -3,32 +3,52 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Post } from './types';
 
+const SESSION_CACHE_KEY = 'tellyfilmy_posts_v2';
+
+/** Load from sessionStorage for instant render on refresh (no layout flash) */
+function loadCached(): Post[] {
+  try {
+    if (typeof window === 'undefined') return [];
+    const raw = sessionStorage.getItem(SESSION_CACHE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Save latest posts to sessionStorage so next refresh is instant */
+function saveCache(posts: Post[]) {
+  try {
+    if (typeof window === 'undefined') return;
+    sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(posts));
+  } catch {}
+}
+
 /**
  * Custom hook to provide live, synchronized posts across all devices.
- * Uses the server's /posts.json as the single source of truth,
- * sorted deterministically by date (newest first).
+ * Uses the server's /posts.json as the single source of truth.
  *
- * FIX: Uses a ref for initialPosts so the effect only runs once on mount.
- * Previously [initialPosts] dependency caused a re-sync loop on every render.
+ * KEY FIX: Uses sessionStorage cache so refresh is instant with no layout flash.
+ * The hook also only runs once on mount (ref-based), preventing infinite loops.
  */
 export function useLivePosts(initialPosts: Post[] = []) {
   const [posts, setPosts] = useState<Post[]>(() => {
+    // 1. Try sessionStorage first (instant, no flash)
+    const cached = loadCached();
+    if (cached.length > 0) return sortPostsByDateDesc(cached);
+    // 2. Fall back to static build posts
     return sortPostsByDateDesc(initialPosts);
   });
 
-  // Keep initial posts accessible inside the effect without re-triggering it
   const initialPostsRef = useRef(initialPosts);
 
   useEffect(() => {
     let isMounted = true;
 
-    // Helper: detect broken base64/blob URLs that don't work across devices
-    const isLocalOnlyUrl = (url?: string) =>
-      typeof url === 'string' && (url.startsWith('data:') || url.startsWith('blob:'));
-
     async function syncPosts() {
       try {
-        // Fetch server /posts.json with timestamp cache buster
         const res = await fetch(`/posts.json?t=${Date.now()}`, {
           cache: 'no-store',
           headers: {
@@ -40,22 +60,10 @@ export function useLivePosts(initialPosts: Post[] = []) {
         if (res.ok) {
           const serverPosts: Post[] = await res.json();
           if (Array.isArray(serverPosts) && serverPosts.length > 0) {
-            // Strip out base64/blob image URLs (they only work on the device that uploaded)
-            const cleaned = serverPosts.map((p) => {
-              if (!p) return p;
-              return {
-                ...p,
-                imageUrl: isLocalOnlyUrl(p.imageUrl) ? '/logo.png' : p.imageUrl,
-                images: Array.isArray(p.images)
-                  ? p.images.filter((img) => !isLocalOnlyUrl(img))
-                  : [],
-              };
-            });
-
             // Deduplicate by slug
             const seen = new Set<string>();
             const unique: Post[] = [];
-            for (const p of cleaned) {
+            for (const p of serverPosts) {
               if (p && p.slug && !seen.has(p.slug)) {
                 seen.add(p.slug);
                 unique.push(p);
@@ -65,6 +73,8 @@ export function useLivePosts(initialPosts: Post[] = []) {
             const sorted = sortPostsByDateDesc(unique);
             if (isMounted) {
               setPosts(sorted);
+              // Cache for next refresh — instant render, zero flash
+              saveCache(sorted);
             }
             return;
           }
@@ -82,12 +92,11 @@ export function useLivePosts(initialPosts: Post[] = []) {
 
     syncPosts();
 
-    // Re-sync on custom update events or window focus
     const handleUpdate = () => syncPosts();
     window.addEventListener('tellyfilmy_posts_updated', handleUpdate);
     window.addEventListener('focus', handleUpdate);
 
-    // Poll every 30 seconds so all devices stay live without refresh
+    // Poll every 30s so all devices stay in sync
     const pollInterval = setInterval(syncPosts, 30000);
 
     return () => {
@@ -97,7 +106,7 @@ export function useLivePosts(initialPosts: Post[] = []) {
       window.removeEventListener('focus', handleUpdate);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty deps - runs once. initialPosts handled via ref above.
+  }, []); // runs once on mount
 
   return posts;
 }

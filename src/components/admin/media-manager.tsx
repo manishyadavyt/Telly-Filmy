@@ -45,6 +45,8 @@ export function MediaManager({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState('');
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+  // Local preview URLs (object URLs) shown while upload is in progress
+  const [localPreviews, setLocalPreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -91,7 +93,7 @@ export function MediaManager({
     }
   };
 
-  // Handle multi-file upload — only saves server URLs, never base64
+  // Handle multi-file upload — shows local preview instantly, saves server URL
   const handleFiles = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
 
@@ -104,6 +106,10 @@ export function MediaManager({
       });
       return;
     }
+
+    // Show instant local previews so the admin can see what they selected
+    const objectUrls = fileArray.map((f) => URL.createObjectURL(f));
+    setLocalPreviews(objectUrls);
 
     setUploading(true);
     setUploadProgress(10);
@@ -125,6 +131,10 @@ export function MediaManager({
       setUploadProgress(Math.round(((i + 1) / fileArray.length) * 100));
     }
 
+    // Revoke object URLs to free memory
+    objectUrls.forEach((u) => URL.revokeObjectURL(u));
+    setLocalPreviews([]);
+
     setUploading(false);
     setUploadProgress(0);
     setUploadStatus('');
@@ -133,11 +143,10 @@ export function MediaManager({
       fileInputRef.current.value = '';
     }
 
-    // Report failures
     if (failedFiles.length > 0) {
       toast({
         title: `⚠️ ${failedFiles.length} image(s) failed to upload`,
-        description: `Failed: ${failedFiles.slice(0, 2).join(', ')}${failedFiles.length > 2 ? ` +${failedFiles.length - 2} more` : ''}. Check server upload.php permissions.`,
+        description: `${failedFiles.slice(0, 2).join(', ')}${failedFiles.length > 2 ? ` +${failedFiles.length - 2} more` : ''}. Please try again.`,
         variant: 'destructive',
       });
     }
@@ -163,7 +172,7 @@ export function MediaManager({
 
     toast({
       title: `✅ ${newUploadedUrls.length} image(s) uploaded!`,
-      description: `Images are saved to the server and will load on all devices.`,
+      description: 'Images saved to server — visible on all devices.',
     });
   };
 
@@ -325,7 +334,27 @@ export function MediaManager({
 
           {uploading ? (
             <div className="flex flex-col items-center gap-3 w-full py-2">
-              <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+              {/* Local preview grid while uploading */}
+              {localPreviews.length > 0 && (
+                <div className={`grid gap-2 w-full ${localPreviews.length === 1 ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3'}`}>
+                  {localPreviews.map((previewUrl, i) => (
+                    <div key={i} className="relative aspect-video rounded-lg overflow-hidden bg-slate-800 border border-slate-700">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={previewUrl}
+                        alt={`Preview ${i + 1}`}
+                        className="w-full h-full object-cover opacity-70"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Loader2 className="w-5 h-5 text-orange-400 animate-spin" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {localPreviews.length === 0 && (
+                <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+              )}
               <div className="w-full max-w-xs space-y-1.5">
                 <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                   <div
@@ -333,7 +362,7 @@ export function MediaManager({
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
-                <p className="text-xs text-slate-300 font-medium truncate">{uploadStatus}</p>
+                <p className="text-xs text-slate-300 font-medium truncate text-center">{uploadStatus}</p>
               </div>
             </div>
           ) : (

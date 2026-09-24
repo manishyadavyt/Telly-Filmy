@@ -13,7 +13,8 @@ interface HeroSliderProps {
 export function HeroSlider({ topStories }: HeroSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
+  // Start as true so image shows immediately on page load (no black flash)
+  const [imgVisible, setImgVisible] = useState(true);
 
   const sliderPosts = (topStories || []).slice(0, 5);
   const safeIndex = sliderPosts.length > 0
@@ -38,9 +39,11 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
     }
   }, [sliderPosts.length, currentIndex]);
 
-  // Reset image loaded state when slide changes
+  // Crossfade between slides: brief fade-out then fade-in
   useEffect(() => {
-    setImgLoaded(false);
+    setImgVisible(false);
+    const t = setTimeout(() => setImgVisible(true), 120);
+    return () => clearTimeout(t);
   }, [safeIndex]);
 
   // Render nothing if empty (after hooks)
@@ -77,7 +80,7 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
             href={`/posts/${currentPost.slug}`}
             className="group relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-[#080c16] flex flex-col justify-end min-h-[300px] sm:min-h-[520px] transition-transform duration-300 border border-slate-900"
           >
-            {/* Background Image with smooth crossfade transition */}
+            {/* Background Image — always visible, crossfades between slides */}
             <Image
               key={currentPost.slug}
               src={
@@ -90,10 +93,8 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
               alt={currentPost.title}
               fill
               unoptimized
-              onLoad={() => setImgLoaded(true)}
-              onError={(e) => { (e.target as HTMLImageElement).src = '/logo.png'; setImgLoaded(true); }}
-              className={`object-cover group-hover:scale-105 transition-all duration-700 ease-out ${
-                imgLoaded ? 'opacity-90' : 'opacity-0'
+              className={`object-cover group-hover:scale-105 transition-all duration-500 ease-out ${
+                imgVisible ? 'opacity-90' : 'opacity-0'
               }`}
               priority
             />
