@@ -26,12 +26,22 @@ function saveCache(posts: Post[]) {
   } catch {}
 }
 
+function arePostsEqual(a: Post[], b: Post[]): boolean {
+  if (a === b) return true;
+  if (!a || !b || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i]?.slug !== b[i]?.slug || a[i]?.title !== b[i]?.title || a[i]?.imageUrl !== b[i]?.imageUrl) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * Custom hook to provide live, synchronized posts across all devices.
  * Uses the server's /posts.json as the single source of truth.
  *
- * KEY FIX: Uses sessionStorage cache so refresh is instant with no layout flash.
- * The hook also only runs once on mount (ref-based), preventing infinite loops.
+ * KEY FIX: Uses sessionStorage cache and deep equality bailout so refresh is instant with no layout flash.
  */
 export function useLivePosts(initialPosts: Post[] = []) {
   const [posts, setPosts] = useState<Post[]>(() => {
@@ -72,7 +82,10 @@ export function useLivePosts(initialPosts: Post[] = []) {
 
             const sorted = sortPostsByDateDesc(unique);
             if (isMounted) {
-              setPosts(sorted);
+              setPosts((prev) => {
+                if (arePostsEqual(prev, sorted)) return prev;
+                return sorted;
+              });
               // Cache for next refresh — instant render, zero flash
               saveCache(sorted);
             }
@@ -86,7 +99,11 @@ export function useLivePosts(initialPosts: Post[] = []) {
       // Fallback: sort initial static posts
       const fallback = initialPostsRef.current;
       if (isMounted && fallback.length > 0) {
-        setPosts(sortPostsByDateDesc(fallback));
+        setPosts((prev) => {
+          const sorted = sortPostsByDateDesc(fallback);
+          if (arePostsEqual(prev, sorted)) return prev;
+          return sorted;
+        });
       }
     }
 

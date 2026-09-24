@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Post } from '@/lib/types';
@@ -106,8 +106,14 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
     }
   }, [sliderPosts.length, currentIndex]);
 
-  // Crossfade between slides: brief fade-out then fade-in
+  const isFirstMount = useRef(true);
+
+  // Crossfade between slides: brief fade-out then fade-in (skipped on first mount)
   useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
     setImgVisible(false);
     const t = setTimeout(() => setImgVisible(true), 120);
     return () => clearTimeout(t);

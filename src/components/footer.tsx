@@ -95,7 +95,6 @@ export default function Footer() {
           <div className="flex items-center space-x-6 text-xs font-medium">
             <Link href="/privacy-policy" className="hover:text-slate-900 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-slate-900 transition-colors">Terms of Service</Link>
-            <Link href="/sitemap.xml" className="hover:text-slate-900 transition-colors">Sitemap</Link>
           </div>
         </div>
 
