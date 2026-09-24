@@ -131,6 +131,16 @@ if ($action === 'add') {
     }
     $posts = array_values(array_filter($posts, fn($p) => isset($p['slug']) && $p['slug'] !== $slug));
 
+} elseif ($action === 'sync_all' || $action === 'batch_add') {
+    $batchPosts = $data['posts'] ?? [];
+    if (is_array($batchPosts) && count($batchPosts) > 0) {
+        foreach (array_reverse($batchPosts) as $bp) {
+            if (isset($bp['slug']) && !empty($bp['slug'])) {
+                $posts = array_values(array_filter($posts, fn($p) => isset($p['slug']) && $p['slug'] !== $bp['slug']));
+                array_unshift($posts, $bp);
+            }
+        }
+    }
 } else {
     http_response_code(400);
     echo json_encode(['error' => 'Unknown action: ' . $action]);

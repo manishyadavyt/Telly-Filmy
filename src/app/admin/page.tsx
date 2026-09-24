@@ -40,11 +40,13 @@ export default function AdminDashboard() {
       const seenSlugs = new Set<string>();
 
       // 1. Check localStorage first
+      let localPostsList: Post[] = [];
       try {
         const local = localStorage.getItem('tellyfilmy_posts');
         if (local) {
           const localPosts: Post[] = JSON.parse(local);
           if (Array.isArray(localPosts)) {
+            localPostsList = localPosts;
             for (const lp of localPosts) {
               if (lp && lp.slug && !seenSlugs.has(lp.slug)) {
                 combined.push(lp);
@@ -55,9 +57,9 @@ export default function AdminDashboard() {
         }
       } catch {}
 
-      // 2. Check /posts.json or /api/posts
+      // 2. Check /posts.json with cache buster
       try {
-        const response = await fetch('/posts.json', { cache: 'no-store' });
+        const response = await fetch(`/posts.json?t=${Date.now()}`, { cache: 'no-store' });
         if (response.ok) {
           const data = await response.json();
           if (Array.isArray(data)) {
@@ -66,6 +68,27 @@ export default function AdminDashboard() {
                 combined.push(sp);
                 seenSlugs.add(sp.slug);
               }
+            }
+
+            // Automatically sync any local articles to server posts.json
+            const serverSlugs = new Set(data.map((p: Post) => p?.slug));
+            const unSynced = localPostsList.filter((lp) => lp && lp.slug && !serverSlugs.has(lp.slug));
+            if (unSynced.length > 0) {
+              fetch('/save-posts.php', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-Upload-Secret': 'tellyfilmy_upload_2024',
+                },
+                body: JSON.stringify({
+                  action: 'sync_all',
+                  posts: unSynced,
+                }),
+              }).then((r) => {
+                if (r.ok) {
+                  window.dispatchEvent(new CustomEvent('tellyfilmy_posts_updated'));
+                }
+              }).catch(() => {});
             }
           }
         }

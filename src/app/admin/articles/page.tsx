@@ -81,12 +81,14 @@ export default function ArticlesPage() {
         }
       } catch {}
 
+      let localDrafts: Post[] = [];
       // 2. Merge any local storage drafts
       try {
         const local = localStorage.getItem('tellyfilmy_posts');
         if (local) {
           const localPosts: Post[] = JSON.parse(local);
           if (Array.isArray(localPosts)) {
+            localDrafts = localPosts;
             for (const lp of localPosts) {
               if (lp && lp.slug && !seenSlugs.has(lp.slug)) {
                 combined.unshift(lp);
@@ -96,6 +98,25 @@ export default function ArticlesPage() {
           }
         }
       } catch {}
+
+      // Auto-sync local drafts to server posts.json
+      if (localDrafts.length > 0) {
+        fetch('/save-posts.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Upload-Secret': 'tellyfilmy_upload_2024',
+          },
+          body: JSON.stringify({
+            action: 'sync_all',
+            posts: localDrafts,
+          }),
+        }).then((r) => {
+          if (r.ok) {
+            window.dispatchEvent(new CustomEvent('tellyfilmy_posts_updated'));
+          }
+        }).catch(() => {});
+      }
 
       // Sort by date desc
       combined.sort((a, b) => {
