@@ -59,14 +59,19 @@
 }
 
 @keyframes marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
 }
 
 .animate-marquee {
   display: flex;
   width: max-content;
+  /* GPU-composited layer prevents flash/jump on page refresh */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: transform;
   animation: marquee 60s linear infinite;
+  animation-fill-mode: none;
 }
 
 .animate-marquee:hover {

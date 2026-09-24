@@ -12,6 +12,7 @@ import {
   Minus,
   Image as ImageIcon,
   AlignLeft,
+  Code,
 } from 'lucide-react';
 
 interface RichEditorProps {
@@ -57,7 +58,6 @@ export function RichEditor({
       const newValue =
         value.substring(0, start) + replacement + value.substring(end);
       onChange(newValue);
-      // restore cursor after render
       requestAnimationFrame(() => {
         el.focus();
         const newCursor = start + before.length + text.length + after.length;
@@ -72,8 +72,6 @@ export function RichEditor({
       const el = textareaRef.current;
       if (!el) return;
       const { start, end, selected } = getSelection();
-
-      // Find the start of the current line
       const lineStart = value.lastIndexOf('\n', start - 1) + 1;
       const text = selected || defaultText;
       const before = value.substring(0, lineStart);
@@ -92,7 +90,10 @@ export function RichEditor({
   const insertAtCursor = useCallback(
     (text: string) => {
       const el = textareaRef.current;
-      if (!el) return;
+      if (!el) {
+        onChange(value + (value ? '\n\n' : '') + text);
+        return;
+      }
       const { start, end } = getSelection();
       const newValue = value.substring(0, start) + text + value.substring(end);
       onChange(newValue);
@@ -107,17 +108,17 @@ export function RichEditor({
 
   const handleLink = useCallback(() => {
     const { selected } = getSelection();
-    const url = prompt('Enter URL:', 'https://');
+    const url = prompt('Enter link URL:', 'https://');
     if (!url) return;
     const linkText = selected || 'link text';
-    replaceSelection(`<a href="${url}">`, '</a>', linkText);
+    replaceSelection(`<a href="${url}" target="_blank" rel="noopener noreferrer">`, '</a>', linkText);
   }, [replaceSelection]);
 
   const handleImage = useCallback(() => {
-    const url = prompt('Enter image URL:', 'https://');
+    const url = prompt('Enter Image URL to insert into article:', 'https://');
     if (!url) return;
-    const alt = prompt('Alt text:', 'Image') || 'Image';
-    insertAtCursor(`\n<img src="${url}" alt="${alt}" />\n`);
+    const alt = prompt('Image caption / alt text (optional):', 'Article Image') || 'Article Image';
+    insertAtCursor(`\n\n<img src="${url}" alt="${alt}" />\n\n`);
   }, [insertAtCursor]);
 
   const wordCount = value.trim() ? value.trim().split(/\s+/).length : 0;
@@ -136,57 +137,57 @@ export function RichEditor({
     },
     {
       icon: <Heading2 className="w-4 h-4" />,
-      label: 'H2',
-      action: () => insertLine('<h2>', 'Heading 2'),
+      label: 'H2 Heading',
+      action: () => insertLine('<h2>', 'Subheading</h2>\n'),
     },
     {
       icon: <Heading3 className="w-4 h-4" />,
-      label: 'H3',
-      action: () => insertLine('<h3>', 'Heading 3'),
+      label: 'H3 Heading',
+      action: () => insertLine('<h3>', 'Section Title</h3>\n'),
     },
     {
       icon: <List className="w-4 h-4" />,
-      label: 'List',
-      action: () => insertAtCursor('\n<ul>\n  <li>Item 1</li>\n  <li>Item 2</li>\n</ul>\n'),
+      label: 'Bullet List',
+      action: () => insertAtCursor('\n<ul>\n  <li>Key highlight 1</li>\n  <li>Key highlight 2</li>\n</ul>\n'),
     },
     {
       icon: <Quote className="w-4 h-4" />,
-      label: 'Quote',
-      action: () => replaceSelection('<blockquote>', '</blockquote>', 'quote text'),
+      label: 'Quote Block',
+      action: () => replaceSelection('<blockquote>', '</blockquote>', 'Notable quote or insider statement...'),
     },
     {
       icon: <Link2 className="w-4 h-4" />,
-      label: 'Link',
+      label: 'Add Hyperlink',
       action: handleLink,
     },
     {
-      icon: <ImageIcon className="w-4 h-4" />,
-      label: 'Image URL',
+      icon: <ImageIcon className="w-4 h-4 text-orange-400" />,
+      label: 'Insert Image in Content',
       action: handleImage,
     },
     {
       icon: <Minus className="w-4 h-4" />,
-      label: 'Divider',
+      label: 'Horizontal Divider',
       action: () => insertAtCursor('\n<hr />\n'),
     },
     {
       icon: <AlignLeft className="w-4 h-4" />,
-      label: 'Paragraph',
-      action: () => replaceSelection('<p>', '</p>', 'paragraph text'),
+      label: 'Paragraph Wrap',
+      action: () => replaceSelection('<p>', '</p>', 'Paragraph text...'),
     },
   ];
 
   return (
     <div className="flex flex-col rounded-xl border border-slate-700 overflow-hidden bg-slate-900 focus-within:border-orange-500 transition-colors">
       {/* Toolbar */}
-      <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-slate-700 bg-slate-800/80 flex-wrap">
+      <div className="flex items-center gap-1 px-3 py-2 border-b border-slate-700 bg-slate-800/80 flex-wrap">
         {buttons.map((btn) => (
           <button
             key={btn.label}
             type="button"
             title={btn.label}
             onClick={btn.action}
-            className="p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-700 transition-colors focus:outline-none active:bg-slate-600 min-w-[36px] min-h-[36px] flex items-center justify-center"
+            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors focus:outline-none active:bg-slate-600 min-w-[34px] min-h-[34px] flex items-center justify-center"
           >
             {btn.icon}
           </button>
@@ -201,14 +202,19 @@ export function RichEditor({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         style={{ minHeight }}
-        className="w-full bg-transparent px-4 py-3 text-slate-200 text-sm font-mono leading-relaxed resize-y focus:outline-none placeholder:text-slate-600"
+        className="w-full bg-transparent px-4 py-3.5 text-slate-200 text-sm font-mono leading-relaxed resize-y focus:outline-none placeholder:text-slate-600"
         spellCheck
       />
 
       {/* Footer */}
-      <div className="flex items-center justify-end gap-4 px-3 py-1.5 bg-slate-800/50 border-t border-slate-700">
-        <span className="text-xs text-slate-500">{wordCount} words</span>
-        <span className="text-xs text-slate-500">{charCount} chars</span>
+      <div className="flex items-center justify-between px-3 py-1.5 bg-slate-800/50 border-t border-slate-700">
+        <span className="text-[11px] text-slate-400">
+          💡 Tip: You can also use the Media Manager on the right to insert uploaded images directly.
+        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-400">{wordCount} words</span>
+          <span className="text-xs text-slate-500">({charCount} chars)</span>
+        </div>
       </div>
     </div>
   );

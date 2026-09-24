@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import {
   ArrowLeft,
-  Plus,
   Loader2,
   X,
   Globe,
@@ -20,13 +18,14 @@ import {
   ChevronUp,
   Search,
   DollarSign,
+  ImageIcon,
 } from 'lucide-react';
 import { addPost } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { RichEditor } from '@/components/admin/rich-editor';
-import { ImageInput } from '@/components/admin/image-input';
+import { MediaManager } from '@/components/admin/media-manager';
 
 const CATEGORIES = [
   'Bollywood',
@@ -96,7 +95,7 @@ export default function CreateArticlePage() {
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState('Bollywood');
   const [customCategory, setCustomCategory] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
@@ -104,7 +103,7 @@ export default function CreateArticlePage() {
   const [isTrending, setIsTrending] = useState(false);
   const [enableAds, setEnableAds] = useState(true);
 
-  // Images
+  // Multi-images
   const [imageUrl, setImageUrl] = useState('');
   const [images, setImages] = useState<string[]>([]);
 
@@ -114,7 +113,6 @@ export default function CreateArticlePage() {
   const [focusKeyword, setFocusKeyword] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -141,10 +139,10 @@ export default function CreateArticlePage() {
     }
   };
 
-  const addArticleImage = (url: string) => {
-    if (url && !images.includes(url)) {
-      setImages([...images, url]);
-    }
+  // Helper to insert image tag into content editor
+  const handleInsertImageIntoContent = (imgUrl: string, altText?: string) => {
+    const tag = `\n\n<img src="${imgUrl}" alt="${altText || 'Article Image'}" />\n\n`;
+    setContent((prev) => prev + tag);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -165,39 +163,42 @@ export default function CreateArticlePage() {
       return;
     }
     if (!imageUrl) {
-      toast({ title: 'Missing image', description: 'Please add a featured image.', variant: 'destructive' });
+      toast({ title: 'Missing featured image', description: 'Please upload or select at least one featured image.', variant: 'destructive' });
       return;
     }
 
     setIsSubmitting(true);
     try {
+      const generatedSlug = slug || generateSlug(title);
       const result = await addPost({
         title: title.trim(),
-        slug: slug || generateSlug(title),
-        excerpt: excerpt.trim() || content.substring(0, 160).trim() + '...',
+        slug: generatedSlug,
+        excerpt: excerpt.trim() || content.replace(/<[^>]*>?/gm, '').substring(0, 160).trim() + '...',
         content: content.trim(),
         category: finalCategory,
         isTopStory,
         isTrending,
-        imageUrl,
+        imageUrl: imageUrl.trim(),
         imageHint: 'Featured Image',
-        images,
-        tags,
+        images: Array.isArray(images) ? images : [],
+        tags: tags.length > 0 ? tags : [finalCategory],
         videoUrl: videoUrl.trim() || undefined,
         metaTitle: metaTitle.trim() || `${title.trim()} | TellyFilmy`,
-        metaDescription: metaDescription.trim() || excerpt.trim() || content.substring(0, 160).trim(),
+        metaDescription: metaDescription.trim() || excerpt.trim() || content.replace(/<[^>]*>?/gm, '').substring(0, 160).trim(),
         focusKeyword: focusKeyword.trim(),
         enableAds,
       });
 
       if (result.success) {
-        toast({ title: '✅ Article published!', description: `"${title}" is now live.` });
-        router.push('/admin');
+        toast({ title: '✅ Article published successfully!', description: `"${title}" is now live on TellyFilmy.` });
+        setTimeout(() => {
+          router.push('/admin/articles');
+        }, 600);
       } else {
-        throw new Error('Server returned failure');
+        throw new Error('Failed to publish article on server.');
       }
     } catch (err: any) {
-      toast({ title: 'Publish failed', description: err.message || 'An error occurred', variant: 'destructive' });
+      toast({ title: 'Publish failed', description: err.message || 'An error occurred during publishing.', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
@@ -219,18 +220,18 @@ export default function CreateArticlePage() {
     seoScore >= 5 ? 'bg-emerald-400' : seoScore >= 3 ? 'bg-yellow-400' : 'bg-rose-400';
 
   return (
-    <div className="min-h-screen bg-[#0B1120] text-white">
+    <div className="min-h-screen bg-[#0B1120] text-white pb-16">
       {/* Sticky top bar */}
       <div className="sticky top-0 z-30 bg-[#0f172a]/95 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <Link
-            href="/admin"
+            href="/admin/articles"
             className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="min-w-0">
-            <h1 className="text-base sm:text-lg font-bold text-white truncate">New Article</h1>
+            <h1 className="text-base sm:text-lg font-bold text-white truncate">Create New Article</h1>
             {slug && (
               <p className="text-xs text-slate-500 truncate">/{slug}</p>
             )}
@@ -238,45 +239,37 @@ export default function CreateArticlePage() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
-            type="button"
-            onClick={() => setShowPreview(!showPreview)}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600 text-sm font-medium transition-colors"
-          >
-            <Eye className="w-4 h-4" />
-            Preview
-          </button>
-          <button
             type="submit"
             form="article-form"
             disabled={isSubmitting}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white font-bold rounded-xl text-sm transition-all disabled:opacity-60 shadow-lg shadow-orange-500/20"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white font-bold rounded-xl text-sm transition-all disabled:opacity-60 shadow-lg shadow-orange-500/20"
           >
             {isSubmitting ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Publishing...</>
             ) : (
-              <><CheckCircle2 className="w-4 h-4" /> Publish</>
+              <><CheckCircle2 className="w-4 h-4" /> Publish Article</>
             )}
           </button>
         </div>
       </div>
 
-      <form id="article-form" onSubmit={handleSubmit} className="max-w-5xl mx-auto px-3 sm:px-6 py-6 space-y-4">
-        {/* Title */}
+      <form id="article-form" onSubmit={handleSubmit} className="max-w-6xl mx-auto px-3 sm:px-6 py-6 space-y-5">
+        {/* Title & Slug */}
         <div className="bg-slate-900 border border-slate-700/60 rounded-xl px-4 sm:px-5 py-4">
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Article title..."
+            placeholder="Enter a compelling article headline..."
             className="w-full bg-transparent text-white text-xl sm:text-2xl font-bold placeholder:text-slate-600 focus:outline-none leading-snug"
           />
           <div className="mt-2 flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-slate-500">Slug:</span>
+            <span className="text-xs text-slate-500">Permalink:</span>
             <input
               value={slug}
               onChange={(e) => { setSlug(e.target.value); setSlugEdited(true); }}
               className="text-xs text-orange-400 bg-transparent border-b border-dashed border-slate-600 focus:outline-none focus:border-orange-500 transition-colors min-w-0 flex-1"
-              placeholder="auto-generated-slug"
+              placeholder="article-slug"
             />
             {slugEdited && (
               <button
@@ -290,39 +283,38 @@ export default function CreateArticlePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* LEFT: Content sections */}
-          <div className="lg:col-span-2 space-y-4">
-
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          {/* LEFT 7 COLUMNS: Content & Editors */}
+          <div className="lg:col-span-7 space-y-4">
             {/* Excerpt */}
             <CollapsibleSection title="Excerpt / Summary" icon={<Globe className="w-4 h-4" />}>
               <textarea
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
-                placeholder="Write a compelling summary (used for SEO meta description too)..."
+                placeholder="Write a short summary (also used for SEO meta description)..."
                 rows={3}
                 maxLength={320}
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-slate-200 text-sm focus:outline-none focus:border-orange-500 transition-colors resize-none placeholder:text-slate-600"
               />
               <div className="flex justify-between text-xs text-slate-500">
-                <span>Ideal: 120–160 characters for SEO</span>
+                <span>Recommended: 120–160 characters for SEO</span>
                 <span className={excerpt.length > 160 ? 'text-orange-400' : ''}>{excerpt.length}/320</span>
               </div>
             </CollapsibleSection>
 
-            {/* Content */}
+            {/* Rich Content Editor */}
             <CollapsibleSection title="Article Content" icon={<Globe className="w-4 h-4" />} badge="Rich Editor">
               <RichEditor
                 id="content"
                 value={content}
                 onChange={setContent}
-                placeholder={'Write your article here...\n\nUse the toolbar above for formatting.\n\nHTMl tags like <h2>, <p>, <strong>, <em>, <ul>, <blockquote> are supported.'}
-                minHeight="380px"
+                placeholder={'Write your full article body here...\n\nUse the toolbar buttons to format headings (H2, H3), bold text, bullet lists, quotes, and insert images into the body text.'}
+                minHeight="420px"
               />
             </CollapsibleSection>
 
             {/* Video */}
-            <CollapsibleSection title="YouTube Video" icon={<Youtube className="w-4 h-4" />}>
+            <CollapsibleSection title="YouTube Video Embed" icon={<Youtube className="w-4 h-4" />} defaultOpen={false}>
               <input
                 type="url"
                 value={videoUrl}
@@ -330,21 +322,20 @@ export default function CreateArticlePage() {
                 placeholder="https://www.youtube.com/watch?v=..."
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-slate-200 text-sm focus:outline-none focus:border-orange-500 transition-colors placeholder:text-slate-600"
               />
-              <p className="text-xs text-slate-500">Optional — embeds a YouTube video in the article.</p>
+              <p className="text-xs text-slate-500">Optional — embeds an interactive YouTube player in the article.</p>
             </CollapsibleSection>
 
-            {/* SEO */}
+            {/* SEO Settings */}
             <CollapsibleSection
-              title="SEO Settings"
+              title="SEO Settings & Google Preview"
               icon={<Search className="w-4 h-4" />}
               badge={`${seoScore}/6`}
               defaultOpen={false}
             >
-              {/* SEO Score Bar */}
               <div className="mb-2">
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-slate-400">SEO Score</span>
-                  <span className={seoColor}>{seoScore}/6 — {seoScore >= 5 ? 'Excellent' : seoScore >= 3 ? 'Needs improvement' : 'Poor'}</span>
+                  <span className="text-slate-400">SEO Strength</span>
+                  <span className={seoColor}>{seoScore}/6 — {seoScore >= 5 ? 'Excellent' : seoScore >= 3 ? 'Good' : 'Needs attention'}</span>
                 </div>
                 <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
                   <div
@@ -357,7 +348,7 @@ export default function CreateArticlePage() {
               <div className="space-y-3">
                 <div>
                   <Label className="text-xs text-slate-400 mb-1.5 block">
-                    Meta Title <span className="text-slate-600">(30–65 chars ideal)</span>
+                    Meta Title <span className="text-slate-600">(30–65 chars)</span>
                   </Label>
                   <input
                     value={metaTitle}
@@ -375,13 +366,13 @@ export default function CreateArticlePage() {
 
                 <div>
                   <Label className="text-xs text-slate-400 mb-1.5 block">
-                    Meta Description <span className="text-slate-600">(120–160 chars ideal)</span>
+                    Meta Description <span className="text-slate-600">(120–160 chars)</span>
                   </Label>
                   <textarea
                     value={metaDescription}
                     onChange={(e) => setMetaDescription(e.target.value)}
                     maxLength={200}
-                    placeholder={excerpt || 'Write a compelling description for search engines...'}
+                    placeholder={excerpt || 'Write a compelling description for Google search results...'}
                     rows={3}
                     className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-orange-500 transition-colors resize-none placeholder:text-slate-600"
                   />
@@ -397,15 +388,15 @@ export default function CreateArticlePage() {
                   <input
                     value={focusKeyword}
                     onChange={(e) => setFocusKeyword(e.target.value)}
-                    placeholder="e.g. Bollywood movie review 2024"
+                    placeholder="e.g. Yeh Rishta Kya Kehlata Hai spoiler"
                     className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-orange-500 transition-colors placeholder:text-slate-600"
                   />
                 </div>
 
-                {/* Google Search Preview */}
+                {/* Google Preview */}
                 {(metaTitle || title) && (
                   <div className="mt-2 p-3 bg-white rounded-lg">
-                    <p className="text-blue-700 text-sm font-medium truncate hover:underline cursor-pointer">
+                    <p className="text-blue-700 text-sm font-medium truncate hover:underline">
                       {metaTitle || `${title} | TellyFilmy`}
                     </p>
                     <p className="text-green-700 text-xs mt-0.5 truncate">
@@ -424,7 +415,7 @@ export default function CreateArticlePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-200">Enable Google AdSense</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Show ads in this article (in-article & sidebar)</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Show ads in this article (in-article & sidebar slots)</p>
                 </div>
                 <Switch
                   id="enable-ads"
@@ -432,29 +423,20 @@ export default function CreateArticlePage() {
                   onCheckedChange={setEnableAds}
                 />
               </div>
-              {enableAds && (
-                <div className="mt-2 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                  <p className="text-xs text-emerald-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    AdSense ads will be shown automatically in this article.
-                  </p>
-                </div>
-              )}
             </CollapsibleSection>
-
           </div>
 
-          {/* RIGHT: Sidebar settings */}
-          <div className="space-y-4">
-
-            {/* Featured Image */}
+          {/* RIGHT 5 COLUMNS: Images & Publishing Options */}
+          <div className="lg:col-span-5 space-y-4">
+            {/* Powerful Multi-Image Manager */}
             <div className="bg-slate-900 border border-slate-700/60 rounded-xl px-4 sm:px-5 py-4">
-              <ImageInput
-                value={imageUrl}
-                onChange={setImageUrl}
+              <MediaManager
+                featuredImage={imageUrl}
+                onFeaturedImageChange={setImageUrl}
+                galleryImages={images}
+                onGalleryImagesChange={setImages}
+                onInsertIntoContent={handleInsertImageIntoContent}
                 slug={slug}
-                imageType="main"
-                label="Featured Image *"
               />
             </div>
 
@@ -469,7 +451,7 @@ export default function CreateArticlePage() {
                     onClick={() => setCategory(cat)}
                     className={`px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all border ${
                       category === cat
-                        ? 'bg-orange-500 text-white border-orange-500'
+                        ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
                         : 'bg-slate-800 text-slate-400 border-slate-700 hover:border-orange-500/50 hover:text-white'
                     }`}
                   >
@@ -508,7 +490,7 @@ export default function CreateArticlePage() {
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleTagAdd}
-                placeholder="Type and press Enter or comma..."
+                placeholder="Type tag and press Enter..."
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500 transition-colors placeholder:text-slate-600"
               />
               {tags.length > 0 && (
@@ -530,18 +512,17 @@ export default function CreateArticlePage() {
                   ))}
                 </div>
               )}
-              <p className="text-xs text-slate-600">Tags help with SEO. Add at least 3–5 tags.</p>
             </div>
 
             {/* Publishing options */}
             <div className="bg-slate-900 border border-slate-700/60 rounded-xl px-4 sm:px-5 py-4 space-y-4">
-              <Label className="text-sm font-semibold text-slate-300 block">Publishing Options</Label>
+              <Label className="text-sm font-semibold text-slate-300 block">Publishing Highlights</Label>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-200 flex items-center gap-1.5">
                     <Star className="w-4 h-4 text-orange-400" /> Top Story
                   </p>
-                  <p className="text-xs text-slate-500 mt-0.5">Hero slider & featured section</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Show in hero banner & top featured slider</p>
                 </div>
                 <Switch id="top-story" checked={isTopStory} onCheckedChange={setIsTopStory} />
               </div>
@@ -550,42 +531,13 @@ export default function CreateArticlePage() {
                   <p className="text-sm font-medium text-slate-200 flex items-center gap-1.5">
                     <TrendingUp className="w-4 h-4 text-rose-400" /> Trending
                   </p>
-                  <p className="text-xs text-slate-500 mt-0.5">Show in trending section</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Show in trending badge & trending feed</p>
                 </div>
                 <Switch id="trending" checked={isTrending} onCheckedChange={setIsTrending} />
               </div>
             </div>
 
-            {/* Additional Images */}
-            <div className="bg-slate-900 border border-slate-700/60 rounded-xl px-4 sm:px-5 py-4 space-y-3">
-              <Label className="text-sm font-semibold text-slate-300 block">Additional Images</Label>
-              <ImageInput
-                value=""
-                onChange={addArticleImage}
-                slug={slug}
-                imageType="article"
-                imageIndex={images.length}
-                label="Add Article Image"
-              />
-              {images.length > 0 && (
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  {images.map((img, idx) => (
-                    <div key={idx} className="relative aspect-square rounded-lg overflow-hidden bg-slate-800 group border border-slate-700">
-                      <Image src={img} alt={`Article ${idx}`} fill className="object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setImages(images.filter((_, i) => i !== idx))}
-                        className="absolute top-1 right-1 p-1 bg-black/70 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-500"
-                      >
-                        <X className="w-3 h-3 text-white" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Publish button mobile */}
+            {/* Submit Button */}
             <button
               type="submit"
               form="article-form"
@@ -598,7 +550,6 @@ export default function CreateArticlePage() {
                 <><CheckCircle2 className="w-5 h-5" /> Publish Article</>
               )}
             </button>
-
           </div>
         </div>
       </form>

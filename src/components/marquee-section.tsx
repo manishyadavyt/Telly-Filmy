@@ -18,7 +18,7 @@ export function MarqueeSection({ posts }: MarqueeSectionProps) {
     <div className="w-full bg-white border-b border-rose-100 text-slate-800 py-2 sm:py-3 overflow-hidden flex items-center shadow-xs">
       {/* Full-width ticker — no container padding */}
       <div className="w-full overflow-hidden">
-        <div className="animate-marquee items-center space-x-8 sm:space-x-12 whitespace-nowrap will-change-transform">
+        <div className="animate-marquee items-center space-x-8 sm:space-x-12 whitespace-nowrap">
           {duplicatedPosts.map((post, idx) => (
             <Link
               key={`${post.id}-${idx}`}

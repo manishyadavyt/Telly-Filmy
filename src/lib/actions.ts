@@ -2,7 +2,10 @@ import type { Post } from './types';
 
 const UPLOAD_SECRET = 'tellyfilmy_upload_2024';
 
-type AddPostInput = Omit<Post, 'id' | 'author' | 'views'>;
+type AddPostInput = Omit<Post, 'id' | 'author' | 'views'> & {
+  author?: { name: string; avatarUrl: string };
+  views?: number;
+};
 
 export async function addPost(
   postData: AddPostInput
@@ -21,9 +24,12 @@ export async function addPost(
       ...postData,
       id: slug,
       slug,
-      author: { name: 'TellyFilmy', avatarUrl: '/logo.png' },
-      date: new Date().toISOString(),
-      views: 0,
+      images: Array.isArray(postData.images) ? postData.images : [],
+      tags: Array.isArray(postData.tags) ? postData.tags : [],
+      author: postData.author || { name: 'TellyFilmy', avatarUrl: '/logo.png' },
+      date: postData.date || new Date().toISOString(),
+      views: typeof postData.views === 'number' ? postData.views : 0,
+      enableAds: postData.enableAds !== false,
     };
 
     if (typeof window !== 'undefined') {
@@ -65,7 +71,7 @@ export async function addPost(
   }
 }
 
-type UpdatePostInput = Partial<Omit<Post, 'id' | 'author' | 'views'>>;
+type UpdatePostInput = Partial<Omit<Post, 'id'>>;
 
 export async function updatePost(
   slug: string,
@@ -86,6 +92,8 @@ export async function updatePost(
       ...postData,
       slug: newSlug,
       id: newSlug,
+      images: Array.isArray(postData.images) ? postData.images : undefined,
+      tags: Array.isArray(postData.tags) ? postData.tags : undefined,
     };
 
     if (typeof window !== 'undefined') {
@@ -155,6 +163,10 @@ export async function deletePost(
   slug: string
 ): Promise<{ success: boolean }> {
   try {
+    if (!slug) {
+      throw new Error('Missing article slug for deletion');
+    }
+
     if (typeof window !== 'undefined') {
       try {
         const local = localStorage.getItem('tellyfilmy_posts');
@@ -169,7 +181,7 @@ export async function deletePost(
         console.warn('LocalStorage delete warning:', e);
       }
 
-      // Persist to Hostinger server
+      // Persist deletion to Hostinger server
       const res = await fetch('/save-posts.php', {
         method: 'POST',
         headers: {
