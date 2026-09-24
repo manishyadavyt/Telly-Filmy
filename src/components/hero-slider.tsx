@@ -4,16 +4,83 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Post } from '@/lib/types';
-import { Flame, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Flame, Calendar, ChevronLeft, ChevronRight, Sparkles, ImageOff } from 'lucide-react';
 
 interface HeroSliderProps {
   topStories: Post[];
 }
 
+/** Check if an image URL is a temporary browser-local URL */
+function isLocalUrl(url?: string): boolean {
+  return typeof url === 'string' && (url.startsWith('data:') || url.startsWith('blob:'));
+}
+
+/** Hero image with error fallback and smooth crossfade */
+function HeroSlideImage({ src, alt, visible }: { src?: string; alt: string; visible: boolean }) {
+  const [hasError, setHasError] = useState(false);
+  const isInvalid = !src || isLocalUrl(src) || hasError;
+
+  // Reset error when src changes
+  useEffect(() => {
+    setHasError(false);
+  }, [src]);
+
+  if (isInvalid) {
+    return (
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#31102f] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2 opacity-30">
+          <Sparkles className="w-16 h-16 text-rose-400" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      unoptimized
+      onError={() => setHasError(true)}
+      className={`object-cover group-hover:scale-105 transition-all duration-500 ease-out ${
+        visible ? 'opacity-90' : 'opacity-0'
+      }`}
+      priority
+    />
+  );
+}
+
+/** Trending sidebar thumbnail with clean error fallback (no logo replacement) */
+function TrendingThumbnail({ src, alt, index }: { src?: string; alt: string; index: number }) {
+  const [hasError, setHasError] = useState(false);
+  const isInvalid = !src || isLocalUrl(src) || hasError;
+
+  return (
+    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0 bg-slate-900 flex items-center justify-center shadow-sm">
+      {!isInvalid ? (
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          unoptimized
+          onError={() => setHasError(true)}
+          className="object-cover group-hover:scale-110 transition-transform duration-300"
+        />
+      ) : (
+        <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center">
+          <ImageOff className="w-5 h-5 text-rose-400/50" />
+        </div>
+      )}
+      <span className="absolute top-0.5 left-0.5 bg-[#e11d48] text-white text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs z-10">
+        #{index + 1}
+      </span>
+    </div>
+  );
+}
+
 export function HeroSlider({ topStories }: HeroSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  // Start as true so image shows immediately on page load (no black flash)
   const [imgVisible, setImgVisible] = useState(true);
 
   const sliderPosts = (topStories || []).slice(0, 5);
@@ -32,7 +99,7 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
     return () => clearInterval(timer);
   }, [sliderPosts.length, isPaused]);
 
-  // Clamp index when list shrinks (e.g. after post deletion)
+  // Clamp index when list shrinks
   useEffect(() => {
     if (sliderPosts.length > 0 && currentIndex >= sliderPosts.length) {
       setCurrentIndex(0);
@@ -80,24 +147,14 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
             href={`/posts/${currentPost.slug}`}
             className="group relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-[#080c16] flex flex-col justify-end min-h-[300px] sm:min-h-[520px] transition-transform duration-300 border border-slate-900"
           >
-            {/* Background Image — always visible, crossfades between slides */}
-            <Image
+            {/* Background Image with error fallback */}
+            <HeroSlideImage
               key={currentPost.slug}
-              src={
-                currentPost.imageUrl &&
-                !currentPost.imageUrl.startsWith('data:') &&
-                !currentPost.imageUrl.startsWith('blob:')
-                  ? currentPost.imageUrl
-                  : '/logo.png'
-              }
+              src={currentPost.imageUrl}
               alt={currentPost.title}
-              fill
-              unoptimized
-              className={`object-cover group-hover:scale-105 transition-all duration-500 ease-out ${
-                imgVisible ? 'opacity-90' : 'opacity-0'
-              }`}
-              priority
+              visible={imgVisible}
             />
+
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#080c16] via-[#080c16]/70 to-transparent"></div>
 
@@ -185,26 +242,16 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
             <div className="flex flex-col space-y-3 sm:space-y-4 flex-1 justify-around">
               {sidePosts.map((post, idx) => (
                 <Link
-                  key={post.id}
+                  key={post.id || post.slug}
                   href={`/posts/${post.slug}`}
                   className="group flex gap-3 sm:gap-3.5 items-center"
                 >
                   {/* Thumbnail / Number Badge */}
-                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0 bg-slate-900 flex items-center justify-center shadow-sm">
-                    {post.imageUrl && !post.imageUrl.startsWith('data:') && !post.imageUrl.startsWith('blob:') ? (
-                      <Image
-                        src={post.imageUrl}
-                        alt={post.title}
-                        fill
-                        unoptimized
-                        onError={(e) => { (e.target as HTMLImageElement).src = '/logo.png'; }}
-                        className="object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                    ) : null}
-                    <span className="absolute top-0.5 left-0.5 bg-[#e11d48] text-white text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs">
-                      #{idx + 1}
-                    </span>
-                  </div>
+                  <TrendingThumbnail
+                    src={post.imageUrl}
+                    alt={post.title}
+                    index={idx}
+                  />
 
                   {/* Title & Category */}
                   <div className="flex flex-col space-y-1 flex-1 min-w-0">
