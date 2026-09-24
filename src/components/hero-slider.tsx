@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Post } from '@/lib/types';
@@ -15,12 +15,11 @@ function isLocalUrl(url?: string): boolean {
   return typeof url === 'string' && (url.startsWith('data:') || url.startsWith('blob:'));
 }
 
-/** Hero image with error fallback and smooth crossfade */
-function HeroSlideImage({ src, alt, visible }: { src?: string; alt: string; visible: boolean }) {
+/** Hero image with error fallback and constant instant visibility (no black flash) */
+function HeroSlideImage({ src, alt }: { src?: string; alt: string }) {
   const [hasError, setHasError] = useState(false);
   const isInvalid = !src || isLocalUrl(src) || hasError;
 
-  // Reset error when src changes
   useEffect(() => {
     setHasError(false);
   }, [src]);
@@ -42,15 +41,13 @@ function HeroSlideImage({ src, alt, visible }: { src?: string; alt: string; visi
       fill
       unoptimized
       onError={() => setHasError(true)}
-      className={`object-cover group-hover:scale-105 transition-all duration-500 ease-out ${
-        visible ? 'opacity-90' : 'opacity-0'
-      }`}
+      className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-500 ease-out"
       priority
     />
   );
 }
 
-/** Trending sidebar thumbnail with clean error fallback (no logo replacement) */
+/** Trending sidebar thumbnail with clean error fallback */
 function TrendingThumbnail({ src, alt, index }: { src?: string; alt: string; index: number }) {
   const [hasError, setHasError] = useState(false);
   const isInvalid = !src || isLocalUrl(src) || hasError;
@@ -81,7 +78,6 @@ function TrendingThumbnail({ src, alt, index }: { src?: string; alt: string; ind
 export function HeroSlider({ topStories }: HeroSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [imgVisible, setImgVisible] = useState(true);
 
   const sliderPosts = (topStories || []).slice(0, 5);
   const safeIndex = sliderPosts.length > 0
@@ -106,26 +102,22 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
     }
   }, [sliderPosts.length, currentIndex]);
 
-  const isFirstMount = useRef(true);
-
-  // Crossfade between slides: brief fade-out then fade-in (skipped on first mount)
-  useEffect(() => {
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
-      return;
-    }
-    setImgVisible(false);
-    const t = setTimeout(() => setImgVisible(true), 120);
-    return () => clearTimeout(t);
-  }, [safeIndex]);
-
-  // Render nothing if empty (after hooks)
+  // Render nothing if empty
   if (!topStories || topStories.length === 0) return null;
 
   const currentPost = sliderPosts[safeIndex];
-  const sidePosts = topStories.slice(1, 6);
-
   if (!currentPost) return null;
+
+  // Ensure sidePosts has 5 non-duplicate trending stories
+  const seenSlugs = new Set<string>([currentPost.slug]);
+  const sidePosts: Post[] = [];
+  for (const p of topStories) {
+    if (p && p.slug && !seenSlugs.has(p.slug)) {
+      seenSlugs.add(p.slug);
+      sidePosts.push(p);
+      if (sidePosts.length === 5) break;
+    }
+  }
 
   const prevSlide = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -153,12 +145,10 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
             href={`/posts/${currentPost.slug}`}
             className="group relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-[#080c16] flex flex-col justify-end min-h-[300px] sm:min-h-[520px] transition-transform duration-300 border border-slate-900"
           >
-            {/* Background Image with error fallback */}
+            {/* Background Image — persistent node, smooth transition, no black flash */}
             <HeroSlideImage
-              key={currentPost.slug}
               src={currentPost.imageUrl}
               alt={currentPost.title}
-              visible={imgVisible}
             />
 
             {/* Gradient Overlay */}

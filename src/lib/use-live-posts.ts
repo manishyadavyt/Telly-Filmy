@@ -5,7 +5,7 @@ import type { Post } from './types';
 
 const SESSION_CACHE_KEY = 'tellyfilmy_posts_v2';
 
-/** Load from sessionStorage for instant render on refresh (no layout flash) */
+/** Load from sessionStorage */
 function loadCached(): Post[] {
   try {
     if (typeof window === 'undefined') return [];
@@ -18,7 +18,7 @@ function loadCached(): Post[] {
   }
 }
 
-/** Save latest posts to sessionStorage so next refresh is instant */
+/** Save latest posts to sessionStorage */
 function saveCache(posts: Post[]) {
   try {
     if (typeof window === 'undefined') return;
@@ -41,17 +41,14 @@ function arePostsEqual(a: Post[], b: Post[]): boolean {
  * Custom hook to provide live, synchronized posts across all devices.
  * Uses the server's /posts.json as the single source of truth.
  *
- * KEY FIX: Uses sessionStorage cache and deep equality bailout so refresh is instant with no layout flash.
+ * KEY FIX: 
+ * - Initializes with initialPosts for 100% hydration matching (zero DOM mismatch/flash).
+ * - Smoothly checks cache/server in useEffect with deep equality bailout.
+ * - No window focus thrashing.
  */
 export function useLivePosts(initialPosts: Post[] = []) {
-  const [posts, setPosts] = useState<Post[]>(() => {
-    // 1. Try sessionStorage first (instant, no flash)
-    const cached = loadCached();
-    if (cached.length > 0) return sortPostsByDateDesc(cached);
-    // 2. Fall back to static build posts
-    return sortPostsByDateDesc(initialPosts);
-  });
-
+  // Always initialize from initialPosts for zero-glitch hydration match
+  const [posts, setPosts] = useState<Post[]>(() => sortPostsByDateDesc(initialPosts));
   const initialPostsRef = useRef(initialPosts);
 
   useEffect(() => {
@@ -86,7 +83,6 @@ export function useLivePosts(initialPosts: Post[] = []) {
                 if (arePostsEqual(prev, sorted)) return prev;
                 return sorted;
               });
-              // Cache for next refresh — instant render, zero flash
               saveCache(sorted);
             }
             return;
@@ -107,23 +103,30 @@ export function useLivePosts(initialPosts: Post[] = []) {
       }
     }
 
+    // 1. Check if sessionStorage cache exists and apply immediately
+    const cached = loadCached();
+    if (cached.length > 0) {
+      const sortedCached = sortPostsByDateDesc(cached);
+      setPosts((prev) => (arePostsEqual(prev, sortedCached) ? prev : sortedCached));
+    }
+
+    // 2. Fetch fresh from server
     syncPosts();
 
+    // 3. Listen for post changes from admin panel
     const handleUpdate = () => syncPosts();
     window.addEventListener('tellyfilmy_posts_updated', handleUpdate);
-    window.addEventListener('focus', handleUpdate);
 
-    // Poll every 30s so all devices stay in sync
+    // 4. Poll every 30s in background
     const pollInterval = setInterval(syncPosts, 30000);
 
     return () => {
       isMounted = false;
       clearInterval(pollInterval);
       window.removeEventListener('tellyfilmy_posts_updated', handleUpdate);
-      window.removeEventListener('focus', handleUpdate);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // runs once on mount
+  }, []);
 
   return posts;
 }
@@ -155,17 +158,16 @@ export async function fetchLivePostBySlug(slug: string): Promise<Post | null> {
         Pragma: 'no-cache',
       },
     });
+
     if (res.ok) {
-      const posts: Post[] = await res.json();
-      if (Array.isArray(posts)) {
-        const found = posts.find(
-          (p) => p && p.slug && p.slug.trim().toLowerCase() === cleanSlug
-        );
+      const serverPosts: Post[] = await res.json();
+      if (Array.isArray(serverPosts)) {
+        const found = serverPosts.find((p) => p && p.slug && p.slug.trim().toLowerCase() === cleanSlug);
         if (found) return found;
       }
     }
   } catch (e) {
-    console.warn('Error fetching live post by slug:', e);
+    console.warn('fetchLivePostBySlug warning:', e);
   }
 
   return null;
