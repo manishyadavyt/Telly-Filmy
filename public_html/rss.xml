@@ -5,7 +5,7 @@
     <link>https://www.tellyfilmy.com</link>
     <description>Latest TV serial updates, spoilers, Bollywood news, OTT releases, and trending entertainment stories.</description>
     <language>en-in</language>
-    <lastBuildDate>Thu, 24 Sep 2026 15:22:05 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 24 Sep 2026 15:37:40 GMT</lastBuildDate>
     <atom:link href="https://www.tellyfilmy.com/feed.xml" rel="self" type="application/rss+xml" />
     <image>
       <url>https://www.tellyfilmy.com/logo.png</url>
@@ -13,6 +13,16 @@
       <link>https://www.tellyfilmy.com</link>
     </image>
     
+    <item>
+      <title>Khatron Ke Khiladi: Anil Kapoor to Bring &apos;Jhakaas&apos; Energy to Reality TV Stunt Show</title>
+      <link>https://www.tellyfilmy.com/posts/khatron-ke-khiladi-anil-kapoor</link>
+      <guid isPermaLink="true">https://www.tellyfilmy.com/posts/khatron-ke-khiladi-anil-kapoor</guid>
+      <pubDate>Thu, 24 Sep 2026 15:30:00 GMT</pubDate>
+      <description>Bollywood superstar Anil Kapoor is making headlines with buzz around his dynamic entry into reality television, bringing his signature enthusiasm and fearless charisma to the stage.</description>
+      <category>Reality TV</category>
+      <author>editor@tellyfilmy.com (Telly Filmy)</author>
+      <enclosure url="https://www.tellyfilmy.com/images/posts/khatron-ke-khiladi-anil-kapoor/main.jpeg" type="image/jpeg" length="0" />
+    </item>
     <item>
       <title>Pati Patni Aur Panga | Celebrities Spotted ON Set | Colors Tv Shabir Ahluwalia, Archana Puran Singh</title>
       <link>https://www.tellyfilmy.com/posts/pati-patni-aur-panga-celebrities-spotted-on-set</link>
@@ -502,16 +512,6 @@
       <category>Television</category>
       <author>editor@tellyfilmy.com (Telly Filmy)</author>
       <enclosure url="https://www.tellyfilmy.com/images/posts/sairaab-emotional-world/main.jpeg" type="image/jpeg" length="0" />
-    </item>
-    <item>
-      <title>Virani Family Ki Khushiyaan Wapas… But For How Long? Is Something Bigger Brewing In Kyunki Saas Bhi Kabhi Bahu Thi?</title>
-      <link>https://www.tellyfilmy.com/posts/kyunki-virani-family-happiness-update</link>
-      <guid isPermaLink="true">https://www.tellyfilmy.com/posts/kyunki-virani-family-happiness-update</guid>
-      <pubDate>Wed, 20 May 2026 14:00:00 GMT</pubDate>
-      <description>Kyunki Saas Bhi Kabhi Bahu Thi mein Virani family ke beech wapas aayi khushiyaan, lekin Reyansh ki entry ke saath kuch bada hone ka hint bhi mil raha hai.</description>
-      <category>Television</category>
-      <author>editor@tellyfilmy.com (Telly Filmy)</author>
-      <enclosure url="https://www.tellyfilmy.com/images/posts/kyunki-virani-family-update/main.jpeg" type="image/jpeg" length="0" />
     </item>
   </channel>
 </rss>
