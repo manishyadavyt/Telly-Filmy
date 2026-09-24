@@ -1,5 +1,31 @@
 DirectoryIndex index.php index.html
 
+# ─── PREVENT CACHING FOR DYNAMIC JSON & PHP ENDPOINTS ───
+<IfModule mod_headers.c>
+  # Never cache posts.json so all devices always get the latest articles immediately
+  <FilesMatch "^posts\.json$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+    Header set Access-Control-Allow-Origin "*"
+  </FilesMatch>
+
+  # Never cache PHP endpoints
+  <FilesMatch "\.(php)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+</IfModule>
+
+# ─── LITESPEED CACHE RULES ───
+<IfModule LiteSpeed>
+  RewriteEngine On
+  RewriteRule ^posts\.json$ - [E=Cache-Control:no-cache]
+  RewriteRule ^save-posts\.php$ - [E=Cache-Control:no-cache]
+  RewriteRule ^upload\.php$ - [E=Cache-Control:no-cache]
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /

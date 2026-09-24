@@ -137,6 +137,9 @@ if ($action === 'add') {
     exit;
 }
 
+// Purge LiteSpeed server cache so all devices and CDN edges get the new content immediately
+header('X-LiteSpeed-Purge: *');
+
 // Write back to ALL existing candidate paths
 $jsonContent = json_encode($posts, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 $successCount = 0;
@@ -156,6 +159,66 @@ if ($successCount === 0) {
     http_response_code(500);
     echo json_encode(['error' => 'Failed to write posts.json. Please check server folder write permissions.']);
     exit;
+}
+
+// Locate template shell to generate static HTML for the post
+$postSlug = ($action === 'add' ? ($data['post']['slug'] ?? null) : ($data['post']['slug'] ?? $data['slug'] ?? null));
+if ($postSlug) {
+    $candidate404 = [
+        __DIR__ . '/404.html',
+        __DIR__ . '/public_html/404.html',
+        dirname(__DIR__) . '/public_html/404.html',
+        dirname(__DIR__) . '/out/404.html',
+    ];
+    $shell = null;
+    foreach ($candidate404 as $p404) {
+        if (file_exists($p404) && is_file($p404)) {
+            $shell = file_get_contents($p404);
+            break;
+        }
+    }
+
+    if ($shell && $action !== 'delete') {
+        $postData = ($action === 'add' ? $data['post'] : array_merge($data['post'] ?? [], ['slug' => $postSlug]));
+        $title = htmlspecialchars($postData['metaTitle'] ?? $postData['title'] ?? 'Article') . ' | Telly Filmy';
+        $desc = htmlspecialchars($postData['metaDescription'] ?? $postData['excerpt'] ?? '');
+        $img = htmlspecialchars($postData['imageUrl'] ?? '/logo.png');
+        if (!preg_match('#^https?://#i', $img)) {
+            $img = 'https://www.tellyfilmy.com' . $img;
+        }
+        $postUrl = 'https://www.tellyfilmy.com/posts/' . htmlspecialchars($postSlug);
+
+        $customHtml = preg_replace('#<title>.*?</title>#is', '<title>' . $title . '</title>', $shell, 1);
+        $customHtml = preg_replace('#<meta property="og:title" content=".*?"#is', '<meta property="og:title" content="' . $title . '"', $customHtml, 1);
+        $customHtml = preg_replace('#<meta property="og:description" content=".*?"#is', '<meta property="og:description" content="' . $desc . '"', $customHtml, 1);
+        $customHtml = preg_replace('#<meta property="og:image" content=".*?"#is', '<meta property="og:image" content="' . $img . '"', $customHtml, 1);
+        $customHtml = preg_replace('#<meta property="og:url" content=".*?"#is', '<meta property="og:url" content="' . $postUrl . '"', $customHtml, 1);
+
+        $postDirs = [
+            __DIR__ . '/posts',
+            __DIR__ . '/public_html/posts',
+            dirname(__DIR__) . '/public_html/posts',
+            dirname(__DIR__) . '/posts'
+        ];
+        foreach ($postDirs as $pd) {
+            if (is_dir($pd)) {
+                @file_put_contents($pd . '/' . $postSlug . '.html', $customHtml);
+                @chmod($pd . '/' . $postSlug . '.html', 0666);
+            }
+        }
+    } elseif ($action === 'delete') {
+        $postDirs = [
+            __DIR__ . '/posts',
+            __DIR__ . '/public_html/posts',
+            dirname(__DIR__) . '/public_html/posts',
+            dirname(__DIR__) . '/posts'
+        ];
+        foreach ($postDirs as $pd) {
+            if (is_dir($pd)) {
+                @unlink($pd . '/' . $postSlug . '.html');
+            }
+        }
+    }
 }
 
 echo json_encode(['success' => true, 'count' => count($posts), 'synced_files' => $successCount]);
