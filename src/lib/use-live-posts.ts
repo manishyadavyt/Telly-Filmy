@@ -18,7 +18,7 @@ export function useLivePosts(initialPosts: Post[] = []) {
 
     async function syncPosts() {
       try {
-        // 1. Fetch server /posts.json with timestamp cache buster
+        // Fetch server /posts.json with timestamp cache buster
         const res = await fetch(`/posts.json?t=${Date.now()}`, {
           cache: 'no-store',
           headers: {
@@ -30,32 +30,10 @@ export function useLivePosts(initialPosts: Post[] = []) {
         if (res.ok) {
           const serverPosts: Post[] = await res.json();
           if (Array.isArray(serverPosts) && serverPosts.length > 0) {
-            let combined = [...serverPosts];
-
-            // Merge any local un-synced creator draft from localStorage if present
-            try {
-              const local = localStorage.getItem('tellyfilmy_posts');
-              if (local) {
-                const localPosts: Post[] = JSON.parse(local);
-                if (Array.isArray(localPosts)) {
-                  for (const lp of localPosts) {
-                    if (lp && lp.slug) {
-                      const idx = combined.findIndex((p) => p && p.slug === lp.slug);
-                      if (idx >= 0) {
-                        combined[idx] = { ...combined[idx], ...lp };
-                      } else {
-                        combined.unshift(lp);
-                      }
-                    }
-                  }
-                }
-              }
-            } catch {}
-
             // Deduplicate by slug
             const seen = new Set<string>();
             const unique: Post[] = [];
-            for (const p of combined) {
+            for (const p of serverPosts) {
               if (p && p.slug && !seen.has(p.slug)) {
                 seen.add(p.slug);
                 unique.push(p);
@@ -81,8 +59,15 @@ export function useLivePosts(initialPosts: Post[] = []) {
 
     syncPosts();
 
+    // Re-sync on custom update events or window focus
+    const handleUpdate = () => syncPosts();
+    window.addEventListener('tellyfilmy_posts_updated', handleUpdate);
+    window.addEventListener('focus', handleUpdate);
+
     return () => {
       isMounted = false;
+      window.removeEventListener('tellyfilmy_posts_updated', handleUpdate);
+      window.removeEventListener('focus', handleUpdate);
     };
   }, [initialPosts]);
 
@@ -102,13 +87,13 @@ export function sortPostsByDateDesc(items: Post[]): Post[] {
 }
 
 /**
- * Finds a post by slug from server posts.json or localStorage (works identically on mobile and desktop)
+ * Finds a post by slug from server posts.json (works identically on mobile, desktop, and all browsers)
  */
 export async function fetchLivePostBySlug(slug: string): Promise<Post | null> {
   if (!slug) return null;
   const cleanSlug = slug.trim().toLowerCase();
 
-  // 1. Fetch server /posts.json with cache buster
+  // Fetch server /posts.json with cache buster
   try {
     const res = await fetch(`/posts.json?t=${Date.now()}`, {
       cache: 'no-store',
@@ -126,22 +111,8 @@ export async function fetchLivePostBySlug(slug: string): Promise<Post | null> {
         if (found) return found;
       }
     }
-  } catch {}
-
-  // 2. Check localStorage (creator browser fallback)
-  if (typeof window !== 'undefined') {
-    try {
-      const local = localStorage.getItem('tellyfilmy_posts');
-      if (local) {
-        const posts: Post[] = JSON.parse(local);
-        if (Array.isArray(posts)) {
-          const found = posts.find(
-            (p) => p && p.slug && p.slug.trim().toLowerCase() === cleanSlug
-          );
-          if (found) return found;
-        }
-      }
-    } catch {}
+  } catch (e) {
+    console.warn('Error fetching live post by slug:', e);
   }
 
   return null;

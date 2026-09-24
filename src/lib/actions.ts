@@ -62,6 +62,8 @@ export async function addPost(
         const errJson = await res.json().catch(() => ({}));
         throw new Error(errJson.error || `Server save failed (${res.status})`);
       }
+
+      window.dispatchEvent(new CustomEvent('tellyfilmy_posts_updated'));
     }
 
     return { success: true, slug: newPost.slug };
@@ -150,6 +152,8 @@ export async function updatePost(
         const errJson = await res.json().catch(() => ({}));
         throw new Error(errJson.error || `Server update failed (${res.status})`);
       }
+
+      window.dispatchEvent(new CustomEvent('tellyfilmy_posts_updated'));
     }
 
     return { success: true, newSlug };
@@ -198,6 +202,8 @@ export async function deletePost(
         const errJson = await res.json().catch(() => ({}));
         throw new Error(errJson.error || `Server delete failed (${res.status})`);
       }
+
+      window.dispatchEvent(new CustomEvent('tellyfilmy_posts_updated'));
     }
 
     return { success: true };
