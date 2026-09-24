@@ -85,9 +85,32 @@ export default function EditArticleClient() {
   const router = useRouter();
   const params = useParams();
   const { toast } = useToast();
-  
-  const rawSlug = params.slug as string;
-  const slug = rawSlug ? decodeURIComponent(rawSlug).trim() : '';
+
+  const [activeSlug, setActiveSlug] = useState<string>(() => {
+    if (params && params.slug) {
+      return decodeURIComponent(params.slug as string).trim();
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (params && params.slug) {
+      setActiveSlug(decodeURIComponent(params.slug as string).trim());
+    } else if (typeof window !== 'undefined') {
+      const searchSlug = new URLSearchParams(window.location.search).get('slug');
+      if (searchSlug) {
+        setActiveSlug(searchSlug.trim());
+      } else {
+        const pathParts = window.location.pathname.split('/admin/edit/');
+        if (pathParts[1]) {
+          const clean = pathParts[1].replace(/\/$/, '').replace(/\.html$/, '');
+          if (clean) setActiveSlug(decodeURIComponent(clean).trim());
+        }
+      }
+    }
+  }, [params]);
+
+  const slug = activeSlug;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

@@ -68,6 +68,24 @@ foreach ($candidate404 as $p404) {
     }
 }
 
+// If this is an admin edit route: /admin/edit/* or /admin/edit
+if (preg_match('#^admin/edit(/.*)?$#', $path)) {
+    $candidateEditHtml = [
+        __DIR__ . '/admin/edit.html',
+        __DIR__ . '/public_html/admin/edit.html',
+        dirname(__DIR__) . '/public_html/admin/edit.html',
+        dirname(__DIR__) . '/out/admin/edit.html',
+    ];
+    foreach ($candidateEditHtml as $eh) {
+        if (file_exists($eh) && is_file($eh)) {
+            header('HTTP/1.1 200 OK');
+            header('Content-Type: text/html; charset=UTF-8');
+            readfile($eh);
+            exit;
+        }
+    }
+}
+
 // If this is a single post route: /posts/{slug}
 if (preg_match('#^posts/([a-zA-Z0-9_-]+)$#', $path, $matches)) {
     $slug = $matches[1];
