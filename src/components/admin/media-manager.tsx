@@ -48,50 +48,50 @@ export function MediaManager({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Upload single file helper
+  // Upload single file helper — NEVER uses base64 (base64 URLs break on other devices)
   const uploadSingleFile = async (
     file: File,
     index: number,
     total: number
-  ): Promise<string> => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = async (ev) => {
-        const base64Data = ev.target?.result as string;
-        try {
-          const formData = new FormData();
-          formData.append('file', file);
-          formData.append('slug', slug || 'article');
-          formData.append('imageType', 'article');
-          formData.append('imageIndex', (Date.now() + index).toString());
-          formData.append('secret', UPLOAD_SECRET);
+  ): Promise<string | null> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('slug', slug || 'article');
+      formData.append('imageType', 'article');
+      formData.append('imageIndex', (Date.now() + index).toString());
+      formData.append('secret', UPLOAD_SECRET);
 
-          const res = await fetch(UPLOAD_ENDPOINT, {
-            method: 'POST',
-            headers: {
-              'X-Upload-Secret': UPLOAD_SECRET,
-            },
-            body: formData,
-          });
+      const res = await fetch(UPLOAD_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'X-Upload-Secret': UPLOAD_SECRET,
+        },
+        body: formData,
+      });
 
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.url) {
-              resolve(data.url);
-              return;
-            }
-          }
-          // Fallback to base64
-          resolve(base64Data);
-        } catch {
-          resolve(base64Data);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.url) {
+          return data.url as string;
         }
-      };
-      reader.readAsDataURL(file);
-    });
+        const errMsg = data?.error || 'Server did not return an image URL.';
+        throw new Error(errMsg);
+      } else {
+        let errMsg = `Upload failed (HTTP ${res.status})`;
+        try {
+          const errData = await res.json();
+          if (errData?.error) errMsg = errData.error;
+        } catch {}
+        throw new Error(errMsg);
+      }
+    } catch (err: any) {
+      // Re-throw with file context so the caller can report which file failed
+      throw new Error(`"${file.name}": ${err.message || 'Upload error'}`);
+    }
   };
 
-  // Handle multi-file upload
+  // Handle multi-file upload — only saves server URLs, never base64
   const handleFiles = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
 
@@ -110,14 +110,39 @@ export function MediaManager({
     setUploadStatus(`Uploading 1 of ${fileArray.length}...`);
 
     const newUploadedUrls: string[] = [];
+    const failedFiles: string[] = [];
 
     for (let i = 0; i < fileArray.length; i++) {
       const file = fileArray[i];
       setUploadStatus(`Uploading ${i + 1} of ${fileArray.length}: ${file.name}...`);
-      const url = await uploadSingleFile(file, i, fileArray.length);
-      newUploadedUrls.push(url);
+      try {
+        const url = await uploadSingleFile(file, i, fileArray.length);
+        if (url) newUploadedUrls.push(url);
+      } catch (err: any) {
+        console.error('Upload failed:', err);
+        failedFiles.push(err.message || file.name);
+      }
       setUploadProgress(Math.round(((i + 1) / fileArray.length) * 100));
     }
+
+    setUploading(false);
+    setUploadProgress(0);
+    setUploadStatus('');
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    // Report failures
+    if (failedFiles.length > 0) {
+      toast({
+        title: `⚠️ ${failedFiles.length} image(s) failed to upload`,
+        description: `Failed: ${failedFiles.slice(0, 2).join(', ')}${failedFiles.length > 2 ? ` +${failedFiles.length - 2} more` : ''}. Check server upload.php permissions.`,
+        variant: 'destructive',
+      });
+    }
+
+    if (newUploadedUrls.length === 0) return;
 
     // Add to gallery or set as featured if featured is empty
     let updatedFeatured = featuredImage;
@@ -136,17 +161,10 @@ export function MediaManager({
       onGalleryImagesChange(updatedGallery);
     }
 
-    setUploading(false);
-    setUploadProgress(0);
-    setUploadStatus('');
     toast({
-      title: '✅ Images uploaded successfully!',
-      description: `Added ${newUploadedUrls.length} image(s) to this article.`,
+      title: `✅ ${newUploadedUrls.length} image(s) uploaded!`,
+      description: `Images are saved to the server and will load on all devices.`,
     });
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
   // Handle URL addition

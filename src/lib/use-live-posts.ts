@@ -1,20 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Post } from './types';
 
 /**
  * Custom hook to provide live, synchronized posts across all devices.
  * Uses the server's /posts.json as the single source of truth,
  * sorted deterministically by date (newest first).
+ *
+ * FIX: Uses a ref for initialPosts so the effect only runs once on mount.
+ * Previously [initialPosts] dependency caused a re-sync loop on every render.
  */
 export function useLivePosts(initialPosts: Post[] = []) {
   const [posts, setPosts] = useState<Post[]>(() => {
     return sortPostsByDateDesc(initialPosts);
   });
 
+  // Keep initial posts accessible inside the effect without re-triggering it
+  const initialPostsRef = useRef(initialPosts);
+
   useEffect(() => {
     let isMounted = true;
+
+    // Helper: detect broken base64/blob URLs that don't work across devices
+    const isLocalOnlyUrl = (url?: string) =>
+      typeof url === 'string' && (url.startsWith('data:') || url.startsWith('blob:'));
 
     async function syncPosts() {
       try {
@@ -30,10 +40,22 @@ export function useLivePosts(initialPosts: Post[] = []) {
         if (res.ok) {
           const serverPosts: Post[] = await res.json();
           if (Array.isArray(serverPosts) && serverPosts.length > 0) {
+            // Strip out base64/blob image URLs (they only work on the device that uploaded)
+            const cleaned = serverPosts.map((p) => {
+              if (!p) return p;
+              return {
+                ...p,
+                imageUrl: isLocalOnlyUrl(p.imageUrl) ? '/logo.png' : p.imageUrl,
+                images: Array.isArray(p.images)
+                  ? p.images.filter((img) => !isLocalOnlyUrl(img))
+                  : [],
+              };
+            });
+
             // Deduplicate by slug
             const seen = new Set<string>();
             const unique: Post[] = [];
-            for (const p of serverPosts) {
+            for (const p of cleaned) {
               if (p && p.slug && !seen.has(p.slug)) {
                 seen.add(p.slug);
                 unique.push(p);
@@ -52,8 +74,9 @@ export function useLivePosts(initialPosts: Post[] = []) {
       }
 
       // Fallback: sort initial static posts
-      if (isMounted && initialPosts.length > 0) {
-        setPosts(sortPostsByDateDesc(initialPosts));
+      const fallback = initialPostsRef.current;
+      if (isMounted && fallback.length > 0) {
+        setPosts(sortPostsByDateDesc(fallback));
       }
     }
 
@@ -64,12 +87,17 @@ export function useLivePosts(initialPosts: Post[] = []) {
     window.addEventListener('tellyfilmy_posts_updated', handleUpdate);
     window.addEventListener('focus', handleUpdate);
 
+    // Poll every 30 seconds so all devices stay live without refresh
+    const pollInterval = setInterval(syncPosts, 30000);
+
     return () => {
       isMounted = false;
+      clearInterval(pollInterval);
       window.removeEventListener('tellyfilmy_posts_updated', handleUpdate);
       window.removeEventListener('focus', handleUpdate);
     };
-  }, [initialPosts]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - runs once. initialPosts handled via ref above.
 
   return posts;
 }
@@ -87,13 +115,12 @@ export function sortPostsByDateDesc(items: Post[]): Post[] {
 }
 
 /**
- * Finds a post by slug from server posts.json (works identically on mobile, desktop, and all browsers)
+ * Finds a post by slug from server posts.json
  */
 export async function fetchLivePostBySlug(slug: string): Promise<Post | null> {
   if (!slug) return null;
   const cleanSlug = slug.trim().toLowerCase();
 
-  // Fetch server /posts.json with cache buster
   try {
     const res = await fetch(`/posts.json?t=${Date.now()}`, {
       cache: 'no-store',

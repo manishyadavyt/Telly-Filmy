@@ -16,6 +16,15 @@ export function PostCard({ post, variant = 'grid' }: PostCardProps) {
     day: 'numeric'
   });
 
+  // Safely get image URL — skip base64/blob URLs (they only work on the uploading device)
+  const safeImageUrl = (url?: string) => {
+    if (!url) return '/logo.png';
+    if (url.startsWith('data:') || url.startsWith('blob:')) return '/logo.png';
+    return url;
+  };
+
+  const imgSrc = safeImageUrl(post.imageUrl);
+
   if (variant === 'horizontal') {
     return (
       <Link 
@@ -24,10 +33,11 @@ export function PostCard({ post, variant = 'grid' }: PostCardProps) {
       >
         <div className="relative w-28 h-24 sm:w-44 sm:h-32 rounded-xl overflow-hidden shrink-0 bg-slate-100">
           <Image
-            src={post.imageUrl || '/logo.png'}
+            src={imgSrc}
             alt={post.title}
             fill
             unoptimized
+            onError={(e) => { (e.target as HTMLImageElement).src = '/logo.png'; }}
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
@@ -65,10 +75,11 @@ export function PostCard({ post, variant = 'grid' }: PostCardProps) {
         className="relative w-28 h-24 sm:w-full sm:aspect-video rounded-xl sm:rounded-none overflow-hidden bg-slate-100 shrink-0"
       >
         <Image
-          src={post.imageUrl || '/logo.png'}
+          src={imgSrc}
           alt={post.title}
           fill
           unoptimized
+          onError={(e) => { (e.target as HTMLImageElement).src = '/logo.png'; }}
           className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
         <div className="hidden sm:block absolute top-3 left-3">

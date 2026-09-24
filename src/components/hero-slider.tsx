@@ -13,15 +13,12 @@ interface HeroSliderProps {
 export function HeroSlider({ topStories }: HeroSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
-  if (!topStories || topStories.length === 0) return null;
-
-  const sliderPosts = topStories.slice(0, 5);
-  const sidePosts = topStories.slice(1, 6);
-  const safeIndex = currentIndex < sliderPosts.length ? currentIndex : 0;
-  const currentPost = sliderPosts[safeIndex] || sliderPosts[0];
-
-  if (!currentPost) return null;
+  const sliderPosts = (topStories || []).slice(0, 5);
+  const safeIndex = sliderPosts.length > 0
+    ? Math.min(currentIndex, sliderPosts.length - 1)
+    : 0;
 
   // Auto-advance hero slider every 4.5 seconds
   useEffect(() => {
@@ -34,12 +31,25 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
     return () => clearInterval(timer);
   }, [sliderPosts.length, isPaused]);
 
-  // Adjust index if list shrinks
+  // Clamp index when list shrinks (e.g. after post deletion)
   useEffect(() => {
-    if (currentIndex >= sliderPosts.length) {
+    if (sliderPosts.length > 0 && currentIndex >= sliderPosts.length) {
       setCurrentIndex(0);
     }
   }, [sliderPosts.length, currentIndex]);
+
+  // Reset image loaded state when slide changes
+  useEffect(() => {
+    setImgLoaded(false);
+  }, [safeIndex]);
+
+  // Render nothing if empty (after hooks)
+  if (!topStories || topStories.length === 0) return null;
+
+  const currentPost = sliderPosts[safeIndex];
+  const sidePosts = topStories.slice(1, 6);
+
+  if (!currentPost) return null;
 
   const prevSlide = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -67,14 +77,24 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
             href={`/posts/${currentPost.slug}`}
             className="group relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-[#080c16] flex flex-col justify-end min-h-[300px] sm:min-h-[520px] transition-transform duration-300 border border-slate-900"
           >
-            {/* Background Image with smooth transition */}
+            {/* Background Image with smooth crossfade transition */}
             <Image
-              key={currentPost.id}
-              src={currentPost.imageUrl || '/logo.png'}
+              key={currentPost.slug}
+              src={
+                currentPost.imageUrl &&
+                !currentPost.imageUrl.startsWith('data:') &&
+                !currentPost.imageUrl.startsWith('blob:')
+                  ? currentPost.imageUrl
+                  : '/logo.png'
+              }
               alt={currentPost.title}
               fill
               unoptimized
-              className="object-cover group-hover:scale-105 transition-all duration-700 ease-out opacity-90"
+              onLoad={() => setImgLoaded(true)}
+              onError={(e) => { (e.target as HTMLImageElement).src = '/logo.png'; setImgLoaded(true); }}
+              className={`object-cover group-hover:scale-105 transition-all duration-700 ease-out ${
+                imgLoaded ? 'opacity-90' : 'opacity-0'
+              }`}
               priority
             />
             {/* Gradient Overlay */}
@@ -170,12 +190,13 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
                 >
                   {/* Thumbnail / Number Badge */}
                   <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0 bg-slate-900 flex items-center justify-center shadow-sm">
-                    {post.imageUrl ? (
+                    {post.imageUrl && !post.imageUrl.startsWith('data:') && !post.imageUrl.startsWith('blob:') ? (
                       <Image
                         src={post.imageUrl}
                         alt={post.title}
                         fill
                         unoptimized
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/logo.png'; }}
                         className="object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     ) : null}
