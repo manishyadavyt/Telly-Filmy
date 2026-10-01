@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Post } from './types';
 
-const SESSION_CACHE_KEY = 'tellyfilmy_posts_v2';
+const SESSION_CACHE_KEY = 'tellyfilmy_posts_v3'; // bumped to bust stale caches
 
 /** Load from sessionStorage */
 function loadCached(): Post[] {
@@ -86,6 +86,9 @@ export function useLivePosts(initialPosts: Post[] = []) {
             const sorted = sortPostsByDateDesc(unique);
             if (isMounted) {
               setPosts((prev) => {
+                // Always update if server has more posts (new articles published)
+                // or if content differs
+                if (sorted.length > prev.length) return sorted;
                 if (arePostsEqual(prev, sorted)) return prev;
                 return sorted;
               });
@@ -120,11 +123,11 @@ export function useLivePosts(initialPosts: Post[] = []) {
       }
     }
 
-    // 2. Delay the first server sync by 300ms so the initial paint is stable
-    //    before any background state update can cause a visible flicker.
+    // 2. Delay the first server sync by 100ms so the initial paint is stable
+    //    but new articles from posts.json still load very quickly.
     syncTimer = setTimeout(() => {
       if (isMounted) syncPosts();
-    }, 300);
+    }, 100);
 
     // 3. Listen for post changes from admin panel
     const handleUpdate = () => syncPosts();

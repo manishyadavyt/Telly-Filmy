@@ -60,57 +60,58 @@ export function ImageInput({
     setUploading(true);
     setUploadProgress(25);
 
-    // Read as Base64 fallback in case server upload is slow or restricted
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      const base64Data = ev.target?.result as string;
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('slug', slug || 'post-image');
+      formData.append('imageType', imageType);
+      formData.append('imageIndex', imageIndex.toString());
+      formData.append('secret', UPLOAD_SECRET);
 
-      try {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('slug', slug || 'post-image');
-        formData.append('imageType', imageType);
-        formData.append('imageIndex', imageIndex.toString());
-        formData.append('secret', UPLOAD_SECRET);
+      setUploadProgress(60);
 
-        setUploadProgress(60);
+      const res = await fetch(UPLOAD_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'X-Upload-Secret': UPLOAD_SECRET,
+        },
+        body: formData,
+      });
 
-        const res = await fetch(UPLOAD_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'X-Upload-Secret': UPLOAD_SECRET,
-          },
-          body: formData,
-        });
+      setUploadProgress(90);
 
-        setUploadProgress(90);
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.url) {
-            onChange(data.url);
-            toast({ title: '✅ Image uploaded to server!' });
-            setUploading(false);
-            setUploadProgress(0);
-            return;
-          }
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.url) {
+          onChange(data.url);
+          toast({ title: '✅ Image uploaded to server!' });
+          return;
         }
-        
-        // Fallback to client base64 storage if server returned error
-        onChange(base64Data);
-        toast({ title: '✅ Image attached successfully!' });
-      } catch {
-        // Fallback to base64
-        onChange(base64Data);
-        toast({ title: '✅ Image attached!' });
-      } finally {
-        setUploading(false);
-        setUploadProgress(0);
-        if (fileRef.current) fileRef.current.value = '';
       }
-    };
 
-    reader.readAsDataURL(file);
+      // Server returned an error — show it clearly so admin can act
+      let serverError = `Upload failed (HTTP ${res.status})`;
+      try {
+        const errJson = await res.json();
+        if (errJson?.error) serverError = errJson.error;
+      } catch {}
+      toast({
+        title: '❌ Image upload failed',
+        description: serverError + ' — Check server upload.php permissions or try a URL instead.',
+        variant: 'destructive',
+      });
+    } catch (err: any) {
+      toast({
+        title: '❌ Image upload failed',
+        description: (err?.message || 'Network error') + ' — Check your connection or use the URL tab.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+
   };
 
   const handleUrlChange = (val: string) => {
