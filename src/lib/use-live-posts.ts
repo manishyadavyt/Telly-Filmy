@@ -30,7 +30,12 @@ function arePostsEqual(a: Post[], b: Post[]): boolean {
   if (a === b) return true;
   if (!a || !b || a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
-    if (a[i]?.slug !== b[i]?.slug || a[i]?.title !== b[i]?.title || a[i]?.imageUrl !== b[i]?.imageUrl) {
+    if (
+      a[i]?.slug !== b[i]?.slug ||
+      a[i]?.title !== b[i]?.title ||
+      a[i]?.imageUrl !== b[i]?.imageUrl ||
+      a[i]?.date !== b[i]?.date
+    ) {
       return false;
     }
   }
@@ -43,8 +48,8 @@ function arePostsEqual(a: Post[], b: Post[]): boolean {
  *
  * KEY FIX: 
  * - Initializes with initialPosts for 100% hydration matching (zero DOM mismatch/flash).
- * - Smoothly checks cache/server in useEffect with deep equality bailout.
- * - No window focus thrashing.
+ * - Smoothly checks server in useEffect with deep equality bailout.
+ * - No mount-time flash/flicker from cached sessions.
  */
 export function useLivePosts(initialPosts: Post[] = []) {
   // Always initialize from initialPosts for zero-glitch hydration match
@@ -53,6 +58,7 @@ export function useLivePosts(initialPosts: Post[] = []) {
 
   useEffect(() => {
     let isMounted = true;
+    let syncTimer: ReturnType<typeof setTimeout> | null = null;
 
     async function syncPosts() {
       try {
@@ -92,10 +98,11 @@ export function useLivePosts(initialPosts: Post[] = []) {
         console.warn('Live posts sync warning:', e);
       }
 
-      // Fallback: sort initial static posts
+      // Fallback: sort initial static posts if state is currently empty
       const fallback = initialPostsRef.current;
       if (isMounted && fallback.length > 0) {
         setPosts((prev) => {
+          if (prev.length > 0) return prev;
           const sorted = sortPostsByDateDesc(fallback);
           if (arePostsEqual(prev, sorted)) return prev;
           return sorted;
@@ -103,15 +110,21 @@ export function useLivePosts(initialPosts: Post[] = []) {
       }
     }
 
-    // 1. Check if sessionStorage cache exists and apply immediately
-    const cached = loadCached();
-    if (cached.length > 0) {
-      const sortedCached = sortPostsByDateDesc(cached);
-      setPosts((prev) => (arePostsEqual(prev, sortedCached) ? prev : sortedCached));
+    // 1. Only read cache if initialPosts is empty (e.g. pure client component)
+    //    Skip when initialPosts are provided to prevent a double-render flash.
+    if (!initialPosts || initialPosts.length === 0) {
+      const cached = loadCached();
+      if (cached.length > 0) {
+        const sortedCached = sortPostsByDateDesc(cached);
+        setPosts((prev) => (arePostsEqual(prev, sortedCached) ? prev : sortedCached));
+      }
     }
 
-    // 2. Fetch fresh from server
-    syncPosts();
+    // 2. Delay the first server sync by 300ms so the initial paint is stable
+    //    before any background state update can cause a visible flicker.
+    syncTimer = setTimeout(() => {
+      if (isMounted) syncPosts();
+    }, 300);
 
     // 3. Listen for post changes from admin panel
     const handleUpdate = () => syncPosts();
@@ -122,6 +135,7 @@ export function useLivePosts(initialPosts: Post[] = []) {
 
     return () => {
       isMounted = false;
+      if (syncTimer) clearTimeout(syncTimer);
       clearInterval(pollInterval);
       window.removeEventListener('tellyfilmy_posts_updated', handleUpdate);
     };

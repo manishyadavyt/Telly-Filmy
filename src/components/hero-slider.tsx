@@ -84,13 +84,13 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
     ? Math.min(currentIndex, sliderPosts.length - 1)
     : 0;
 
-  // Auto-advance hero slider every 4.5 seconds
+  // Auto-advance hero slider every 5 seconds
   useEffect(() => {
     if (sliderPosts.length <= 1 || isPaused) return;
 
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % sliderPosts.length);
-    }, 4500);
+    }, 5000);
 
     return () => clearInterval(timer);
   }, [sliderPosts.length, isPaused]);
@@ -102,22 +102,23 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
     }
   }, [sliderPosts.length, currentIndex]);
 
-  // Render nothing if empty
-  if (!topStories || topStories.length === 0) return null;
-
-  const currentPost = sliderPosts[safeIndex];
-  if (!currentPost) return null;
-
-  // Ensure sidePosts has 5 non-duplicate trending stories
-  const seenSlugs = new Set<string>([currentPost.slug]);
+  // Stable trending sidebar list (doesn't shuffle when slider rotates)
   const sidePosts: Post[] = [];
-  for (const p of topStories) {
-    if (p && p.slug && !seenSlugs.has(p.slug)) {
-      seenSlugs.add(p.slug);
-      sidePosts.push(p);
-      if (sidePosts.length === 5) break;
+  if (topStories && topStories.length > 0) {
+    const seen = new Set<string>();
+    // If more than 5 stories, start trending after the main hero
+    const candidateList = topStories.length > 5 ? topStories.slice(1) : topStories;
+    for (const p of candidateList) {
+      if (p && p.slug && !seen.has(p.slug)) {
+        seen.add(p.slug);
+        sidePosts.push(p);
+        if (sidePosts.length === 5) break;
+      }
     }
   }
+
+  // Render nothing if empty
+  if (!topStories || topStories.length === 0 || sliderPosts.length === 0) return null;
 
   const prevSlide = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -141,80 +142,95 @@ export function HeroSlider({ topStories }: HeroSliderProps) {
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          <Link 
-            href={`/posts/${currentPost.slug}`}
-            className="group relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-[#080c16] flex flex-col justify-end min-h-[300px] sm:min-h-[520px] transition-transform duration-300 border border-slate-900"
-          >
-            {/* Background Image — persistent node, smooth transition, no black flash */}
-            <HeroSlideImage
-              src={currentPost.imageUrl}
-              alt={currentPost.title}
-            />
+          <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-[#080c16] min-h-[300px] sm:min-h-[520px] border border-slate-900">
+            {/* Stacked Slides with Smooth Cross-Fade */}
+            {sliderPosts.map((post, idx) => {
+              const isActive = idx === safeIndex;
+              return (
+                <Link
+                  key={post.id || post.slug}
+                  href={`/posts/${post.slug}`}
+                  tabIndex={isActive ? 0 : -1}
+                  aria-hidden={!isActive}
+                  className={`group absolute inset-0 flex flex-col justify-end transition-all duration-700 ease-in-out ${
+                    isActive
+                      ? 'opacity-100 z-10 pointer-events-auto scale-100'
+                      : 'opacity-0 z-0 pointer-events-none scale-[1.02]'
+                  }`}
+                >
+                  {/* Background Image */}
+                  <HeroSlideImage
+                    src={post.imageUrl}
+                    alt={post.title}
+                  />
 
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#080c16] via-[#080c16]/70 to-transparent"></div>
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#080c16] via-[#080c16]/70 to-transparent"></div>
 
-            {/* Overlaid Content */}
-            <div className="relative z-10 p-3.5 sm:p-7 space-y-1.5 sm:space-y-3">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <span className="bg-[#e11d48] text-white font-black text-[8px] sm:text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-xs shadow-xs">
-                  {currentPost.category}
-                </span>
-                <span className="text-[10px] sm:text-xs text-slate-300 font-medium flex items-center gap-1">
-                  <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-rose-400" />
-                  {new Date(currentPost.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                </span>
+                  {/* Overlaid Content */}
+                  <div className="relative z-10 p-3.5 sm:p-7 space-y-1.5 sm:space-y-3 pb-12 sm:pb-14">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <span className="bg-[#e11d48] text-white font-black text-[8px] sm:text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-xs shadow-xs">
+                        {post.category}
+                      </span>
+                      <span className="text-[10px] sm:text-xs text-slate-300 font-medium flex items-center gap-1">
+                        <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-rose-400" />
+                        {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                    </div>
+
+                    <h2 className="font-outfit text-sm sm:text-2xl md:text-3xl font-extrabold leading-snug sm:leading-tight text-white group-hover:text-rose-300 transition-colors line-clamp-2 sm:line-clamp-3">
+                      {post.title}
+                    </h2>
+                  </div>
+                </Link>
+              );
+            })}
+
+            {/* Slider Pagination Dots & Navigation Controls (Always On Top) */}
+            <div className="absolute bottom-3 sm:bottom-6 left-3.5 sm:left-7 right-3.5 sm:right-7 z-20 flex items-center justify-between pointer-events-auto">
+              <div className="flex items-center space-x-1 sm:space-x-1.5">
+                {sliderPosts.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    aria-label={`Go to slide ${idx + 1}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setCurrentIndex(idx);
+                    }}
+                    className={`h-1 sm:h-1.5 rounded-full transition-all duration-300 ${
+                      idx === safeIndex 
+                        ? 'w-4 sm:w-6 bg-[#e11d48]' 
+                        : 'w-1.5 sm:w-2 bg-white/40 hover:bg-white/70'
+                    }`}
+                  />
+                ))}
               </div>
 
-              <h2 className="font-outfit text-sm sm:text-2xl md:text-3xl font-extrabold leading-snug sm:leading-tight text-white group-hover:text-rose-300 transition-colors line-clamp-2 sm:line-clamp-3">
-                {currentPost.title}
-              </h2>
-
-              {/* Slider Pagination Dots & Navigation Controls */}
-              <div className="flex items-center justify-between pt-1 sm:pt-2">
-                <div className="flex items-center space-x-1 sm:space-x-1.5">
-                  {sliderPosts.map((_, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      aria-label={`Go to slide ${idx + 1}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setCurrentIndex(idx);
-                      }}
-                      className={`h-1 sm:h-1.5 rounded-full transition-all ${
-                        idx === currentIndex 
-                          ? 'w-4 sm:w-6 bg-[#e11d48]' 
-                          : 'w-1.5 sm:w-2 bg-white/40 hover:bg-white/70'
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                {/* Left / Right Arrow Buttons */}
-                <div className="flex items-center space-x-1 sm:space-x-1.5">
-                  <button
-                    type="button"
-                    aria-label="Previous Story"
-                    onClick={prevSlide}
-                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/50 hover:bg-[#e11d48] text-white flex items-center justify-center backdrop-blur-md transition-colors border border-white/20"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Next Story"
-                    onClick={nextSlide}
-                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/50 hover:bg-[#e11d48] text-white flex items-center justify-center backdrop-blur-md transition-colors border border-white/20"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  </button>
-                </div>
+              {/* Left / Right Arrow Buttons */}
+              <div className="flex items-center space-x-1 sm:space-x-1.5">
+                <button
+                  type="button"
+                  aria-label="Previous Story"
+                  onClick={prevSlide}
+                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/60 hover:bg-[#e11d48] text-white flex items-center justify-center backdrop-blur-md transition-colors border border-white/20 shadow-sm"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next Story"
+                  onClick={nextSlide}
+                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/60 hover:bg-[#e11d48] text-white flex items-center justify-center backdrop-blur-md transition-colors border border-white/20 shadow-sm"
+                >
+                  <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </button>
               </div>
-
             </div>
-          </Link>
+
+          </div>
         </div>
 
         {/* RIGHT 4 COLS: TRENDING STORIES CARD */}
